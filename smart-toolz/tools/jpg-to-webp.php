@@ -45,13 +45,8 @@ smartToozAd('socialbar');
 </style>
 </head>
 <body>
-<header class="site-header">
-<div class="navbar">
-<a class="logo" href="/smart-toolz/"><span class="logo-icon">🛠️</span><span>Smart-Tooz</span></a>
-<nav class="nav-links" id="navLinks"><a href="/smart-toolz/">Home</a><a href="/smart-toolz/">All Tools</a></nav>
-<button class="menu-button" id="menuButton" type="button" aria-label="Open menu">☰</button>
-</div>
-</header>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 
 <div class="page-layout">
 <main class="tool-content">

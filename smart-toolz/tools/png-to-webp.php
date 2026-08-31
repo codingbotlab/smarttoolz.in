@@ -83,20 +83,9 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
 
-<header class="site-header">
-    <nav class="navbar">
-        <a class="logo" href="/smart-toolz/">
-            <span class="logo-icon">🛠️</span>
-            <span>Smart-Tooz</span>
-        </a>
-        <div class="nav-links" id="navLinks">
-            <a href="/smart-toolz/">Home</a>
-            <a href="/smart-toolz/tool.php">All Tools</a>
-        </div>
-        <button class="menu-button" id="menuButton" type="button" aria-label="Open menu">☰</button>
-    </nav>
-</header>
+
 
 <main class="page-layout">
     <section class="tool-content">

@@ -105,7 +105,8 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
 </style>
 </head>
 <body>
-<header class="site-header"><div class="navbar"><a class="logo" href="/smart-toolz/"><span class="logo-icon">🛠️</span><span>Smart-Tooz</span></a><nav class="nav-links" id="navLinks"><a href="/smart-toolz/">Home</a><a href="/smart-toolz/">All Tools</a></nav><button class="menu-button" id="menuButton" type="button" aria-label="Open menu">☰</button></div></header>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <div class="page-layout">
 <main class="tool-content">
 <div class="desktop-ad ad-slot"><?php smartToozMemeAd('top_desktop'); ?></div><div class="mobile-ad ad-slot"><?php smartToozMemeAd('top_mobile'); ?></div>

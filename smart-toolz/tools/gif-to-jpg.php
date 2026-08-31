@@ -53,13 +53,8 @@ function h(string $value): string {
 </style>
 </head>
 <body>
-<header class="site-header">
-<div class="navbar">
-<a class="logo" href="/smart-toolz/"><span class="logo-icon">🛠️</span><span>Smart-Tooz</span></a>
-<nav class="nav-links" id="navLinks"><a href="/smart-toolz/">Home</a><a href="/smart-toolz/">All Tools</a><a href="/creator-ai/">Creator AI</a></nav>
-<button class="menu-button" type="button" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
-</div>
-</header>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="page-layout">
 <section class="tool-content">
 <div class="desktop-ad ad-slot"><?php smartToozAd('top'); ?></div>

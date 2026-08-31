@@ -1064,6 +1064,7 @@ footer p {
 
 
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
 
 
 <!-- ============================================================
@@ -1080,60 +1081,7 @@ smartToozAd('socialbar');
      HEADER
 ============================================================ -->
 
-<header class="site-header">
 
-    <nav class="navbar">
-
-
-        <a
-            href="/"
-            class="logo"
-        >
-
-            <div class="logo-icon">
-                S
-            </div>
-
-            <span>
-                Smart-Tooz
-            </span>
-
-        </a>
-
-
-        <div
-            class="nav-links"
-            id="navLinks"
-        >
-
-            <a href="/">
-                Home
-            </a>
-
-            <a href="/#tools">
-                Tools
-            </a>
-
-            <a href="/contact.php">
-                Contact
-            </a>
-
-        </div>
-
-
-        <button
-            type="button"
-            class="menu-button"
-            onclick="toggleMenu()"
-            aria-label="Open menu"
-        >
-            ☰
-        </button>
-
-
-    </nav>
-
-</header>
 
 
 <!-- ============================================================

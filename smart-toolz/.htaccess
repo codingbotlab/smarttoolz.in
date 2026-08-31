@@ -1,8 +1,6 @@
 RewriteEngine On
 
-# Existing real tool files are served normally. Missing tool URLs are
-# internally routed to the shared functional tool router so the 50-tool
-# catalog never produces a 404 page.
+# Real tool files stay untouched. Only missing tool pages use the universal engine.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /smart-toolz/tool-router.php?tool=$1 [L,QSA]
+RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /smart-toolz/tool-engine.php?tool=$1 [L,QSA]

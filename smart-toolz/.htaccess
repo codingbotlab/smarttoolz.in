@@ -1,6 +1,10 @@
 RewriteEngine On
 
-# Real tool files stay untouched. Only missing tool pages use the universal engine.
+# Utility tools that use the lightweight PHP engine.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^tools/(timestamp-converter|unix-timestamp|stopwatch-timer)\.php$ /smart-toolz/tool-extras.php?tool=$1 [L,QSA]
+
+# Real tool files stay untouched. Missing tool pages use the universal engine.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /smart-toolz/tool-engine.php?tool=$1 [L,QSA]

@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS creator_users (
  daily_credits INT UNSIGNED NOT NULL DEFAULT 0,
  daily_credits_reset_at DATETIME NULL,
  plan VARCHAR(40) NOT NULL DEFAULT 'free',
+ credit_period_started_at DATETIME NULL,
+ credit_period_ends_at DATETIME NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  INDEX idx_creator_user_id (user_id), INDEX idx_creator_plan (plan)
@@ -33,10 +35,10 @@ CREATE TABLE IF NOT EXISTS creator_credit_transactions (
  type VARCHAR(40) NOT NULL,
  amount INT NOT NULL,
  balance_after INT NOT NULL DEFAULT 0,
- request_id VARCHAR(191) NULL,
+ reference_id VARCHAR(191) NULL,
  description VARCHAR(255) NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
- INDEX idx_credit_user_created (user_id,created_at), UNIQUE KEY uq_credit_request (request_id)
+ INDEX idx_credit_user_created (user_id,created_at), INDEX idx_credit_reference(reference_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tool_usage (
@@ -152,4 +154,4 @@ CREATE TABLE IF NOT EXISTS saas_payouts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO saas_plans(slug,name,price_inr,monthly_credits,ads_free) VALUES
-('free','Free',0,100,0),('pro','Pro',199,2000,1),('creator','Creator',499,10000,1);
+('free','Free',0,1000,0),('pro','Pro',199,2000,1),('creator','Creator',499,10000,1);

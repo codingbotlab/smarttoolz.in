@@ -24,8 +24,7 @@ CREATE TABLE IF NOT EXISTS creator_users (
  plan VARCHAR(40) NOT NULL DEFAULT 'free',
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- INDEX idx_creator_user_id (user_id),
- INDEX idx_creator_plan (plan)
+ INDEX idx_creator_user_id (user_id), INDEX idx_creator_plan (plan)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS creator_credit_transactions (
@@ -37,8 +36,7 @@ CREATE TABLE IF NOT EXISTS creator_credit_transactions (
  request_id VARCHAR(191) NULL,
  description VARCHAR(255) NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
- INDEX idx_credit_user_created (user_id, created_at),
- UNIQUE KEY uq_credit_request (request_id)
+ INDEX idx_credit_user_created (user_id,created_at), UNIQUE KEY uq_credit_request (request_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tool_usage (
@@ -47,16 +45,14 @@ CREATE TABLE IF NOT EXISTS tool_usage (
  tool_slug VARCHAR(150) NOT NULL,
  ip_hash CHAR(64) NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
- INDEX idx_tool_user (user_id),
- INDEX idx_tool_slug (tool_slug),
- INDEX idx_tool_created (created_at)
+ INDEX idx_tool_user (user_id), INDEX idx_tool_slug (tool_slug), INDEX idx_tool_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS user_favorite_tools (
  user_id BIGINT UNSIGNED NOT NULL,
  tool_slug VARCHAR(150) NOT NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY (user_id, tool_slug)
+ PRIMARY KEY (user_id,tool_slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS user_settings (
@@ -64,3 +60,96 @@ CREATE TABLE IF NOT EXISTS user_settings (
  settings_json JSON NOT NULL,
  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ads_settings (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ ad_key VARCHAR(80) NOT NULL UNIQUE,
+ enabled TINYINT(1) NOT NULL DEFAULT 0,
+ ad_code MEDIUMTEXT NULL,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS saas_plans (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ slug VARCHAR(40) NOT NULL UNIQUE,
+ name VARCHAR(80) NOT NULL,
+ price_inr DECIMAL(10,2) NOT NULL DEFAULT 0,
+ monthly_credits INT UNSIGNED NOT NULL DEFAULT 0,
+ ads_free TINYINT(1) NOT NULL DEFAULT 0,
+ active TINYINT(1) NOT NULL DEFAULT 1,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_subscriptions (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ plan_slug VARCHAR(40) NOT NULL,
+ status VARCHAR(30) NOT NULL DEFAULT 'active',
+ order_id VARCHAR(100) NULL,
+ starts_at DATETIME NOT NULL,
+ ends_at DATETIME NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ INDEX(user_id), INDEX(plan_slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_orders (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ plan_slug VARCHAR(40) NOT NULL,
+ amount_inr DECIMAL(10,2) NOT NULL,
+ gateway_order_id VARCHAR(120) NULL UNIQUE,
+ status VARCHAR(30) NOT NULL DEFAULT 'created',
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ paid_at DATETIME NULL,
+ INDEX(user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_wallets (
+ user_id BIGINT UNSIGNED PRIMARY KEY,
+ balance_inr DECIMAL(10,2) NOT NULL DEFAULT 0,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_wallet_transactions (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ type VARCHAR(30) NOT NULL,
+ amount_inr DECIMAL(10,2) NOT NULL,
+ balance_after DECIMAL(10,2) NOT NULL,
+ reference_id VARCHAR(120) NULL,
+ description VARCHAR(255) NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ INDEX(user_id,created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_referral_codes (
+ user_id BIGINT UNSIGNED PRIMARY KEY,
+ code VARCHAR(30) NOT NULL UNIQUE,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_referrals (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ referrer_id BIGINT UNSIGNED NOT NULL,
+ referred_id BIGINT UNSIGNED NOT NULL UNIQUE,
+ code VARCHAR(30) NOT NULL,
+ commission_percent DECIMAL(5,2) NOT NULL DEFAULT 20,
+ commission_inr DECIMAL(10,2) NOT NULL DEFAULT 0,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ INDEX(referrer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saas_payouts (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ amount_inr DECIMAL(10,2) NOT NULL,
+ method VARCHAR(40) NOT NULL,
+ details TEXT NULL,
+ status VARCHAR(30) NOT NULL DEFAULT 'pending',
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ processed_at DATETIME NULL,
+ INDEX(user_id,status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO saas_plans(slug,name,price_inr,monthly_credits,ads_free) VALUES
+('free','Free',0,100,0),('pro','Pro',199,2000,1),('creator','Creator',499,10000,1);

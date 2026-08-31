@@ -9,10 +9,9 @@ try {
     $userId=smarttoolz_current_user_id();
     if($userId){
         if($action==='consume'){
-            // Logged-in users do not receive trials. Their normal tool/credit flow must handle billing.
-            echo json_encode(['ok'=>false,'reason'=>'login_user','message'=>'Logged-in users use credits; no free trial applies.']); exit;
+            echo json_encode(smarttoolz_trial_consume($userId,$tool),JSON_UNESCAPED_UNICODE); exit;
         }
-        echo json_encode(['ok'=>true,'logged_in'=>true,'credits_required'=>true,'message'=>'Logged-in users use credits.']); exit;
+        echo json_encode(['ok'=>true,'logged_in'=>true,'credits_required'=>true]+smarttoolz_trial_status($userId,$tool),JSON_UNESCAPED_UNICODE); exit;
     }
     if($action==='consume'){$result=smarttoolz_guest_trial_consume($tool);echo json_encode($result,JSON_UNESCAPED_UNICODE);exit;}
     echo json_encode(['ok'=>true]+smarttoolz_guest_trial_status($tool),JSON_UNESCAPED_UNICODE);

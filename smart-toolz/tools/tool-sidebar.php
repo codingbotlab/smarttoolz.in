@@ -76,6 +76,36 @@ $currentPage = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?
 .tools-sidebar::-webkit-scrollbar{width:5px}
 .tools-sidebar::-webkit-scrollbar-track{background:transparent}
 .tools-sidebar::-webkit-scrollbar-thumb{background:#dfe2ea;border-radius:20px}
-@media(max-width:700px){.tools-sidebar{position:relative;top:auto;width:100%;max-height:none;overflow:visible;margin-bottom:18px}.sidebar-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}}
+
+/* Some older tool pages wrapped this component in another .tools-sidebar.
+   Flatten that wrapper visually so there can only be one visible sidebar. */
+.page-layout > .tools-sidebar:has(> .tools-sidebar){
+    width:270px;
+    flex:0 0 270px;
+    position:sticky;
+    top:90px;
+    max-height:calc(100vh - 110px);
+    overflow:visible;
+    padding:0;
+    background:transparent;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+}
+.page-layout > .tools-sidebar:has(> .tools-sidebar) > .tools-sidebar{
+    width:100%;
+    flex:1 1 auto;
+    position:relative;
+    top:auto;
+    max-height:calc(100vh - 110px);
+    margin:0;
+}
+
+@media(max-width:700px){
+    .tools-sidebar{position:relative;top:auto;width:100%;max-height:none;overflow:visible;margin-bottom:18px}
+    .page-layout > .tools-sidebar:has(> .tools-sidebar){width:100%;flex:0 0 auto;position:relative;top:auto;max-height:none;overflow:visible;padding:0;margin:0;background:transparent;border:0;box-shadow:none}
+    .page-layout > .tools-sidebar:has(> .tools-sidebar) > .tools-sidebar{width:100%;max-height:none;overflow:visible;margin-bottom:18px}
+    .sidebar-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+}
 @media(max-width:430px){.sidebar-list{grid-template-columns:1fr}}
 </style>

@@ -30,9 +30,16 @@ if($isLoggedIn){
         }
     }catch(Throwable $e){$headerCredits=null;}
 
+    try{
+        require_once $_SERVER['DOCUMENT_ROOT'].'/smart-toolz/lib/trials.php';
+        if(($_SESSION['smarttoolz_login_notice_sid']??'')!==session_id()){
+            smarttoolz_notify((int)$_SESSION['user_id'],'login','Login activity','You signed in to SmartToolz successfully.');
+            $_SESSION['smarttoolz_login_notice_sid']=session_id();
+        }
+    }catch(Throwable $e){}
+
     if($isToolPage){
         try{
-            require_once $_SERVER['DOCUMENT_ROOT'].'/smart-toolz/lib/trials.php';
             $ts=smarttoolz_trial_status((int)$_SESSION['user_id'],$slug);
             $trialRemaining=(int)$ts['remaining'];
             $trialUsed=(int)$ts['used'];
@@ -58,7 +65,7 @@ if(toolPage){
  const remainingEl=document.getElementById('trialRemaining'),seoEl=document.getElementById('seoTrialRemaining'),pill=document.getElementById('trialPill');
  const setRemaining=v=>{if(remainingEl)remainingEl.textContent=v;if(seoEl)seoEl.textContent=v;if(pill)pill.classList.toggle('empty',Number(v)<=0)};
  async function consume(){const r=await fetch('/smart-toolz/api/trial.php?action=consume&tool='+encodeURIComponent(toolSlug),{method:'POST',cache:'no-store'});let d={};try{d=await r.json()}catch(e){}if(d.ok){setRemaining(d.remaining);loadNotifications();return d}if(d.reason==='login_required'){window.location.href='/creator-ai/auth/google-login.php?return='+encodeURIComponent(location.href);return null}if(d.reason==='trial_exhausted'||r.status===429||d.remaining===0){setRemaining(0);alert(d.message||'Your 5 free trials for this tool are finished.');return null}alert(d.message||'Unable to start this tool.');return null}
- let approved=false,busy=false;
+ let busy=false;
  document.addEventListener('submit',async e=>{const form=e.target;if(!(form instanceof HTMLFormElement)||!form.closest('main'))return;if(form.dataset.trialApproved==='1'){form.dataset.trialApproved='';return}e.preventDefault();if(busy)return;busy=true;const d=await consume();if(d){form.dataset.trialApproved='1';form.requestSubmit()}busy=false},{capture:true});
  document.addEventListener('click',async e=>{const el=e.target.closest('main button, main input[type="submit"]');if(!el||el.closest('form')||el.dataset.trialApproved==='1')return;if(el.disabled)return;e.preventDefault();if(busy)return;busy=true;const d=await consume();if(d){el.dataset.trialApproved='1';el.click();el.dataset.trialApproved=''}busy=false},{capture:true});
 }

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);if(session_status()!==PHP_SESSION_ACTIVE)session_start();require_once $_SERVER['DOCUMENT_ROOT'].'/creator-ai/auth/config.php';require_once __DIR__.'/tool.php';
+declare(strict_types=1);if(session_status()!==PHP_SESSION_ACTIVE)session_start();require_once $_SERVER['DOCUMENT_ROOT'].'/creator-ai/auth/config.php';define('SMARTTOOLZ_HOME_REGISTRY',true);require_once __DIR__.'/tool.php';
 $pdo=null;try{$pdo=db();}catch(Throwable $e){error_log($e->getMessage());}$ads=[];if($pdo instanceof PDO){try{$q=$pdo->query('SELECT ad_key,enabled,ad_code FROM ads_settings');while($r=$q->fetch(PDO::FETCH_ASSOC))$ads[$r['ad_key']]=$r;}catch(Throwable $e){}}
 function homeAd(string $k):void{global $ads;if(isset($ads[$k])&&(int)$ads[$k]['enabled']===1)echo $ads[$k]['ad_code']??'';}
 if(!isset($tools)||!is_array($tools))$tools=[];$wanted=['Image Compressor','Image Resizer','JPG to PNG','PNG to JPG','PDF to JPG','Image Cropper','GIF Maker','Meme Generator','Color Picker','JSON Formatter','QR Code Generator'];$popular=[];foreach($wanted as $w)foreach($tools as $t)if(strcasecmp($t['name']??'',$w)===0){$popular[]=$t;break;}foreach($tools as $t)if(count($popular)<12&&!in_array($t,$popular,true))$popular[]=$t;

@@ -1,0 +1,1 @@
+SmartToolz installer marker. Shared bootstrap/schema/header updates are installed from main.

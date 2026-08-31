@@ -1,0 +1,10 @@
+<?php
+declare(strict_types=1);require_once __DIR__.'/bootstrap.php';learning_require_login();$pdo=learning_pdo();$uid=learning_user_id();$d=json_decode(file_get_contents('php://input'),true)?:$_POST;$action=(string)($d['action']??'');$lesson=(int)($d['lesson_id']??0);
+try{
+if($action==='save_code'){$q=$pdo->prepare("INSERT INTO learning_saved_code(user_id,lesson_id,html_code,css_code,js_code) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE html_code=VALUES(html_code),css_code=VALUES(css_code),js_code=VALUES(js_code),updated_at=CURRENT_TIMESTAMP");$q->execute([$uid,$lesson,(string)($d['html_code']??''),(string)($d['css_code']??''),(string)($d['js_code']??'')]);jsonOut(['ok'=>true]);}
+if($action==='complete_lesson'){$q=$pdo->prepare("INSERT INTO learning_lesson_progress(user_id,lesson_id,started,completed,progress_percent,first_opened_at,last_opened_at,completed_at) VALUES(?,?,1,1,100,NOW(),NOW(),NOW()) ON DUPLICATE KEY UPDATE started=1,completed=1,progress_percent=100,last_opened_at=NOW(),completed_at=NOW()");$q->execute([$uid,$lesson]);$s=$pdo->prepare("INSERT INTO learning_user_stats(user_id,lessons_completed) VALUES(?,1) ON DUPLICATE KEY UPDATE lessons_completed=lessons_completed+1");$s->execute([$uid]);learning_bootstrap_activity($uid,'lesson_completed',null,$lesson);jsonOut(['ok'=>true]);}
+if($action==='like'||$action==='bookmark'){$table=$action==='like'?'learning_likes':'learning_bookmarks';$s=$pdo->prepare("SELECT id FROM {$table} WHERE user_id=? AND lesson_id=?");$s->execute([$uid,$lesson]);$old=$s->fetchColumn();if($old){$pdo->prepare("DELETE FROM {$table} WHERE id=?")->execute([$old]);$active=false;}else{$pdo->prepare("INSERT INTO {$table}(user_id,lesson_id) VALUES(?,?)")->execute([$uid,$lesson]);$active=true;}jsonOut(['ok'=>true,'active'=>$active]);}
+jsonOut(['ok'=>false,'error'=>'Unknown action'],400);
+}catch(Throwable $e){jsonOut(['ok'=>false,'error'=>$e->getMessage()],500);}
+
+function jsonOut(array $data,int $status=200):never{http_response_code($status);header('Content-Type:application/json; charset=utf-8');echo json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit;}

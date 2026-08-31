@@ -47,7 +47,27 @@ CREATE TABLE IF NOT EXISTS tool_usage (
  tool_slug VARCHAR(150) NOT NULL,
  ip_hash CHAR(64) NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
- INDEX idx_tool_user (user_id), INDEX idx_tool_slug (tool_slug), INDEX idx_tool_created (created_at)
+ INDEX idx_tool_user(user_id), INDEX idx_tool_slug(tool_slug), INDEX idx_tool_created(created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS smarttoolz_tool_trials (
+ user_id BIGINT UNSIGNED NOT NULL,
+ tool_slug VARCHAR(150) NOT NULL,
+ uses INT UNSIGNED NOT NULL DEFAULT 0,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (user_id,tool_slug), INDEX idx_trial_user(user_id), INDEX idx_trial_tool(tool_slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS smarttoolz_notifications (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ type VARCHAR(30) NOT NULL DEFAULT 'info',
+ title VARCHAR(180) NOT NULL,
+ message VARCHAR(500) NOT NULL,
+ read_at DATETIME NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ INDEX idx_notification_user_created(user_id,created_at), INDEX idx_notification_unread(user_id,read_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS user_favorite_tools (

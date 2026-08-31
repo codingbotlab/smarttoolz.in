@@ -1,0 +1,34 @@
+name: Migrate Smart-Tooz Common Header
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Migrate tool pages
+        run: python scripts/migrate-common-header.py
+
+      - name: Commit migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add smart-toolz/tools/*.php
+          if git diff --cached --quiet; then
+            echo "No pages need migration."
+            exit 0
+          fi
+          git commit -m "Migrate tool pages to common header [skip ci]"
+          git push

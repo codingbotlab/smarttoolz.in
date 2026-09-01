@@ -1,0 +1,7 @@
+{
+  "name": "qr-generator-real-recorder",
+  "private": true,
+  "type": "module",
+  "scripts": {"record": "node record.js"},
+  "dependencies": {"playwright": "^1.55.0"}
+}

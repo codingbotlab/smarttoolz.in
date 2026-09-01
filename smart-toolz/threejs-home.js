@@ -1,121 +1,94 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.min.js';
 
 (() => {
-  const host = document.querySelector('#st-three-hero');
-  if (!host) return;
+  const host = document.createElement('div');
+  host.id = 'st-three-world';
+  host.setAttribute('aria-hidden', 'true');
+  document.body.prepend(host);
+  const canvas = document.createElement('canvas');
+  host.appendChild(canvas);
+
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.7));
+  renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.z = 7;
+  const camera = new THREE.PerspectiveCamera(55, 1, .1, 120);
+  camera.position.z = 14;
 
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(host.clientWidth || 520, host.clientHeight || 420, false);
-  renderer.setClearColor(0x000000, 0);
-  host.appendChild(renderer.domElement);
-
-  const group = new THREE.Group();
-  scene.add(group);
+  const world = new THREE.Group();
+  scene.add(world);
 
   const core = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.55, 2),
-    new THREE.MeshBasicMaterial({ color: 0x2563eb, wireframe: true, transparent: true, opacity: 0.42 })
+    new THREE.IcosahedronGeometry(2.5, 2),
+    new THREE.MeshBasicMaterial({color:0x635bff, wireframe:true, transparent:true, opacity:.18})
   );
-  group.add(core);
+  core.position.set(4.5, 2, -5);
+  world.add(core);
 
-  const ringMaterial = new THREE.MeshBasicMaterial({ color: 0x06b6d4, wireframe: true, transparent: true, opacity: 0.45 });
-  const ring1 = new THREE.Mesh(new THREE.TorusGeometry(2.05, 0.018, 10, 100), ringMaterial);
-  ring1.rotation.x = Math.PI * 0.35;
-  group.add(ring1);
-
-  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(2.35, 0.014, 10, 100), ringMaterial);
-  ring2.rotation.y = Math.PI * 0.48;
-  group.add(ring2);
-
-  const points = [];
-  for (let i = 0; i < 260; i++) {
-    const r = 2.2 + Math.random() * 2.0;
-    const a = Math.random() * Math.PI * 2;
-    const z = (Math.random() - 0.5) * 3.6;
-    points.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, z));
-  }
-  const particleGeometry = new THREE.BufferGeometry().setFromPoints(points);
-  const particles = new THREE.Points(
-    particleGeometry,
-    new THREE.PointsMaterial({ color: 0x60a5fa, size: 0.035, transparent: true, opacity: 0.75 })
+  const core2 = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(1.5, 2),
+    new THREE.MeshBasicMaterial({color:0x06b6d4, wireframe:true, transparent:true, opacity:.2})
   );
-  group.add(particles);
+  core2.position.set(-5, -3, -6);
+  world.add(core2);
 
-  const nodes = [];
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2;
-    const p = new THREE.Mesh(
-      new THREE.SphereGeometry(0.055 + Math.random() * 0.035, 8, 8),
-      new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.9 })
-    );
-    p.position.set(Math.cos(a) * 2.25, Math.sin(a) * 2.25, Math.sin(a * 2) * 0.55);
-    nodes.push(p);
-    group.add(p);
+  const rings=[];
+  [[4.5,2,-5,3.15,.55],[4.5,2,-5,3.65,1.05],[-5,-3,-6,2,.7]].forEach(v=>{
+    const r=new THREE.Mesh(new THREE.TorusGeometry(v[3],.018,8,96),new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.25}));
+    r.position.set(v[0],v[1],v[2]); r.rotation.set(v[4],v[4]*.7,.2); world.add(r); rings.push(r);
+  });
+
+  const count=innerWidth<700?350:700;
+  const pos=new Float32Array(count*3);
+  for(let i=0;i<count;i++){
+    pos[i*3]=(Math.random()-.5)*30;
+    pos[i*3+1]=(Math.random()-.5)*26;
+    pos[i*3+2]=-2-Math.random()*38;
+  }
+  const pg=new THREE.BufferGeometry();
+  pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const particles=new THREE.Points(pg,new THREE.PointsMaterial({color:0x64748b,size:.035,transparent:true,opacity:.42}));
+  world.add(particles);
+
+  const linePos=[];
+  for(let i=0;i<65;i++){
+    const a=new THREE.Vector3((Math.random()-.5)*22,(Math.random()-.5)*18,-5-Math.random()*18);
+    const b=a.clone().add(new THREE.Vector3((Math.random()-.5)*3.5,(Math.random()-.5)*3.5,(Math.random()-.5)*2));
+    linePos.push(a.x,a.y,a.z,b.x,b.y,b.z);
+  }
+  const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(linePos,3));
+  world.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0x94a3b8,transparent:true,opacity:.1})));
+
+  const orbs=new THREE.Group(); world.add(orbs);
+  for(let i=0;i<20;i++){
+    const o=new THREE.Mesh(new THREE.SphereGeometry(.045+Math.random()*.07,10,10),new THREE.MeshBasicMaterial({color:i%2?0x635bff:0x06b6d4,transparent:true,opacity:.55}));
+    o.position.set((Math.random()-.5)*19,(Math.random()-.5)*15,-4-Math.random()*20);
+    o.userData.y=o.position.y; o.userData.p=Math.random()*6.28; orbs.add(o);
   }
 
-  let targetX = 0;
-  let targetY = 0;
-  let raf = 0;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let mx=0,my=0,scroll=0,targetScroll=0;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const resize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);};
+  resize(); addEventListener('resize',resize,{passive:true});
+  addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2},{passive:true});
+  addEventListener('scroll',()=>{targetScroll=Math.min(scrollY/Math.max(document.body.scrollHeight-innerHeight,1),1)},{passive:true});
 
-  const resize = () => {
-    const w = Math.max(280, host.clientWidth || 520);
-    const h = Math.max(280, host.clientHeight || 420);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h, false);
+  let raf;
+  const animate=t=>{
+    const time=t*.001; scroll+=(targetScroll-scroll)*.035;
+    if(!reduced){
+      world.rotation.y+=.0007; core.rotation.x+=.0014; core.rotation.y+=.002; core2.rotation.y-=.0012;
+      rings.forEach((r,i)=>{r.rotation.z+=(i?-1:1)*.0013;r.rotation.x+=.0005;});
+      particles.rotation.y=time*.006;
+      orbs.children.forEach(o=>o.position.y=o.userData.y+Math.sin(time*.8+o.userData.p)*.18);
+    }
+    world.position.x+=(-mx*.65-world.position.x)*.025;
+    world.position.y+=(my*.4-scroll*1.5-world.position.y)*.025;
+    camera.position.x+=(mx*.3-camera.position.x)*.02;
+    camera.position.y+=(-my*.18-camera.position.y)*.02;
+    camera.lookAt(0,-scroll*1.5,-7);
+    renderer.render(scene,camera); raf=requestAnimationFrame(animate);
   };
-  window.addEventListener('resize', resize, { passive: true });
-  resize();
-
-  host.addEventListener('pointermove', (event) => {
-    if (reduced) return;
-    const rect = host.getBoundingClientRect();
-    targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 0.7;
-    targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 0.45;
-  }, { passive: true });
-
-  host.addEventListener('pointerleave', () => {
-    targetX = 0;
-    targetY = 0;
-  }, { passive: true });
-
-  const animate = (time) => {
-    group.rotation.y += reduced ? 0 : 0.0025;
-    group.rotation.x += reduced ? 0 : 0.0008;
-    core.rotation.z += reduced ? 0 : 0.0015;
-    ring1.rotation.z += reduced ? 0 : 0.002;
-    ring2.rotation.x -= reduced ? 0 : 0.0015;
-    particles.rotation.y -= reduced ? 0 : 0.0007;
-
-    nodes.forEach((node, i) => {
-      node.position.z += Math.sin(time * 0.001 + i) * 0.0008;
-    });
-
-    group.rotation.y += (targetX - group.rotation.y * 0.08) * 0.008;
-    group.rotation.x += (targetY - group.rotation.x * 0.08) * 0.008;
-
-    renderer.render(scene, camera);
-    raf = requestAnimationFrame(animate);
-  };
-
-  raf = requestAnimationFrame(animate);
-
-  window.addEventListener('pagehide', () => {
-    cancelAnimationFrame(raf);
-    renderer.dispose();
-    particleGeometry.dispose();
-    core.geometry.dispose();
-    core.material.dispose();
-    ring1.geometry.dispose();
-    ring2.geometry.dispose();
-    ringMaterial.dispose();
-    particles.material.dispose();
-    nodes.forEach((node) => { node.geometry.dispose(); node.material.dispose(); });
-  }, { once: true });
+  raf=requestAnimationFrame(animate);
 })();

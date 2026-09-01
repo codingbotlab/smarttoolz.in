@@ -64,7 +64,7 @@ jobs:
 
       - name: Render final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
-        run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23
+        run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23 --concurrency=2 --log=verbose
 
       - name: Verify final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator
@@ -76,43 +76,17 @@ jobs:
         working-directory: Reddott-films/knowledge-videos/qr-generator
         run: ffmpeg -y -ss 00:00:08 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
 
-      - name: Check YouTube configuration
-        id: youtube_config
-        shell: bash
-        run: |
-          if [[ -n "$YT_CLIENT_ID" && -n "$YT_CLIENT_SECRET" && -n "$YT_REFRESH_TOKEN" ]]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "YouTube OAuth secrets are not configured; video generation will still complete."
-          fi
-
-      - name: Upload to YouTube
-        if: steps.youtube_config.outputs.ready == 'true'
-        working-directory: Reddott-films/knowledge-videos/qr-generator/youtube-upload
-        env:
-          VIDEO_PATH: ../remotion/out/qr-generator.mp4
-          THUMBNAIL_PATH: ../output/thumbnail.png
-          PUBLISH_META_PATH: ../published/youtube.json
-        run: |
-          npm install
-          node upload.mjs
-
-      - name: Publish YouTube metadata to repository
-        if: steps.youtube_config.outputs.ready == 'true'
-        run: |
-          test -s Reddott-films/knowledge-videos/qr-generator/published/youtube.json
-          git config user.name 'Reddott Video Bot'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add Reddott-films/knowledge-videos/qr-generator/published/youtube.json
-          git commit -m 'Publish QR Generator YouTube metadata' || true
-          git push
+      - name: YouTube upload intentionally paused
+        run: echo 'YouTube upload is paused until the generated MP4 is manually verified.'
 
       - name: Upload workflow artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: qr-generator-video
+          if-no-files-found: warn
           path: |
             Reddott-films/knowledge-videos/qr-generator/remotion/out/qr-generator.mp4
             Reddott-films/knowledge-videos/qr-generator/output/thumbnail.png
             Reddott-films/knowledge-videos/qr-generator/output/browser-demo.webm
+            Reddott-films/knowledge-videos/qr-generator/output/narration.wav

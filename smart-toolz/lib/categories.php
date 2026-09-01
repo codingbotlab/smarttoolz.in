@@ -65,14 +65,37 @@ if (!function_exists('smarttoolz_category_db')) {
     function smarttoolz_category_assignments(): array {
         smarttoolz_category_install();
         try {
-            $q = smarttoolz_category_db()->query('SELECT t.tool_slug,c.name AS category_name,c.slug AS category_slug,c.icon AS category_icon FROM smarttoolz_tool_categories t INNER JOIN smarttoolz_categories c ON c.id=t.category_id WHERE c.enabled=1');
+            $q = smarttoolz_category_db()->query('SELECT tool_slug,category_id FROM smarttoolz_tool_categories');
             $out = [];
             foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $out[(string)$row['tool_slug']] = $row;
+                $out[(string)$row['tool_slug']] = (int)$row['category_id'];
             }
             return $out;
         } catch (Throwable) {
             return [];
+        }
+    }
+
+    function smarttoolz_seed_registry_assignments(array $tools): void {
+        smarttoolz_category_install();
+        try {
+            $db = smarttoolz_category_db();
+            $categoryIds = [];
+            $q = $db->query('SELECT id,slug FROM smarttoolz_categories');
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $categoryIds[(string)$row['slug']] = (int)$row['id'];
+            }
+            $q = $db->prepare('INSERT IGNORE INTO smarttoolz_tool_categories(tool_slug,category_id) VALUES(?,?)');
+            foreach ($tools as $tool) {
+                $toolSlug = basename((string)($tool['url'] ?? ''), '.php');
+                $categorySlug = smarttoolz_category_slug((string)($tool['category'] ?? ''));
+                if ($toolSlug === '' || $categorySlug === '' || !isset($categoryIds[$categorySlug])) {
+                    continue;
+                }
+                $q->execute([$toolSlug, $categoryIds[$categorySlug]]);
+            }
+        } catch (Throwable $e) {
+            error_log('SmartToolz registry category assignment seed: ' . $e->getMessage());
         }
     }
 
@@ -86,13 +109,29 @@ if (!function_exists('smarttoolz_category_db')) {
             }
         }
         if ($defaults) smarttoolz_category_seed(array_values($defaults));
+
+        // Save all existing registry categories into DB once, without
+        // overwriting any custom assignments already made in admin.
+        smarttoolz_seed_registry_assignments($tools);
+
         $map = smarttoolz_category_assignments();
+        $details = [];
+        try {
+            $db = smarttoolz_category_db();
+            $q = $db->prepare('SELECT c.id,c.name,c.slug,c.icon FROM smarttoolz_categories c WHERE c.id=? LIMIT 1');
+            foreach ($map as $toolSlug => $categoryId) {
+                $q->execute([$categoryId]);
+                $row = $q->fetch(PDO::FETCH_ASSOC);
+                if ($row) $details[$toolSlug] = $row;
+            }
+        } catch (Throwable) {}
+
         foreach ($tools as &$tool) {
             $slug = basename((string)($tool['url'] ?? ''), '.php');
-            if (isset($map[$slug])) {
-                $tool['category'] = (string)$map[$slug]['category_name'];
-                $tool['category_slug'] = (string)$map[$slug]['category_slug'];
-                $tool['category_icon'] = (string)$map[$slug]['category_icon'];
+            if (isset($details[$slug])) {
+                $tool['category'] = (string)$details[$slug]['name'];
+                $tool['category_slug'] = (string)$details[$slug]['slug'];
+                $tool['category_icon'] = (string)$details[$slug]['icon'];
             } else {
                 $tool['category_slug'] = smarttoolz_category_slug((string)($tool['category'] ?? ''));
             }

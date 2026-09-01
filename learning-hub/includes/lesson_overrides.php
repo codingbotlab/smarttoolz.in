@@ -4,77 +4,85 @@ declare(strict_types=1);
 /* Hand-written lesson content. Add one lesson at a time; never use as a generic fallback. */
 function lh_lesson_override(array $course, array $lesson, int $position): ?string {
     $courseSlug = (string)($course['slug'] ?? '');
+
     if ($courseSlug === 'computer-basics-for-beginners' && $position === 1) {
         return <<<'HTML'
 <article class="lh-prose">
   <div class="lh-lesson-intro">
     <p>A computer is an electronic machine that takes <strong>input</strong>, processes it according to instructions, stores information when needed, and produces <strong>output</strong>. Understanding this simple flow makes the rest of computer basics much easier to learn.</p>
   </div>
-
   <h2>What is a computer?</h2>
-  <p>A computer works with data. You give it information through an input device or program, the processor and other components work on that information, and the result is shown or saved. For example, when you open a photo, your computer reads the photo file from storage, loads data into memory, and sends the image to the display.</p>
-
-  <div class="table-responsive"><table class="table table-bordered align-middle">
-    <thead><tr><th>Stage</th><th>What happens</th><th>Example</th></tr></thead>
-    <tbody>
-      <tr><td>Input</td><td>Information is provided to the computer.</td><td>Typing with a keyboard</td></tr>
-      <tr><td>Processing</td><td>Instructions are executed and data is transformed.</td><td>Calculating a total</td></tr>
-      <tr><td>Storage</td><td>Data is kept for later use.</td><td>Saving a document on an SSD</td></tr>
-      <tr><td>Output</td><td>The result is presented to the user or another device.</td><td>Seeing a result on the monitor</td></tr>
-    </tbody>
-  </table></div>
-
+  <p>A computer works with data. You give it information through an input device or program, the processor and other components work on that information, and the result is shown or saved.</p>
   <h2>The main parts of a computer</h2>
-  <p>Different components have different jobs. You do not need to memorize every specification yet; first understand the role each part plays.</p>
-  <ul>
-    <li><strong>CPU:</strong> executes instructions and performs calculations.</li>
-    <li><strong>RAM:</strong> provides fast temporary working space for programs and data currently in use.</li>
-    <li><strong>Storage:</strong> keeps files, applications and the operating system when the computer is turned off.</li>
-    <li><strong>Motherboard:</strong> connects major components so they can communicate.</li>
-    <li><strong>Power supply:</strong> provides electrical power to the system.</li>
-    <li><strong>GPU:</strong> processes graphics and can accelerate supported workloads.</li>
-    <li><strong>Input devices:</strong> keyboard, mouse, microphone, scanner and similar devices.</li>
-    <li><strong>Output devices:</strong> monitor, speakers, printer and similar devices.</li>
-  </ul>
-
-  <h2>Hardware and software are different</h2>
-  <p><strong>Hardware</strong> is the physical equipment you can touch. <strong>Software</strong> is the set of programs and instructions that tell the hardware what to do. A browser is software; the keyboard and SSD are hardware.</p>
-
-  <div class="alert alert-primary">
-    <strong>Remember:</strong> hardware provides the physical capability, while software provides the instructions and user-facing functionality.
-  </div>
-
-  <h2>Real-world example: opening a web browser</h2>
-  <ol>
-    <li>You click the browser icon with the mouse.</li>
-    <li>The operating system starts the browser program from storage.</li>
-    <li>The browser and its data are loaded into RAM so the CPU can work with them quickly.</li>
-    <li>The CPU executes the program's instructions.</li>
-    <li>The display shows the browser window as output.</li>
-  </ol>
-  <p>This is why a computer is best understood as a system of connected parts rather than one single component.</p>
-
-  <h2>Why this matters when troubleshooting</h2>
-  <p>Knowing the role of each part helps you ask better questions. If a computer cannot save a file, storage or permissions may be relevant. If many applications become slow when memory is heavily used, RAM pressure may be involved. If the display has a graphics problem, the display connection or graphics subsystem may need attention.</p>
-
-  <h2>Practice task</h2>
-  <p>Look at the computer or phone you use every day. Write down five physical components and describe the job of each in one sentence. Then name three software applications you use and explain what each application helps you do.</p>
-
-  <h2>Common mistakes</h2>
-  <ul>
-    <li>Thinking RAM and storage are the same thing.</li>
-    <li>Assuming the CPU is the only component responsible for performance.</li>
-    <li>Confusing a program with the physical device it runs on.</li>
-    <li>Trying to troubleshoot without first identifying what changed.</li>
-  </ul>
-
-  <h2>Quick check</h2>
-  <p>Can you explain the difference between CPU, RAM and storage? Can you describe the input → processing → storage/output flow using one example from your own computer use?</p>
-
-  <h2>Next lesson</h2>
-  <p>Next, you will learn about <strong>input and output devices</strong> and how different devices help a person communicate with a computer.</p>
+  <ul><li><strong>CPU:</strong> executes instructions and performs calculations.</li><li><strong>RAM:</strong> provides fast temporary working space.</li><li><strong>Storage:</strong> keeps files and programs long term.</li><li><strong>Motherboard:</strong> connects major components.</li></ul>
+  <h2>Practice task</h2><p>Write down five physical components and describe the job of each.</p>
 </article>
 HTML;
     }
+
+    if ($courseSlug === 'computer-basics-for-beginners' && $position === 4) {
+        return <<<'HTML'
+<article class="lh-prose">
+  <div class="lh-lesson-intro">
+    <p><strong>RAM and storage are not the same thing.</strong> RAM is fast working memory used while programs are running. Storage, such as an SSD or HDD, keeps files and programs even after the computer is turned off.</p>
+  </div>
+
+  <h2>RAM: your computer's working space</h2>
+  <p>When you open a browser, document or game, the operating system loads the information the program needs into RAM. The CPU can access active data from RAM much more quickly than it can from permanent storage.</p>
+  <p>RAM is <strong>volatile memory</strong>: its contents are normally lost when power is removed. That is why unsaved work can disappear after a sudden shutdown.</p>
+
+  <h2>Storage: keeping data for the long term</h2>
+  <p>An SSD or HDD stores the operating system, applications, photos, videos and documents. Storage is <strong>non-volatile</strong>, so its data remains available after the computer is turned off.</p>
+
+  <h2>RAM vs storage</h2>
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead><tr><th>Feature</th><th>RAM</th><th>Storage</th></tr></thead>
+      <tbody>
+        <tr><td>Main purpose</td><td>Active working data</td><td>Long-term files and programs</td></tr>
+        <tr><td>Power off</td><td>Data is normally lost</td><td>Data remains saved</td></tr>
+        <tr><td>Typical technology</td><td>DRAM</td><td>SSD / HDD</td></tr>
+        <tr><td>Example</td><td>Keeping a browser and spreadsheet open</td><td>Saving the spreadsheet file</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>A simple real-world example</h2>
+  <p>Suppose you open a 200 MB project from an SSD. The file remains on the SSD, but the application loads the working parts into RAM. As you edit the project, active data is held in RAM while the application writes saved changes back to storage.</p>
+
+  <div class="alert alert-primary"><strong>Smart tip:</strong> Think of RAM as the desk where you work and storage as the cabinet where you keep your files.</div>
+
+  <h2>Why more RAM can help</h2>
+  <p>When available RAM becomes limited, an operating system may move some less-active data to storage. Storage is slower than RAM, so heavy memory pressure can make multitasking feel less responsive. More RAM can help when your normal workload regularly runs short of working memory.</p>
+
+  <h2>Why more storage is different</h2>
+  <p>Adding storage gives you more room for files and applications. It does not automatically give a program more working memory. A computer with a large SSD can still feel slow if its workload needs more RAM or if another component is the bottleneck.</p>
+
+  <h2>Practical task</h2>
+  <ol>
+    <li>Open your system monitor or Task Manager.</li>
+    <li>Look at current memory usage.</li>
+    <li>Open two or three normal applications.</li>
+    <li>Observe how memory usage changes.</li>
+    <li>Record whether the computer remains responsive.</li>
+  </ol>
+
+  <h2>Common mistakes</h2>
+  <ul>
+    <li>Calling an SSD “memory” in the same sense as RAM.</li>
+    <li>Assuming a larger storage drive makes every program faster.</li>
+    <li>Thinking unused RAM is automatically wasted RAM.</li>
+    <li>Buying more RAM without checking what the actual slowdown is.</li>
+  </ul>
+
+  <h2>Quick check</h2>
+  <p>What happens to RAM when a computer is powered off? Why can adding an SSD increase available storage without increasing working memory?</p>
+
+  <h2>Key takeaway</h2>
+  <p><strong>RAM holds the data you are actively working with; storage keeps your data and programs for the long term.</strong> Knowing the difference helps you choose upgrades intelligently and troubleshoot slow computers.</p>
+</article>
+HTML;
+    }
+
     return null;
 }

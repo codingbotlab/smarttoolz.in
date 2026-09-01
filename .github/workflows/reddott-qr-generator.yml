@@ -19,7 +19,7 @@ env:
 jobs:
   build-publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,6 +28,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install system tools
         run: |
@@ -40,6 +45,12 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
+      - name: Install Kokoro TTS
+        run: |
+          python -m venv "$GITHUB_WORKSPACE/tts-venv"
+          "$GITHUB_WORKSPACE/tts-venv/bin/python" -m pip install --upgrade pip
+          "$GITHUB_WORKSPACE/tts-venv/bin/pip" install "kokoro>=0.9.4" soundfile
+
       - name: Record the real SmartToolz page
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
         run: node record.js
@@ -50,8 +61,12 @@ jobs:
           test -s output/browser-demo.webm
           ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 output/browser-demo.webm
 
-      - name: Build narration
+      - name: Build natural narration
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        env:
+          KOKORO_PYTHON: ${{ github.workspace }}/tts-venv/bin/python
+          KOKORO_VOICE: af_heart
+          KOKORO_SPEED: '1.02'
         run: node build-narration.mjs
 
       - name: Prepare Remotion public assets

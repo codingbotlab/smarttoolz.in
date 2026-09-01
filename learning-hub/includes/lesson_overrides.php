@@ -29,6 +29,37 @@ HTML;
 HTML;
     }
 
+    if ($courseSlug === 'computer-basics-for-beginners' && $position === 7) {
+        return <<<'HTML'
+<article class="lh-prose">
+  <div class="lh-lesson-intro"><p>A <strong>GPU (Graphics Processing Unit)</strong> is a processor designed to perform graphics and other workloads that can be divided into many parallel operations. It helps turn data into the images and frames you see on a display.</p></div>
+  <h2>What does a GPU do?</h2>
+  <p>When a game renders a 3D scene, a video editor previews effects, or a desktop draws a complex interface, graphics calculations have to be performed repeatedly. A GPU is built to handle large numbers of similar calculations in parallel, while the CPU is designed for broader general-purpose instruction processing.</p>
+  <h2>Integrated vs dedicated graphics</h2>
+  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Type</th><th>Typical setup</th><th>Practical trade-off</th></tr></thead><tbody>
+    <tr><td>Integrated GPU</td><td>Graphics hardware built into the processor or platform</td><td>Usually lower power and cost; often shares system memory.</td></tr>
+    <tr><td>Dedicated GPU</td><td>Separate graphics processor/card with its own high-speed memory</td><td>Usually offers much higher graphics throughput, but uses more power and costs more.</td></tr>
+  </tbody></table></div>
+  <h2>GPU memory is not system RAM</h2>
+  <p>Dedicated graphics cards commonly have their own <strong>VRAM</strong>, which stores textures, frame data and other graphics resources close to the GPU. Integrated graphics commonly use a portion of system RAM instead. This is why “8 GB RAM” and “8 GB VRAM” describe different resources.</p>
+  <h2>GPU vs CPU</h2>
+  <p>The CPU handles a wide range of sequential and general-purpose tasks. The GPU is highly effective when a workload can be split into many similar operations. Modern applications often use both: the CPU coordinates the application while the GPU accelerates supported graphics or compute work.</p>
+  <h2>Real-world example</h2>
+  <ol><li>You launch a game.</li><li>The CPU runs the game logic, operating-system interactions and instructions that coordinate the application.</li><li>The GPU processes supported rendering work such as geometry, shading and image generation.</li><li>Graphics data is stored in appropriate memory and the completed frame is sent to the display.</li></ol>
+  <h2>How to identify a graphics problem</h2>
+  <p>Look for the pattern before changing hardware. A problem limited to one game may be software or settings related. Artifacts, driver crashes, black screens or failures under sustained load can point toward graphics-driver, temperature, power, cable, display or hardware issues.</p>
+  <h2>Practical task</h2>
+  <ol><li>Open your system information or Task Manager and identify the graphics processor.</li><li>Record whether it is integrated or dedicated.</li><li>While playing a video or running a graphics-heavy application, observe GPU usage and temperature if your system exposes those readings.</li><li>Write down what changes when the workload starts and stops.</li></ol>
+  <h2>Common mistakes</h2>
+  <ul><li>Assuming every computer needs a dedicated graphics card.</li><li>Comparing GPUs only by memory size.</li><li>Confusing VRAM with system RAM.</li><li>Assuming high GPU usage automatically means something is wrong; heavy workloads can legitimately use the GPU extensively.</li></ul>
+  <h2>Quick check</h2>
+  <ol><li>Why is a GPU well suited to parallel graphics work?</li><li>How is integrated graphics different from a dedicated GPU?</li><li>Why can a computer use both CPU and GPU for the same application?</li></ol>
+  <h2>Key takeaway</h2>
+  <p><strong>The GPU is a specialized parallel processor that accelerates graphics and other suitable workloads; the CPU and GPU work together rather than replacing one another.</strong></p>
+</article>
+HTML;
+    }
+
     /* Course 16 = Graphic Design Foundations in the master curriculum. */
     if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 1) {
         return <<<'HTML'

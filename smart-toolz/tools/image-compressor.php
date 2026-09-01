@@ -24,6 +24,7 @@ smartToozAd('popunder');smartToozAd('socialbar');
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
 <?php require_once dirname(__DIR__).'/header.php'; ?>
 <div class="page-layout">
 <main class="tool-content">

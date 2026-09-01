@@ -22,10 +22,26 @@ try{
   $q=$db->prepare("INSERT INTO learning_events(user_id,event_name,entity_type,entity_id,metadata) VALUES(?,?,?,?,?)");
   $q->execute([(int)$user['id'],'course_enrolled','course',(int)$course['id'],json_encode(['course_slug'=>$course['slug'],'course_title'=>$course['title']],JSON_UNESCAPED_UNICODE)]);
 
-  $q=$db->prepare('SELECT slug FROM learning_lessons WHERE course_id=? AND enabled=1 ORDER BY sort_order,id LIMIT 1');
-  $q->execute([(int)$course['id']]);
-  $lessonSlug=(string)($q->fetchColumn()?:'');
-  header('Location:'.($lessonSlug?'/learning-hub/lesson.php?slug='.rawurlencode($lessonSlug):'/learning-hub/course.php?slug='.rawurlencode($course['slug'])));
+  $lessonSlug='';
+  $hasChapterCol=(int)$db->query("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='learning_lessons' AND column_name='chapter_id'")->fetchColumn()>0;
+  $hasChapters=(int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='learning_chapters'")->fetchColumn()>0;
+  if($hasChapterCol && $hasChapters){
+    try{
+      $q=$db->prepare("SELECT l.slug FROM learning_lessons l JOIN learning_chapters ch ON ch.id=l.chapter_id WHERE ch.course_id=? AND l.enabled=1 ORDER BY ch.sort_order,ch.id,l.sort_order,l.id LIMIT 1");
+      $q->execute([(int)$course['id']]);
+      $lessonSlug=(string)($q->fetchColumn()?:'');
+    }catch(Throwable){}
+  }
+  if($lessonSlug===''){
+    $q=$db->prepare('SELECT slug FROM learning_lessons WHERE course_id=? AND enabled=1 ORDER BY sort_order,id LIMIT 1');
+    $q->execute([(int)$course['id']]);
+    $lessonSlug=(string)($q->fetchColumn()?:'');
+  }
+
+  $target=$lessonSlug
+    ? '/learning-hub/lesson.php?slug='.rawurlencode($lessonSlug)
+    : '/learning-hub/course.php?slug='.rawurlencode($course['slug']);
+  header('Location:'.$target);
   exit;
 }catch(Throwable $e){
   http_response_code(500);

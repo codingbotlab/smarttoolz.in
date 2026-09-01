@@ -2,6 +2,14 @@
 declare(strict_types=1);
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
+require_once __DIR__ . '/lib/settings.php';
+
+$siteName = smarttoolz_setting_string('site_name', 'SmartToolz');
+$siteTagline = smarttoolz_setting_string('site_tagline', 'Free, fast and simple online tools.');
+$guestTrialEnabled = smarttoolz_setting_bool('guest_trial_enabled', true);
+$guestTrialTotal = max(0, smarttoolz_setting_int('guest_trial_limit', 5));
+$maintenanceMode = smarttoolz_setting_bool('maintenance_mode', false);
+
 $isLoggedIn = !empty($_SESSION['user_id']);
 $displayName = (string)($_SESSION['user_name'] ?? '');
 $displayAvatar = (string)($_SESSION['user_avatar'] ?? '');
@@ -13,20 +21,21 @@ $script = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
 $isHome = in_array($script, ['index.php', 'home.php'], true);
 $isAccount = $script === 'account.php';
 $isAllTools = $script === 'tool.php';
-$isToolPage = !$isHome && !$isAccount && !$isAllTools && str_contains((string)($_SERVER['SCRIPT_NAME'] ?? ''), '/tools/');
+$isAdminArea = str_contains((string)($_SERVER['SCRIPT_NAME'] ?? ''), '/smart-toolz/admin/');
+$isToolPage = !$isHome && !$isAccount && !$isAllTools && !$isAdminArea && str_contains((string)($_SERVER['SCRIPT_NAME'] ?? ''), '/tools/');
 $slug = basename($script, '.php');
 $toolTitle = ucwords(str_replace(['-', '_'], ' ', strtolower($slug ?: 'Online Tool')));
 
 $guestTrialUsed = 0;
-$guestTrialTotal = 5;
 $guestTrialExhausted = false;
 
-if (!$isLoggedIn && $isToolPage) {
+if (!$isLoggedIn && $isToolPage && $guestTrialEnabled && $guestTrialTotal > 0) {
     try {
         require_once $_SERVER['DOCUMENT_ROOT'] . '/smart-toolz/lib/trials.php';
         $guestStatus = smarttoolz_guest_trial_status($slug);
         $guestTrialUsed = (int)($guestStatus['used'] ?? 0);
         $guestTrialExhausted = $guestTrialUsed >= $guestTrialTotal;
+        $guestTrialTotal = (int)($guestStatus['limit'] ?? $guestTrialTotal);
     } catch (Throwable $e) {
         $guestTrialUsed = 0;
     }
@@ -41,29 +50,25 @@ if ($isLoggedIn) {
             $headerCredits = (int)($hr['credits'] ?? 0);
             $role = strtolower((string)($hr['role'] ?? 'user'));
             $email = strtolower(trim((string)($hr['email'] ?? '')));
-
-            // Admin is recognised by role OR the configured owner/admin email.
-            $isAdmin = in_array($role, ['admin', 'superadmin'], true)
-                || $email === 'maddyhunk30@gmail.com';
+            $isAdmin = in_array($role, ['admin', 'superadmin'], true) || $email === 'maddyhunk30@gmail.com';
         }
-    } catch (Throwable $e) {
-        // Keep header usable even when the optional admin lookup fails.
-    }
+    } catch (Throwable $e) {}
 
     try {
         require_once $_SERVER['DOCUMENT_ROOT'] . '/smart-toolz/lib/trials.php';
         if (($_SESSION['smarttoolz_login_notice_sid'] ?? '') !== session_id()) {
-            smarttoolz_notify(
-                (int)$_SESSION['user_id'],
-                'login',
-                'Login activity',
-                'You signed in to SmartToolz successfully.'
-            );
+            smarttoolz_notify((int)$_SESSION['user_id'], 'login', 'Login activity', 'You signed in to ' . $siteName . ' successfully.');
             $_SESSION['smarttoolz_login_notice_sid'] = session_id();
         }
-    } catch (Throwable $e) {
-        // Notifications must never break the site header.
-    }
+    } catch (Throwable $e) {}
+}
+
+/* Site-wide maintenance switch. Admins can always access the admin area. */
+if ($maintenanceMode && !$isAdmin && !$isAdminArea && !str_contains((string)($_SERVER['REQUEST_URI'] ?? ''), '/creator-ai/auth/')) {
+    http_response_code(503);
+    $retry = max(60, smarttoolz_setting_int('maintenance_retry_seconds', 300));
+    header('Retry-After: ' . $retry);
+    exit('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . ' - Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f6f8fc;color:#172033;font-family:Inter,system-ui,Arial,sans-serif}.box{width:min(560px,calc(100% - 32px));padding:36px;text-align:center;background:#fff;border:1px solid #e5e9f0;border-radius:22px;box-shadow:0 18px 50px #1d27400d}.icon{font-size:42px}.box h1{margin:12px 0 8px}.box p{margin:0;color:#707b8e;line-height:1.7}</style><main class="box"><div class="icon">🛠️</div><h1>' . htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . ' is under maintenance</h1><p>' . htmlspecialchars($siteTagline, ENT_QUOTES, 'UTF-8') . '<br>We will be back soon.</p></main>');
 }
 ?>
 
@@ -71,7 +76,7 @@ if ($isLoggedIn) {
     <nav class="navbar">
         <a class="logo" href="/smart-toolz/">
             <span class="logo-icon">🛠️</span>
-            <span>SmartToolz</span>
+            <span><?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?></span>
         </a>
 
         <button class="menu-button" type="button" aria-label="Menu" aria-expanded="false">☰</button>
@@ -82,18 +87,12 @@ if ($isLoggedIn) {
 
             <?php if ($isLoggedIn): ?>
                 <?php if ($isAdmin): ?>
-                    <a class="admin-link" href="/smart-toolz/admin/" title="Open SmartToolz Admin">
-                        🛡️ Admin
-                    </a>
+                    <a class="admin-link" href="/smart-toolz/admin/" title="Open SmartToolz Admin">🛡️ Admin</a>
                 <?php endif; ?>
 
-                <button class="notify-btn" id="notifyBtn" type="button" aria-label="Notifications">
-                    🔔<b id="notifyCount" hidden>0</b>
-                </button>
+                <button class="notify-btn" id="notifyBtn" type="button" aria-label="Notifications">🔔<b id="notifyCount" hidden>0</b></button>
 
-                <span class="credit-pill">
-                    ⚡ <b id="headerCredits"><?= $headerCredits === null ? '—' : number_format($headerCredits) ?></b> credits
-                </span>
+                <span class="credit-pill">⚡ <b id="headerCredits"><?= $headerCredits === null ? '—' : number_format($headerCredits) ?></b> credits</span>
 
                 <a class="nav-user" href="/smart-toolz/account.php">
                     <?php if ($displayAvatar !== ''): ?>
@@ -103,7 +102,6 @@ if ($isLoggedIn) {
                     <?php endif; ?>
                     <strong><?= htmlspecialchars($displayName ?: 'Account', ENT_QUOTES, 'UTF-8') ?></strong>
                 </a>
-
                 <a href="/creator-ai/auth/logout.php">Logout</a>
             <?php else: ?>
                 <a class="login-btn" href="/creator-ai/auth/google-login.php">Login with Google</a>
@@ -112,50 +110,40 @@ if ($isLoggedIn) {
 
         <?php if ($isLoggedIn): ?>
             <div class="notification-panel" id="notificationPanel">
-                <div class="notification-head">
-                    <strong>Activity</strong>
-                    <button id="markAllRead" type="button">Mark all read</button>
-                </div>
+                <div class="notification-head"><strong>Activity</strong><button id="markAllRead" type="button">Mark all read</button></div>
                 <div id="notificationList"><div class="notification-empty">Loading…</div></div>
             </div>
         <?php endif; ?>
     </nav>
 </header>
 
-<?php if (!$isHome && !$isAccount && !$isAllTools): ?>
-    <?php if ($isToolPage && !$isLoggedIn && $guestTrialExhausted): ?>
+<?php if (!$isHome && !$isAccount && !$isAllTools && !$isAdminArea): ?>
+    <?php if ($isToolPage && !$isLoggedIn && $guestTrialEnabled && $guestTrialTotal > 0 && $guestTrialExhausted): ?>
         <section class="trial-lock">
             <div class="trial-lock-icon">🔒</div>
             <div>
                 <span class="tool-free-badge">FREE TRIALS USED</span>
                 <h1>Your free trials for this tool are finished</h1>
-                <p>You have used all <strong>5 / 5 free trials</strong> for <?= htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') ?>. Login to continue with credits, or try another tool.</p>
-                <div class="trial-lock-actions">
-                    <a class="trial-login" href="/creator-ai/auth/google-login.php">Login to Continue</a>
-                    <a class="trial-other" href="/smart-toolz/tool.php">Try Another Tools →</a>
-                </div>
+                <p>You have used all <strong><?= $guestTrialTotal ?> / <?= $guestTrialTotal ?> free trials</strong> for <?= htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') ?>. Login to continue with credits, or try another tool.</p>
+                <div class="trial-lock-actions"><a class="trial-login" href="/creator-ai/auth/google-login.php">Login to Continue</a><a class="trial-other" href="/smart-toolz/tool.php">Try Another Tools →</a></div>
             </div>
         </section>
-        <style>.trial-lock{width:min(1400px,calc(100% - 30px));margin:24px auto 0;padding:32px;display:flex;gap:22px;align-items:flex-start;background:#fff;border:2px solid #eee9ff;border-radius:22px;box-shadow:0 14px 45px rgba(35,30,80,.08)}.trial-lock-icon{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:16px;background:#f0efff;font-size:27px}.trial-lock h1{margin:8px 0 7px;font-size:28px;line-height:1.2}.trial-lock p{margin:0;color:#667287;font-size:13px;line-height:1.7}.trial-lock-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.trial-login,.trial-other{padding:11px 16px;border-radius:11px;font-size:12px;font-weight:850;text-decoration:none}.trial-login{background:#635bff;color:#fff}.trial-other{background:#f2f3f7;color:#384257}.trial-login:hover{background:#5149e8}.trial-other:hover{background:#e7e9ef}@media(max-width:600px){.trial-lock{padding:23px;flex-direction:column}.trial-lock h1{font-size:23px}.trial-lock-actions>a{width:100%;text-align:center}}</style>
-        <script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('input,button,textarea,select').forEach(function(e){if(!e.closest('.site-header'))e.disabled=true;});});</script>
     <?php else: ?>
         <section class="tool-seo-intro">
             <div>
                 <span class="tool-free-badge">FREE ONLINE TOOL</span>
                 <h2>Free Online <?= htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') ?></h2>
-                <p>SmartToolz <?= htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') ?> helps you complete this task quickly and easily. Use the tool online without unnecessary setup.</p>
+                <p><?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') ?> helps you complete this task quickly and easily. <?= htmlspecialchars($siteTagline, ENT_QUOTES, 'UTF-8') ?></p>
             </div>
             <div class="how-use">
                 <h3>How to Use</h3>
-                <ol>
-                    <li>Enter, upload or select your data.</li>
-                    <li>Choose your options and click the main action button.</li>
-                    <li>Review the result and download or copy it.</li>
-                </ol>
-                <?php if ($isToolPage && !$isLoggedIn): ?>
+                <ol><li>Enter, upload or select your data.</li><li>Choose your options and click the main action button.</li><li>Review the result and download or copy it.</li></ol>
+                <?php if ($isToolPage && !$isLoggedIn && $guestTrialEnabled && $guestTrialTotal > 0): ?>
                     <div class="trial-note">🎁 <b><?= $guestTrialUsed ?> / <?= $guestTrialTotal ?> used</b> — <?= max(0, $guestTrialTotal - $guestTrialUsed) ?> free trials remaining for this tool.</div>
+                <?php elseif ($isToolPage && !$isLoggedIn && !$guestTrialEnabled): ?>
+                    <div class="trial-note">🔐 Guest trials are currently disabled. Login to continue using credits.</div>
                 <?php elseif ($isToolPage && $isLoggedIn): ?>
-                    <div class="trial-note">⚡ Logged in: <b>1 credit</b> is used per successful generation. No free trial applies.</div>
+                    <div class="trial-note">⚡ Logged in: <b>credits apply</b> according to current site settings.</div>
                 <?php endif; ?>
             </div>
         </section>
@@ -163,7 +151,7 @@ if ($isLoggedIn) {
 <?php endif; ?>
 
 <style>
-.site-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid #e7eaf1}.navbar{width:min(1400px,calc(100% - 28px));min-height:72px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:22px;position:relative}.logo{display:flex;align-items:center;gap:10px;color:#172033;font-size:21px;font-weight:850;text-decoration:none;white-space:nowrap}.logo-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:#fff;background:linear-gradient(135deg,#635bff,#916cff)}.nav-links{display:flex;align-items:center;gap:10px}.nav-links a{color:#596477;font-size:13px;font-weight:700;text-decoration:none}.nav-links a:hover{color:#635bff}.admin-link{color:#635bff!important;font-weight:900!important}.login-btn{padding:10px 15px;border-radius:11px;color:#fff!important;background:#635bff}.credit-pill{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid #ddd9ff;border-radius:999px;background:#f5f3ff;color:#635bff;font-size:12px;font-weight:800;white-space:nowrap}.notify-btn{position:relative;border:1px solid #e0e4ec;background:#fff;border-radius:11px;width:38px;height:38px;cursor:pointer;font-size:17px}.notify-btn b{position:absolute;right:-5px;top:-6px;min-width:18px;height:18px;padding:0 4px;display:grid;place-items:center;border-radius:999px;background:#e5484d;color:#fff;font-size:9px}.notification-panel{display:none;position:absolute;right:18px;top:67px;width:min(390px,calc(100% - 20px));background:#fff;border:1px solid #e3e7ef;border-radius:16px;box-shadow:0 18px 50px rgba(20,30,70,.18);overflow:hidden}.notification-panel.open{display:block}.notification-head{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;border-bottom:1px solid #edf0f4}.notification-head button{border:0;background:transparent;color:#635bff;font-size:11px;font-weight:800;cursor:pointer}.notification-item{padding:12px 15px;border-bottom:1px solid #f0f2f5;cursor:pointer}.notification-item.unread{background:#f7f6ff}.notification-item strong{display:block;font-size:12px}.notification-item p{margin:4px 0;color:#697489;font-size:11px;line-height:1.5}.notification-item small{color:#98a0ae;font-size:10px}.notification-empty{padding:25px;text-align:center;color:#8791a2;font-size:12px}.nav-user{display:flex;align-items:center;gap:7px!important}.nav-user img,.nav-user>span{width:30px;height:30px;border-radius:50%;object-fit:cover}.nav-user>span{display:grid;place-items:center;background:#635bff;color:#fff;font-size:12px}.menu-button{display:none;border:0;background:transparent;font-size:27px;cursor:pointer}.tool-seo-intro{width:min(1400px,calc(100% - 30px));margin:24px auto 0;padding:24px 26px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:22px;background:#fff;border:1px solid #e5e9f0;border-radius:20px;box-shadow:0 10px 35px rgba(20,30,70,.045)}.tool-free-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#eeedff;color:#635bff;font-size:11px;font-weight:900;letter-spacing:.4px}.tool-seo-intro h2{margin:9px 0 7px;font-size:26px;line-height:1.15}.tool-seo-intro p{margin:0;color:#707b8e;font-size:13px;line-height:1.7}.how-use{padding:18px;background:#f7f8fc;border:1px solid #e8eaf1;border-radius:15px}.how-use h3{margin:0 0 8px;font-size:16px}.how-use ol{margin:0 0 10px;padding-left:20px;color:#596477;font-size:12px;line-height:1.8}.trial-note{padding:9px 11px;margin-top:10px;border-radius:10px;background:#fff;border:1px solid #dfe5ee;color:#5f6b7e;font-size:11px;font-weight:700}@media(max-width:820px){.menu-button{display:block}.nav-links{display:none;position:absolute;top:64px;left:0;right:0;padding:12px;flex-direction:column;align-items:stretch;background:#fff;border:1px solid #e7eaf1;border-top:0;border-radius:0 0 16px 16px;box-shadow:0 18px 35px #141c321a}.nav-links.open{display:flex}.nav-links a,.credit-pill,.notify-btn{margin:2px 0;padding:10px}.nav-user{justify-content:flex-start}.notification-panel{right:10px;top:64px}}@media(max-width:900px){.tool-seo-intro{grid-template-columns:1fr}}
+.site-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid #e7eaf1}.navbar{width:min(1400px,calc(100% - 28px));min-height:72px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:22px;position:relative}.logo{display:flex;align-items:center;gap:10px;color:#172033;font-size:21px;font-weight:850;text-decoration:none;white-space:nowrap}.logo-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:#fff;background:linear-gradient(135deg,#635bff,#916cff)}.nav-links{display:flex;align-items:center;gap:10px}.nav-links a{color:#596477;font-size:13px;font-weight:700;text-decoration:none}.nav-links a:hover{color:#635bff}.admin-link{color:#635bff!important;font-weight:900!important}.login-btn{padding:10px 15px;border-radius:11px;color:#fff!important;background:#635bff}.credit-pill{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid #ddd9ff;border-radius:999px;background:#f5f3ff;color:#635bff;font-size:12px;font-weight:800;white-space:nowrap}.notify-btn{position:relative;border:1px solid #e0e4ec;background:#fff;border-radius:11px;width:38px;height:38px;cursor:pointer;font-size:17px}.notify-btn b{position:absolute;right:-5px;top:-6px;min-width:18px;height:18px;padding:0 4px;display:grid;place-items:center;border-radius:999px;background:#e5484d;color:#fff;font-size:9px}.notification-panel{display:none;position:absolute;right:18px;top:67px;width:min(390px,calc(100% - 20px));background:#fff;border:1px solid #e3e7ef;border-radius:16px;box-shadow:0 18px 50px rgba(20,30,70,.18);overflow:hidden}.notification-panel.open{display:block}.notification-head{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;border-bottom:1px solid #edf0f4}.notification-head button{border:0;background:transparent;color:#635bff;font-size:11px;font-weight:800;cursor:pointer}.notification-item{padding:12px 15px;border-bottom:1px solid #f0f2f5;cursor:pointer}.notification-item.unread{background:#f7f6ff}.notification-item strong{display:block;font-size:12px}.notification-item p{margin:4px 0;color:#697489;font-size:11px;line-height:1.5}.notification-item small{color:#98a0ae;font-size:10px}.notification-empty{padding:25px;text-align:center;color:#8791a2;font-size:12px}.nav-user{display:flex;align-items:center;gap:7px!important}.nav-user img,.nav-user>span{width:30px;height:30px;border-radius:50%;object-fit:cover}.nav-user>span{display:grid;place-items:center;background:#635bff;color:#fff;font-size:12px}.menu-button{display:none;border:0;background:transparent;font-size:27px;cursor:pointer}.tool-seo-intro{width:min(1400px,calc(100% - 30px));margin:24px auto 0;padding:24px 26px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:22px;background:#fff;border:1px solid #e5e9f0;border-radius:20px;box-shadow:0 10px 35px rgba(20,30,70,.045)}.tool-free-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#eeedff;color:#635bff;font-size:11px;font-weight:900;letter-spacing:.4px}.tool-seo-intro h2{margin:9px 0 7px;font-size:26px;line-height:1.15}.tool-seo-intro p{margin:0;color:#707b8e;font-size:13px;line-height:1.7}.how-use{padding:18px;background:#f7f8fc;border:1px solid #e8eaf1;border-radius:15px}.how-use h3{margin:0 0 8px;font-size:16px}.how-use ol{margin:0 0 10px;padding-left:20px;color:#596477;font-size:12px;line-height:1.8}.trial-note{padding:9px 11px;margin-top:10px;border-radius:10px;background:#fff;border:1px solid #dfe5ee;color:#5f6b7e;font-size:11px;font-weight:700}.trial-lock{width:min(1400px,calc(100% - 30px));margin:24px auto 0;padding:32px;display:flex;gap:22px;align-items:flex-start;background:#fff;border:2px solid #eee9ff;border-radius:22px;box-shadow:0 14px 45px rgba(35,30,80,.08)}.trial-lock-icon{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:16px;background:#f0efff;font-size:27px}.trial-lock h1{margin:8px 0 7px;font-size:28px;line-height:1.2}.trial-lock p{margin:0;color:#667287;font-size:13px;line-height:1.7}.trial-lock-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.trial-login,.trial-other{padding:11px 16px;border-radius:11px;font-size:12px;font-weight:850;text-decoration:none}.trial-login{background:#635bff;color:#fff}.trial-other{background:#f2f3f7;color:#384257}@media(max-width:820px){.menu-button{display:block}.nav-links{display:none;position:absolute;top:64px;left:0;right:0;padding:12px;flex-direction:column;align-items:stretch;background:#fff;border:1px solid #e7eaf1;border-top:0;border-radius:0 0 16px 16px;box-shadow:0 18px 35px #141c321a}.nav-links.open{display:flex}.nav-links a,.credit-pill,.notify-btn{margin:2px 0;padding:10px}.nav-user{justify-content:flex-start}.notification-panel{right:10px;top:64px}}@media(max-width:900px){.tool-seo-intro{grid-template-columns:1fr}}
 </style>
 
 <script>
@@ -185,38 +173,17 @@ if ($isLoggedIn) {
     const list = document.getElementById('notificationList');
     const count = document.getElementById('notifyCount');
 
-    function esc(s) {
-        return String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
-    }
-
+    function esc(s) { return String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c])); }
     async function load() {
         try {
             const r = await fetch('/smart-toolz/api/notifications.php?action=list', {cache:'no-store'});
-            const d = await r.json();
-            if (!d.ok) return;
-            if (count) {
-                count.textContent = d.unread || 0;
-                count.hidden = !(d.unread > 0);
-            }
-            if (list) {
-                list.innerHTML = d.notifications?.length
-                    ? d.notifications.map(x => `<div class="notification-item ${x.read_at ? '' : 'unread'}"><strong>${esc(x.title)}</strong><p>${esc(x.message)}</p><small>${esc(x.created_at)}</small></div>`).join('')
-                    : '<div class="notification-empty">No activity yet.</div>';
-            }
+            const d = await r.json(); if (!d.ok) return;
+            if (count) { count.textContent = d.unread || 0; count.hidden = !(d.unread > 0); }
+            if (list) list.innerHTML = d.notifications?.length ? d.notifications.map(x => `<div class="notification-item ${x.read_at ? '' : 'unread'}"><strong>${esc(x.title)}</strong><p>${esc(x.message)}</p><small>${esc(x.created_at)}</small></div>`).join('') : '<div class="notification-empty">No activity yet.</div>';
         } catch (e) {}
     }
-
-    btn?.addEventListener('click', () => {
-        panel?.classList.toggle('open');
-        load();
-    });
-
-    document.getElementById('markAllRead')?.addEventListener('click', async () => {
-        await fetch('/smart-toolz/api/notifications.php?action=read_all', {method:'POST'});
-        load();
-    });
-
-    load();
-    setInterval(load, 15000);
+    if (btn && panel) { btn.onclick = () => { panel.classList.toggle('open'); load(); }; document.addEventListener('click', e => { if (!panel.contains(e.target) && !btn.contains(e.target)) panel.classList.remove('open'); }); }
+    load(); setInterval(load, 10000);
+    const mark = document.getElementById('markAllRead'); if (mark) mark.onclick = async () => { try { await fetch('/smart-toolz/api/notifications.php?action=read_all',{method:'POST'}); load(); } catch(e){} };
 })();
 </script>

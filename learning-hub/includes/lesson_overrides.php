@@ -59,27 +59,98 @@ HTML;
   <p>Adding storage gives you more room for files and applications. It does not automatically give a program more working memory. A computer with a large SSD can still feel slow if its workload needs more RAM or if another component is the bottleneck.</p>
 
   <h2>Practical task</h2>
-  <ol>
-    <li>Open your system monitor or Task Manager.</li>
-    <li>Look at current memory usage.</li>
-    <li>Open two or three normal applications.</li>
-    <li>Observe how memory usage changes.</li>
-    <li>Record whether the computer remains responsive.</li>
-  </ol>
+  <ol><li>Open your system monitor or Task Manager.</li><li>Look at current memory usage.</li><li>Open two or three normal applications.</li><li>Observe how memory usage changes.</li><li>Record whether the computer remains responsive.</li></ol>
 
   <h2>Common mistakes</h2>
-  <ul>
-    <li>Calling an SSD “memory” in the same sense as RAM.</li>
-    <li>Assuming a larger storage drive makes every program faster.</li>
-    <li>Thinking unused RAM is automatically wasted RAM.</li>
-    <li>Buying more RAM without checking what the actual slowdown is.</li>
-  </ul>
+  <ul><li>Calling an SSD “memory” in the same sense as RAM.</li><li>Assuming a larger storage drive makes every program faster.</li><li>Thinking unused RAM is automatically wasted RAM.</li><li>Buying more RAM without checking what the actual slowdown is.</li></ul>
 
   <h2>Quick check</h2>
   <p>What happens to RAM when a computer is powered off? Why can adding an SSD increase available storage without increasing working memory?</p>
 
   <h2>Key takeaway</h2>
   <p><strong>RAM holds the data you are actively working with; storage keeps your data and programs for the long term.</strong> Knowing the difference helps you choose upgrades intelligently and troubleshoot slow computers.</p>
+</article>
+HTML;
+    }
+
+    if ($courseSlug === 'computer-basics-for-beginners' && $position === 5) {
+        return <<<'HTML'
+<article class="lh-prose">
+  <div class="lh-lesson-intro">
+    <p><strong>Hard drives (HDDs) and solid-state drives (SSDs)</strong> both provide permanent storage, but they store and retrieve data using very different technologies. Understanding the difference helps you choose the right drive and diagnose slow storage.</p>
+  </div>
+
+  <h2>HDD: magnetic storage with moving parts</h2>
+  <p>A hard disk drive stores data magnetically on spinning platters. A mechanical actuator moves read/write heads over the platter surface to access data. Because the drive contains moving parts, physical shocks, vibration and mechanical wear can matter.</p>
+
+  <h2>SSD: flash storage with no moving parts</h2>
+  <p>A solid-state drive stores data in NAND flash memory. It has no spinning platter or moving read/write head. The controller manages where data is stored and performs tasks such as wear management and error correction.</p>
+
+  <h2>HDD vs SSD</h2>
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead><tr><th>Feature</th><th>HDD</th><th>SSD</th></tr></thead>
+      <tbody>
+        <tr><td>Storage technology</td><td>Magnetic platters</td><td>NAND flash memory</td></tr>
+        <tr><td>Moving parts</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Typical access latency</td><td>Higher</td><td>Much lower</td></tr>
+        <tr><td>Noise</td><td>Can produce mechanical noise</td><td>Silent during normal operation</td></tr>
+        <tr><td>Shock resistance</td><td>More sensitive while operating</td><td>Generally more resistant to physical shock</td></tr>
+        <tr><td>Common strength</td><td>Large capacity at relatively low cost</td><td>Fast everyday responsiveness</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Why an SSD can make a computer feel faster</h2>
+  <p>Replacing a mechanical system drive with an SSD can reduce storage access latency dramatically. This is noticeable during tasks such as starting the operating system, launching applications, opening many small files and loading projects. The SSD does not make the CPU itself faster; it reduces waiting for storage operations.</p>
+
+  <div class="alert alert-primary">
+    <strong>Smart tip:</strong> “SSD is faster” does not mean every workload becomes equally faster. CPU-heavy calculations, insufficient RAM, network delays and other bottlenecks can still dominate performance.
+  </div>
+
+  <h2>Capacity is different from speed</h2>
+  <p>A 1 TB drive describes how much data it can hold, not how quickly every task will run. Two drives with the same capacity can have very different performance. When comparing storage, consider capacity, interface, sustained performance, workload, reliability and price.</p>
+
+  <h2>What are SATA and NVMe?</h2>
+  <p><strong>SATA</strong> is a storage interface commonly used by 2.5-inch SSDs and older HDDs. <strong>NVMe</strong> is a protocol designed for non-volatile memory and is commonly used by SSDs connected through PCIe. NVMe SSDs can provide much higher throughput and lower overhead than SATA SSDs, especially for demanding workloads.</p>
+
+  <h2>Practical example: choosing a drive</h2>
+  <p>Imagine a home computer used for web browsing, documents, photos and backups. An SSD is a strong choice for the operating system and everyday applications because quick access improves responsiveness. A large HDD can still be useful for storing a large collection of less frequently accessed files when capacity per unit cost is the priority.</p>
+
+  <h2>Checking your own drive</h2>
+  <ol>
+    <li>Open your operating system's storage or system information screen.</li>
+    <li>Identify whether the installed drive is an HDD or SSD.</li>
+    <li>Note its capacity and how much free space remains.</li>
+    <li>Observe disk activity while opening a large application or copying a file.</li>
+    <li>Record whether storage activity appears to be the limiting factor.</li>
+  </ol>
+
+  <h2>Storage health and backups</h2>
+  <p>A healthy drive can still fail. Important files should have a backup separate from the computer. For an HDD, unusual clicking, grinding or repeated read errors can be warning signs. SSDs also have finite write endurance and can fail without the same mechanical symptoms, so monitoring and backups remain important for both.</p>
+
+  <h2>Common mistakes</h2>
+  <ul>
+    <li>Thinking an SSD is a type of RAM.</li>
+    <li>Assuming more gigabytes automatically means more speed.</li>
+    <li>Believing an SSD makes the CPU more powerful.</li>
+    <li>Keeping the only copy of important files on one drive.</li>
+    <li>Buying an NVMe SSD without checking whether the computer supports the required form factor and interface.</li>
+  </ul>
+
+  <h2>Practice task</h2>
+  <p>Check the storage device in your computer. Write down its type, capacity, interface if available, and free space. Then choose one real workload—such as booting, launching an application or copying files—and explain why storage speed might or might not be the bottleneck.</p>
+
+  <h2>Quick check</h2>
+  <ol>
+    <li>What physical difference separates an HDD from an SSD?</li>
+    <li>Why can an SSD improve application launch times?</li>
+    <li>Does a larger capacity drive automatically have higher performance?</li>
+    <li>Why are backups important even when a drive appears healthy?</li>
+  </ol>
+
+  <h2>Key takeaway</h2>
+  <p><strong>HDDs use magnetic spinning media, while SSDs use flash memory.</strong> SSDs usually provide much lower access latency and faster everyday responsiveness, while HDDs can remain attractive when large capacity at low cost is the main goal.</p>
 </article>
 HTML;
     }

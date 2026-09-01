@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - '.github/workflows/reddott-qr-generator.yml'
+      - 'Reddott-films/youtube/upload_video.py'
   schedule:
     - cron: '30 2 * * *'
 
@@ -77,7 +78,6 @@ jobs:
           cp ../output/narration.wav public/narration.wav
           npm install
 
-      # index.jsx is the Remotion entry and registers the root composition.
       - name: Render final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
         run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23 --concurrency=2 --log=verbose
@@ -92,8 +92,12 @@ jobs:
         working-directory: Reddott-films/knowledge-videos/qr-generator
         run: ffmpeg -y -ss 00:00:08 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
 
-      - name: YouTube upload intentionally paused
-        run: echo 'YouTube upload is paused until the generated MP4 is manually verified.'
+      - name: Upload to YouTube with SEO and Smart Toolz playlist
+        working-directory: Reddott-films/knowledge-videos/qr-generator
+        env:
+          VIDEO_PATH: remotion/out/qr-generator.mp4
+          THUMBNAIL_PATH: output/thumbnail.png
+        run: python "$GITHUB_WORKSPACE/Reddott-films/youtube/upload_video.py"
 
       - name: Upload workflow artifacts
         if: ${{ always() }}

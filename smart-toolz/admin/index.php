@@ -131,7 +131,43 @@ foreach([
 @media(max-width:1000px){.adv-grid{grid-template-columns:repeat(2,1fr)}.adv-two{grid-template-columns:1fr}}@media(max-width:600px){.adv-grid{grid-template-columns:1fr}.adv-tabs{display:grid;grid-template-columns:repeat(2,1fr)}}
 </style></head><body><div class="layout"><aside class="side"><div class="brand"><i>🛠️</i> SmartToolz</div><nav class="nav">
 <a class="<?= $tab==='dashboard'?'active':'' ?>" href="?tab=dashboard">📊 Dashboard</a><a class="<?= $tab==='analytics'?'active':'' ?>" href="?tab=analytics">📈 Analytics</a><a class="<?= $tab==='ads'?'active':'' ?>" href="?tab=ads">📢 Ads Settings</a><a class="<?= $tab==='settings'?'active':'' ?>" href="?tab=settings">⚙️ DB Settings</a><a class="<?= $tab==='users'?'active':'' ?>" href="?tab=users">👥 Users & Roles</a><a href="/analytics/" target="_blank">↗ Full Analytics</a></nav><div class="bottom"><a class="btn" style="display:block;text-align:center" href="/smart-toolz/">← Back to site</a></div></aside><main class="main"><div class="top"><div><h1><?=ae(ucwords($tab))?></h1><p>SmartToolz administration and database controls.</p></div><span class="admin-pill">ADMIN · <?=ae($admin['email'])?></span></div><?php if($flash): ?><div class="flash"><?=ae($flash['text']??'Done')?></div><?php endif; ?>
-<?php if($tab==='dashboard'): ?><div class="grid"><?php foreach($stats as $k=>$v): ?><div class="stat"><strong><?=number_format($v)?></strong><small><?=ae($k)?></small></div><?php endforeach; ?></div><div class="panel"><h2>Admin controls</h2><div class="notice">This panel is restricted to accounts with <b>admin</b> or <b>superadmin</b> role. The requested account <b><?=ae(SMARTTOOLZ_ADMIN_EMAIL)?></b> is automatically promoted to <b>admin</b> when the admin schema is initialized. Ads, site settings, roles and credits are changed through prepared SQL statements with CSRF protection.</div></div>
+<?php if($tab==='dashboard'): ?>
+<div class="grid">
+<?php foreach($stats as $k=>$v): ?><div class="stat"><strong><?=number_format($v)?></strong><small><?=ae($k)?></small></div><?php endforeach; ?>
+</div>
+<section id="st-live-dashboard" class="panel st-live-dashboard">
+  <div class="st-live-head">
+    <div class="st-live-title"><span class="st-live-status"><i></i> LIVE SYSTEM</span><h2>SmartToolz Command Center</h2></div>
+    <div class="inline"><span id="stUpdated" class="st-live-clock">Loading…</span><button id="stRefresh" class="st-refresh" type="button">↻ Refresh</button></div>
+  </div>
+  <div id="stCards" class="st-live-grid"></div>
+  <div class="st-two">
+    <div class="st-panel"><h3>Traffic · Last 24 Hours</h3><div id="stTraffic" class="st-chart"></div><div class="st-small">Live traffic bars update every second.</div></div>
+    <div class="st-panel"><h3>Visitor Map</h3><div class="st-map"><div class="st-map-grid"></div><span class="st-dot one"></span><span class="st-dot two"></span><span class="st-dot three"></span><span class="st-dot four"></span><div class="st-map-label">🟢 Live visitor activity · 2 minute window</div></div></div>
+  </div>
+  <div class="st-two">
+    <div class="st-panel"><h3>Top Pages</h3><div id="stPages" class="st-bars"></div></div>
+    <div class="st-panel"><h3>Countries</h3><div id="stCountries" class="st-bars"></div></div>
+  </div>
+  <div class="st-two">
+    <div class="st-panel"><h3>Devices</h3><div id="stDevices" class="st-bars"></div></div>
+    <div class="st-panel"><h3>Browsers</h3><div id="stBrowsers" class="st-bars"></div></div>
+  </div>
+  <div class="st-two">
+    <div class="st-panel"><h3>Live Visitors Now · <span id="stLiveCount">0</span></h3><div class="st-live-table"><div class="st-live-row head"><span>Status</span><span>Location</span><span>Device</span><span>Browser</span><span>Page</span></div><div id="stLiveRows"></div></div></div>
+    <div class="st-panel"><h3>Recent Activity</h3><div id="stActivity" class="st-activity"></div></div>
+  </div>
+  <div class="st-actions">
+    <a class="st-act" href="?tab=analytics">📈 Analytics</a>
+    <a class="st-act" href="?tab=users">👥 Users</a>
+    <a class="st-act" href="?tab=ads">📢 Ads</a>
+    <a class="st-act" href="?tab=settings">⚙️ DB Settings</a>
+    <a class="st-act" href="/analytics/">🌐 Full Analytics</a>
+  </div>
+</section>
+<div class="panel"><h2>Admin controls</h2><div class="notice">This panel is restricted to accounts with <b>admin</b> or <b>superadmin</b> role. The requested account <b><?=ae(SMARTTOOLZ_ADMIN_EMAIL)?></b> is automatically promoted to <b>admin</b> when the admin schema is initialized. Ads, site settings, roles and credits are changed through prepared SQL statements with CSRF protection.</div></div>
+<link rel="stylesheet" href="/smart-toolz/admin/dashboard-live.css?v=20260901-2">
+<script src="/smart-toolz/admin/dashboard-live.js?v=20260901-2"></script>
 <?php elseif($tab==='analytics'): ?>
 <?php
 $aaRows = function(string $sql, array $params = []) use ($db): array {

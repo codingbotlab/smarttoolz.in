@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+env:
+  YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+  YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+  YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+
 jobs:
   build-publish:
     runs-on: ubuntu-latest
@@ -71,13 +76,21 @@ jobs:
         working-directory: Reddott-films/knowledge-videos/qr-generator
         run: ffmpeg -y -ss 00:00:08 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
 
+      - name: Check YouTube configuration
+        id: youtube_config
+        shell: bash
+        run: |
+          if [[ -n "$YT_CLIENT_ID" && -n "$YT_CLIENT_SECRET" && -n "$YT_REFRESH_TOKEN" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "YouTube OAuth secrets are not configured; video generation will still complete."
+          fi
+
       - name: Upload to YouTube
-        if: ${{ secrets.YT_CLIENT_ID != '' && secrets.YT_CLIENT_SECRET != '' && secrets.YT_REFRESH_TOKEN != '' }}
+        if: steps.youtube_config.outputs.ready == 'true'
         working-directory: Reddott-films/knowledge-videos/qr-generator/youtube-upload
         env:
-          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
-          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
-          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           VIDEO_PATH: ../remotion/out/qr-generator.mp4
           THUMBNAIL_PATH: ../output/thumbnail.png
           PUBLISH_META_PATH: ../published/youtube.json
@@ -86,7 +99,7 @@ jobs:
           node upload.mjs
 
       - name: Publish YouTube metadata to repository
-        if: ${{ secrets.YT_CLIENT_ID != '' && secrets.YT_CLIENT_SECRET != '' && secrets.YT_REFRESH_TOKEN != '' }}
+        if: steps.youtube_config.outputs.ready == 'true'
         run: |
           test -s Reddott-films/knowledge-videos/qr-generator/published/youtube.json
           git config user.name 'Reddott Video Bot'

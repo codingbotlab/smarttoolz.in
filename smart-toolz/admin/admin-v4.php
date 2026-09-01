@@ -33,8 +33,8 @@ $labels = [
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?=av4h($pageTitle)?> · SmartToolz Admin</title>
-<link rel="stylesheet" href="/smart-toolz/admin/admin-v5.css?v=20260901-v1">
-<link rel="stylesheet" href="/smart-toolz/admin/admin-tabs.css?v=20260901-v2">
+<link rel="stylesheet" href="/smart-toolz/admin/admin-tabs.css?v=20260901-v3">
+<link rel="stylesheet" href="/smart-toolz/admin/admin-v5.css?v=20260901-v2">
 </head>
 <body class="av4">
 <div class="av4-shell">

@@ -31,32 +31,7 @@ HTML;
 
     if ($courseSlug === 'computer-basics-for-beginners' && $position === 7) {
         return <<<'HTML'
-<article class="lh-prose">
-  <div class="lh-lesson-intro"><p>A <strong>GPU (Graphics Processing Unit)</strong> is a processor designed to perform graphics and other workloads that can be divided into many parallel operations. It helps turn data into the images and frames you see on a display.</p></div>
-  <h2>What does a GPU do?</h2>
-  <p>When a game renders a 3D scene, a video editor previews effects, or a desktop draws a complex interface, graphics calculations have to be performed repeatedly. A GPU is built to handle large numbers of similar calculations in parallel, while the CPU is designed for broader general-purpose instruction processing.</p>
-  <h2>Integrated vs dedicated graphics</h2>
-  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Type</th><th>Typical setup</th><th>Practical trade-off</th></tr></thead><tbody>
-    <tr><td>Integrated GPU</td><td>Graphics hardware built into the processor or platform</td><td>Usually lower power and cost; often shares system memory.</td></tr>
-    <tr><td>Dedicated GPU</td><td>Separate graphics processor/card with its own high-speed memory</td><td>Usually offers much higher graphics throughput, but uses more power and costs more.</td></tr>
-  </tbody></table></div>
-  <h2>GPU memory is not system RAM</h2>
-  <p>Dedicated graphics cards commonly have their own <strong>VRAM</strong>, which stores textures, frame data and other graphics resources close to the GPU. Integrated graphics commonly use a portion of system RAM instead. This is why “8 GB RAM” and “8 GB VRAM” describe different resources.</p>
-  <h2>GPU vs CPU</h2>
-  <p>The CPU handles a wide range of sequential and general-purpose tasks. The GPU is highly effective when a workload can be split into many similar operations. Modern applications often use both: the CPU coordinates the application while the GPU accelerates supported graphics or compute work.</p>
-  <h2>Real-world example</h2>
-  <ol><li>You launch a game.</li><li>The CPU runs the game logic, operating-system interactions and instructions that coordinate the application.</li><li>The GPU processes supported rendering work such as geometry, shading and image generation.</li><li>Graphics data is stored in appropriate memory and the completed frame is sent to the display.</li></ol>
-  <h2>How to identify a graphics problem</h2>
-  <p>Look for the pattern before changing hardware. A problem limited to one game may be software or settings related. Artifacts, driver crashes, black screens or failures under sustained load can point toward graphics-driver, temperature, power, cable, display or hardware issues.</p>
-  <h2>Practical task</h2>
-  <ol><li>Open your system information or Task Manager and identify the graphics processor.</li><li>Record whether it is integrated or dedicated.</li><li>While playing a video or running a graphics-heavy application, observe GPU usage and temperature if your system exposes those readings.</li><li>Write down what changes when the workload starts and stops.</li></ol>
-  <h2>Common mistakes</h2>
-  <ul><li>Assuming every computer needs a dedicated graphics card.</li><li>Comparing GPUs only by memory size.</li><li>Confusing VRAM with system RAM.</li><li>Assuming high GPU usage automatically means something is wrong; heavy workloads can legitimately use the GPU extensively.</li></ul>
-  <h2>Quick check</h2>
-  <ol><li>Why is a GPU well suited to parallel graphics work?</li><li>How is integrated graphics different from a dedicated GPU?</li><li>Why can a computer use both CPU and GPU for the same application?</li></ol>
-  <h2>Key takeaway</h2>
-  <p><strong>The GPU is a specialized parallel processor that accelerates graphics and other suitable workloads; the CPU and GPU work together rather than replacing one another.</strong></p>
-</article>
+<article class="lh-prose"><div class="lh-lesson-intro"><p>A <strong>GPU (Graphics Processing Unit)</strong> is a processor designed to perform graphics and other workloads that can be divided into many parallel operations.</p></div><h2>What does a GPU do?</h2><p>A GPU is built to handle large numbers of similar calculations in parallel, while the CPU is designed for broader general-purpose instruction processing.</p><h2>Integrated vs dedicated graphics</h2><div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Type</th><th>Typical setup</th><th>Practical trade-off</th></tr></thead><tbody><tr><td>Integrated GPU</td><td>Built into the processor or platform</td><td>Usually lower power and cost; often shares system memory.</td></tr><tr><td>Dedicated GPU</td><td>Separate graphics processor/card</td><td>Usually higher graphics throughput, with more power and cost.</td></tr></tbody></table></div><h2>GPU memory</h2><p>Dedicated graphics cards commonly have <strong>VRAM</strong> for textures, frame data and graphics resources. Integrated graphics commonly use part of system RAM.</p><h2>Practical task</h2><ol><li>Identify your graphics processor.</li><li>Record whether it is integrated or dedicated.</li><li>Observe GPU usage during a graphics-heavy task.</li></ol><h2>Key takeaway</h2><p><strong>The GPU is a specialized parallel processor that accelerates graphics and suitable workloads.</strong></p></article>
 HTML;
     }
 
@@ -69,30 +44,46 @@ HTML;
 
     if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 2) {
         return <<<'HTML'
+<article class="lh-prose"><div class="lh-lesson-intro"><p>Graphic design becomes easier to discuss when you know the vocabulary. These terms describe the building blocks and decisions you will use in almost every design project.</p></div><h2>Essential terms</h2><div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Term</th><th>Meaning</th><th>Practical use</th></tr></thead><tbody><tr><td>Composition</td><td>How visual elements are arranged as a whole.</td><td>Controls where the viewer looks.</td></tr><tr><td>Hierarchy</td><td>The visual order that tells viewers what to notice first, second and third.</td><td>Make a headline stronger than supporting text.</td></tr><tr><td>Alignment</td><td>Positioning elements along shared edges, centres or guides.</td><td>Keeps a layout organised.</td></tr><tr><td>Contrast</td><td>Visible difference between elements.</td><td>Separate a call-to-action from surrounding information.</td></tr><tr><td>Whitespace</td><td>Intentional empty space around or between elements.</td><td>Improves readability.</td></tr><tr><td>Typography</td><td>The design and arrangement of written text.</td><td>Controls readability and tone.</td></tr><tr><td>Grid</td><td>A system of guides used to organise content consistently.</td><td>Keeps columns and blocks aligned.</td></tr><tr><td>Palette</td><td>A selected set of colours used together.</td><td>Creates visual consistency.</td></tr></tbody></table></div><h2>Mini analysis task</h2><ol><li>Choose one poster, advertisement or social post.</li><li>Identify its strongest hierarchy decision.</li><li>Find alignment and contrast.</li><li>Notice its whitespace.</li><li>Write one change that would improve clarity.</li></ol><h2>Key takeaway</h2><p><strong>Design vocabulary gives you a precise way to diagnose and improve visual communication.</strong></p></article>
+HTML;
+    }
+
+    if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 3) {
+        return <<<'HTML'
 <article class="lh-prose">
-  <div class="lh-lesson-intro"><p>Graphic design becomes easier to discuss when you know the vocabulary. These terms describe the building blocks and decisions you will use in almost every design project.</p></div>
-  <h2>Essential terms</h2>
-  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Term</th><th>Meaning</th><th>Practical use</th></tr></thead><tbody>
-    <tr><td>Composition</td><td>How visual elements are arranged as a whole.</td><td>Controls where the viewer looks and how information feels organised.</td></tr>
-    <tr><td>Hierarchy</td><td>The visual order that tells viewers what to notice first, second and third.</td><td>Make a headline stronger than supporting text.</td></tr>
-    <tr><td>Alignment</td><td>Positioning elements along shared edges, centres or guides.</td><td>Keeps a poster or social post from looking randomly assembled.</td></tr>
-    <tr><td>Contrast</td><td>Visible difference between elements.</td><td>Separate a call-to-action from surrounding information.</td></tr>
-    <tr><td>Whitespace</td><td>Intentional empty space around or between elements.</td><td>Improves readability and gives important content room to stand out.</td></tr>
-    <tr><td>Typography</td><td>The design and arrangement of written text.</td><td>Choose typefaces, sizes, weights, spacing and line length for clarity.</td></tr>
-    <tr><td>Grid</td><td>A system of guides used to organise content consistently.</td><td>Keep cards, columns and text blocks aligned across multiple designs.</td></tr>
-    <tr><td>Palette</td><td>A selected set of colours used together.</td><td>Creates consistency across a brand or campaign.</td></tr>
+  <div class="lh-lesson-intro"><p><strong>A design process turns a vague idea into a deliberate visual solution.</strong> Instead of opening a design app and decorating until something feels right, a designer moves through a sequence of decisions, tests them, and improves the result.</p></div>
+  <h2>1. Define the problem</h2>
+  <p>Start by identifying the communication goal. Ask: Who is the audience? What must they understand? What action should they take? Where will the design appear?</p>
+  <div class="alert alert-primary"><strong>Example:</strong> “Make a poster” is a task. “Create a mobile-friendly event poster that makes students notice the event name, date and registration action in five seconds” is a design problem.</div>
+  <h2>2. Research and collect references</h2>
+  <p>Study relevant examples before designing. Look at competitors, similar campaigns, typography, colour approaches and layouts. The purpose is not to copy; it is to understand what conventions exist and where your solution can be clearer.</p>
+  <h2>3. Generate ideas</h2>
+  <p>Produce several rough directions instead of polishing the first idea. Thumbnail sketches are useful because they let you test hierarchy and composition quickly without becoming attached to details.</p>
+  <h2>4. Build a first concept</h2>
+  <p>Choose the strongest direction and create a simple version. Establish the headline, supporting information, imagery, spacing and call to action. Keep decorative decisions secondary to communication.</p>
+  <h2>5. Test at the real viewing size</h2>
+  <p>A design that looks excellent when zoomed in may fail on a phone, poster wall or presentation screen. View it at the size and distance your audience will actually use. Check whether the main message is immediately obvious.</p>
+  <h2>6. Get feedback</h2>
+  <p>Ask focused questions rather than “Do you like it?” For example: “What did you notice first?” or “What do you think this poster wants you to do?” If viewers consistently miss the intended message, the hierarchy needs work.</p>
+  <h2>7. Refine and deliver</h2>
+  <p>Make targeted changes, then check alignment, spacing, typography, colour consistency, image quality and export settings. Keep an editable source file and export the format required by the destination.</p>
+  <h2>A simple workflow</h2>
+  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Stage</th><th>Main question</th><th>Useful output</th></tr></thead><tbody>
+    <tr><td>Define</td><td>What problem are we solving?</td><td>Brief and success criteria</td></tr>
+    <tr><td>Research</td><td>What context and conventions matter?</td><td>References and notes</td></tr>
+    <tr><td>Ideate</td><td>What different solutions could work?</td><td>Thumbnail concepts</td></tr>
+    <tr><td>Design</td><td>Which direction communicates best?</td><td>First concept</td></tr>
+    <tr><td>Test</td><td>Does it work for the real viewer?</td><td>Observations</td></tr>
+    <tr><td>Refine</td><td>What specific changes improve it?</td><td>Final design</td></tr>
   </tbody></table></div>
-  <h2>Terms work together</h2>
-  <p>Good design rarely depends on one principle. For example, a social-media announcement might use a grid to establish alignment, a large heading to create hierarchy, contrast to highlight the date, whitespace to separate sections, and a limited colour palette to maintain consistency.</p>
-  <div class="alert alert-primary"><strong>Designer habit:</strong> Do not ask only “Does this look nice?” Ask “What should the viewer notice first, and which design decision makes that happen?”</div>
-  <h2>Mini analysis task</h2>
-  <ol><li>Choose one poster, advertisement or social post you see today.</li><li>Identify its strongest hierarchy decision.</li><li>Find one example of alignment and one example of contrast.</li><li>Notice where whitespace has been used.</li><li>Write one change that would improve clarity without adding another decorative element.</li></ol>
+  <h2>Practice project</h2>
+  <p>Design a fictional “Design Workshop” social post. First write a three-sentence brief defining the audience, goal and viewing context. Then sketch three different layouts, choose one, create a rough digital version, and ask one person what they noticed first. Record the feedback and make one purposeful revision.</p>
   <h2>Common mistakes</h2>
-  <ul><li>Adding more elements when the real problem is weak hierarchy.</li><li>Using contrast everywhere until nothing feels important.</li><li>Treating whitespace as wasted space.</li><li>Choosing terminology without understanding the visual problem it solves.</li></ul>
-  <h2>Quick self-check</h2>
-  <p>Can you explain the difference between hierarchy and alignment? Can you point to one design where whitespace improves readability and describe why?</p>
+  <ul><li>Starting with decoration before defining the communication goal.</li><li>Polishing one idea before exploring alternatives.</li><li>Asking for vague feedback instead of testing specific communication outcomes.</li><li>Judging a design only at desktop zoom instead of its real viewing size.</li><li>Changing many variables at once, making it hard to learn what improved the design.</li></ul>
+  <h2>Quick check</h2>
+  <ol><li>Why should a designer define the audience before choosing visual style?</li><li>What is the benefit of making several thumbnail concepts?</li><li>What question can reveal whether a viewer understood the intended hierarchy?</li></ol>
   <h2>Key takeaway</h2>
-  <p><strong>Design vocabulary gives you a precise way to diagnose and improve visual communication.</strong></p>
+  <p><strong>Good design is not a single moment of inspiration; it is a repeatable process of defining, exploring, testing and refining a visual solution.</strong></p>
 </article>
 HTML;
     }

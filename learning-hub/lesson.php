@@ -1,10 +1,13 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/includes/bootstrap.php';
+require_once __DIR__.'/includes/premium_lessons.php';
 
 $slug=trim((string)($_GET['slug']??''));$lesson=null;$course=null;$lessons=[];$previous=null;$next=null;
 try{$q=$db->prepare("SELECT l.* FROM learning_lessons l WHERE l.slug=? AND l.enabled=1 LIMIT 1");$q->execute([$slug]);$lesson=$q->fetch(PDO::FETCH_ASSOC)?:null;}catch(Throwable){}
 if(!$lesson){http_response_code(404);$lh_page_title='Lesson not found';$lh_description='The requested lesson could not be found.';include __DIR__.'/includes/header.php';include __DIR__.'/includes/navbar.php';?><main class="container py-5"><div class="lh-empty p-5 text-center"><div class="fs-1">📚</div><h1 class="h4 mt-3">Lesson not found</h1><p class="text-secondary">This lesson may have been moved or unpublished.</p><a class="btn btn-primary" href="/learning-hub/courses.php">Browse Courses</a></div></main><?php include __DIR__.'/includes/footer.php';exit;}
+/* Apply any curated lesson content for this slug and persist it once. */
+try{lh_apply_premium_lesson($db,$lesson);}catch(Throwable $e){error_log('Learning Hub premium lesson: '.$e->getMessage());}
 $courseId=(int)($lesson['course_id']??0);
 if(!$courseId&&!empty($lesson['chapter_id'])){try{$q=$db->prepare('SELECT course_id FROM learning_chapters WHERE id=? LIMIT 1');$q->execute([(int)$lesson['chapter_id']]);$courseId=(int)$q->fetchColumn();}catch(Throwable){}}
 if($courseId){try{$q=$db->prepare("SELECT c.*,lc.name category_name,lc.icon category_icon,lc.slug category_slug FROM learning_courses c LEFT JOIN learning_categories lc ON lc.id=c.category_id WHERE c.id=? AND c.enabled=1 LIMIT 1");$q->execute([$courseId]);$course=$q->fetch(PDO::FETCH_ASSOC)?:null;}catch(Throwable){}}

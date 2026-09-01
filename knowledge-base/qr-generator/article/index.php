@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-$videoUrl = '/Reddott-films/knowledge-videos/qr-generator/video.mp4';
+$videoUrl = '/Reddott-films/knowledge-videos/qr-generator/published/video.mp4';
+$posterUrl = '/Reddott-films/knowledge-videos/qr-generator/published/thumbnail.png';
 $toolUrl = '/smart-toolz/tools/qr-generator.php';
 ?><!doctype html>
 <html lang="en">
@@ -20,7 +21,7 @@ $toolUrl = '/smart-toolz/tools/qr-generator.php';
 <header class="top"><nav class="nav"><a class="brand" href="/"><b>Smart</b>Toolz</a><div class="links"><a href="/">Home</a><a href="/smart-toolz/">All Tools</a><a href="/knowledge-base/">Knowledge Base</a><a href="/Reddott-films/blogs/">Video Blog</a></div></nav></header>
 <main class="wrap">
 <section class="hero"><span class="badge">SMARTTOOLZ HOW-TO</span><h1>How to Use the QR Code Generator</h1><p>Create a QR code from your content, review the result, and test it before sharing or printing.</p></section>
-<section class="video"><video controls preload="metadata" poster="/Reddott-films/knowledge-videos/qr-generator/thumbnail.png"><source src="<?= htmlspecialchars($videoUrl,ENT_QUOTES,'UTF-8') ?>" type="video/mp4">Your browser does not support video playback.</video></section>
+<section class="video"><video controls preload="metadata" poster="<?= htmlspecialchars($posterUrl,ENT_QUOTES,'UTF-8') ?>"><source src="<?= htmlspecialchars($videoUrl,ENT_QUOTES,'UTF-8') ?>" type="video/mp4">Your browser does not support video playback.</video></section>
 <article class="content">
 <h2>What is the SmartToolz QR Code Generator?</h2>
 <p>The QR Code Generator lets you create a QR code from content entered into the tool. This guide shows the practical workflow from opening the tool through generating and checking the result.</p>

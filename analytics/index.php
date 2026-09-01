@@ -1622,6 +1622,7 @@ tr:last-child td {
 
 </style>
 
+<link rel="stylesheet" href="/analytics/tabs.css?v=20260901-1">
 </head>
 
 
@@ -3374,6 +3375,7 @@ tr:last-child td {
   setInterval(refresh,1000);
 })();
 </script>
+<script src="/analytics/tabs.js?v=20260901-1"></script>
 </body>
 
 </html>

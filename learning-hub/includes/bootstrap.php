@@ -27,3 +27,5 @@ function lh_install(): void {
     try{$q=$db->prepare('INSERT IGNORE INTO learning_categories(slug,name,description,icon,sort_order) VALUES(?,?,?,?,?)');foreach($defaults as $i=>$r)$q->execute([$r[0],$r[1],$r[2],$r[3],$i]);}catch(Throwable){}
 }
 lh_install();
+require_once __DIR__.'/content_seed.php';
+lh_seed_content($db);

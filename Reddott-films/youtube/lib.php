@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * Reddott Films uses its own YouTube OAuth credentials.
+ * The existing Creator AI config is loaded ONLY for its shared db() helper;
+ * its Google OAuth constants are never used by this module.
+ */
+require_once dirname(__DIR__, 2) . '/creator-ai/auth/config.php';
 require_once __DIR__ . '/config.php';
 
 const REDDOTT_YOUTUBE_REDIRECT_URI = 'https://smarttoolz.in/Reddott-films/youtube/oauth.php';

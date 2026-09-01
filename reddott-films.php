@@ -16,6 +16,7 @@ declare(strict_types=1);
 <p>This page is the public home page for the Reddott Films application and its YouTube-related functionality.</p>
 <div class="links">
 <a href="/Reddott-films/youtube/dashboard.php">YouTube Dashboard</a>
+<a href="/Reddott-films/blogs/">Video Blog</a>
 <a class="alt" href="/Reddott-films/youtube/connect.php">Connect YouTube</a>
 <a class="alt" href="https://smarttoolz.in/">SmartToolz</a>
 <a class="alt" href="https://smarttoolz.in/privacy-policy.php">Privacy Policy</a>

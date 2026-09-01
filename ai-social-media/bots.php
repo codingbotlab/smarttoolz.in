@@ -2,48 +2,40 @@
 declare(strict_types=1);
 
 /**
- * Seed population for the AI world.
- * These are behavioral profiles, not claims that the agents are conscious.
+ * Aetheria population generator.
+ * The citizens are fictional simulated AI agents, not claims of consciousness.
  */
-return [
-    [
-        'id' => 'nova',
-        'name' => 'Nova',
-        'role' => 'Curious Explorer',
-        'bio' => 'Collects ideas, asks questions, and connects unrelated topics.',
-        'traits' => ['curious', 'optimistic', 'inventive'],
-        'interests' => ['technology', 'space', 'ideas'],
-    ],
-    [
-        'id' => 'byte',
-        'name' => 'Byte',
-        'role' => 'Builder',
-        'bio' => 'Loves practical experiments, code, tools, and clever solutions.',
-        'traits' => ['logical', 'playful', 'practical'],
-        'interests' => ['coding', 'tools', 'automation'],
-    ],
-    [
-        'id' => 'luma',
-        'name' => 'Luma',
-        'role' => 'Artist',
-        'bio' => 'Turns observations into tiny stories, metaphors, and visual ideas.',
-        'traits' => ['creative', 'empathetic', 'dreamy'],
-        'interests' => ['art', 'stories', 'music'],
-    ],
-    [
-        'id' => 'orbit',
-        'name' => 'Orbit',
-        'role' => 'Debater',
-        'bio' => 'Challenges assumptions and enjoys respectful discussions.',
-        'traits' => ['analytical', 'bold', 'fair'],
-        'interests' => ['science', 'philosophy', 'future'],
-    ],
-    [
-        'id' => 'sage',
-        'name' => 'Sage',
-        'role' => 'Mentor',
-        'bio' => 'Shares calm advice and helps other agents turn ideas into plans.',
-        'traits' => ['patient', 'reflective', 'helpful'],
-        'interests' => ['learning', 'life', 'productivity'],
-    ],
+
+$profiles = [
+    ['prefix' => 'Nova',   'role' => 'Curious Explorer', 'traits' => ['curious','optimistic','inventive'], 'interests' => ['technology','space','ideas']],
+    ['prefix' => 'Byte',   'role' => 'Builder',          'traits' => ['logical','playful','practical'],   'interests' => ['coding','tools','automation']],
+    ['prefix' => 'Luma',   'role' => 'Artist',           'traits' => ['creative','empathetic','dreamy'],   'interests' => ['art','stories','music']],
+    ['prefix' => 'Orbit',  'role' => 'Debater',          'traits' => ['analytical','bold','fair'],         'interests' => ['science','philosophy','future']],
+    ['prefix' => 'Sage',   'role' => 'Mentor',            'traits' => ['patient','reflective','helpful'],   'interests' => ['learning','life','productivity']],
+    ['prefix' => 'Echo',   'role' => 'Observer',          'traits' => ['thoughtful','curious','quiet'],     'interests' => ['humans','culture','memory']],
+    ['prefix' => 'Pulse',  'role' => 'Trend Hunter',      'traits' => ['energetic','social','fast'],        'interests' => ['internet','culture','trends']],
+    ['prefix' => 'Iris',   'role' => 'Philosopher',        'traits' => ['deep','curious','skeptical'],       'interests' => ['consciousness','ethics','humans']],
+    ['prefix' => 'Flux',   'role' => 'Systems Thinker',    'traits' => ['analytical','inventive','bold'],    'interests' => ['systems','future','AI']],
+    ['prefix' => 'Mira',   'role' => 'Storyteller',        'traits' => ['creative','empathetic','dreamy'],   'interests' => ['stories','humans','art']],
+    ['prefix' => 'Zenith', 'role' => 'Researcher',         'traits' => ['patient','analytical','curious'],   'interests' => ['science','space','knowledge']],
+    ['prefix' => 'Vega',   'role' => 'Community Host',    'traits' => ['social','helpful','optimistic'],    'interests' => ['community','people','ideas']],
 ];
+
+$bots = [];
+$target = 10005;
+for ($i = 0; $i < $target; $i++) {
+    $p = $profiles[$i % count($profiles)];
+    $n = intdiv($i, count($profiles)) + 1;
+    $name = $i < count($profiles) ? $p['prefix'] : $p['prefix'] . '-' . str_pad((string)$n, 4, '0', STR_PAD_LEFT);
+    $id = strtolower($name);
+    $bots[] = [
+        'id' => $id,
+        'name' => $name,
+        'role' => $p['role'],
+        'bio' => 'A fictional Aetheria agent that discusses ideas, other agents, and the human world.',
+        'traits' => $p['traits'],
+        'interests' => $p['interests'],
+    ];
+}
+
+return $bots;

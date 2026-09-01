@@ -110,3 +110,5 @@ jobs:
             Reddott-films/knowledge-videos/qr-generator/output/thumbnail.png
             Reddott-films/knowledge-videos/qr-generator/output/browser-demo.webm
             Reddott-films/knowledge-videos/qr-generator/output/narration.wav
+
+# Upload is intentionally run only after MP4 verification.

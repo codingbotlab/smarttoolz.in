@@ -1,15 +1,13 @@
 <?php
 declare(strict_types=1);
 
-/*
- * Reddott Films — YouTube OAuth start.
- * Kept inside the Reddott-films workspace.
- */
-require_once dirname(__DIR__, 2) . '/creator-ai/auth/config.php';
+/* Reddott Films — separate YouTube OAuth start flow. */
+require_once __DIR__ . '/config.php';
 
-if (!defined('GOOGLE_CLIENT_ID') || GOOGLE_CLIENT_ID === '') {
-    http_response_code(500);
-    exit('Google OAuth client is not configured.');
+reddottYoutubeRequireCredentials();
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
 }
 
 $redirectUri = 'https://smarttoolz.in/Reddott-films/youtube/oauth.php';
@@ -17,7 +15,7 @@ $state = bin2hex(random_bytes(32));
 $_SESSION['reddott_youtube_oauth_state'] = $state;
 
 $params = [
-    'client_id' => GOOGLE_CLIENT_ID,
+    'client_id' => reddottYoutubeClientId(),
     'redirect_uri' => $redirectUri,
     'response_type' => 'code',
     'scope' => implode(' ', [

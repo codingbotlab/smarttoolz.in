@@ -1,54 +1,222 @@
-/* SmartToolz Image Compressor - modular client logic */
+/* SmartToolz Image Compressor - browser-only compression */
 (() => {
   'use strict';
+
   const $ = id => document.getElementById(id);
-  const uploadArea=$('uploadArea'), fileInput=$('fileInput'), fileInfo=$('fileInfo'), settings=$('settings'), quality=$('quality'), qualityValue=$('qualityValue'), compressBtn=$('compressBtn'), resetBtn=$('resetBtn'), errorBox=$('error'), result=$('result'), originalPreview=$('originalPreview'), compressedPreview=$('compressedPreview'), originalSize=$('originalSize'), compressedSize=$('compressedSize'), savedSize=$('savedSize'), downloadBtn=$('downloadBtn');
-  if(!compressBtn || !fileInput) return;
-  let selectedFile=null, originalUrl=null, compressedUrl=null, usageConsumed=false;
-  const tool='image-compressor';
-  function showError(m){errorBox.textContent=m;errorBox.style.display='block'}
-  function clearError(){errorBox.textContent='';errorBox.style.display='none'}
-  function formatBytes(bytes){if(bytes<=0)return '0 Bytes';const u=['Bytes','KB','MB','GB'],i=Math.min(Math.floor(Math.log(bytes)/Math.log(1024)),u.length-1),v=bytes/Math.pow(1024,i);return v.toFixed(i===0?0:2)+' '+u[i]}
-  function filename(n){return n.replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9_-]/g,'-')+'-compressed.jpg'}
-  function loadImage(file){return new Promise((resolve,reject)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(u);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Unable to read this image.'))};img.src=u})}
-  function blob(canvas,type,q){return new Promise(resolve=>canvas.toBlob(resolve,type,q))}
-  async function consumeUsage(){
-    if(usageConsumed)return {ok:true};
-    const r=await fetch('/smart-toolz/api/trial.php?action=consume&tool='+encodeURIComponent(tool),{method:'POST',cache:'no-store',headers:{'X-Requested-With':'XMLHttpRequest'}});
-    const d=await r.json();
-    if(!d.ok) throw new Error(d.message||'Usage limit reached.');
-    usageConsumed=true;
-    return d;
+  const uploadArea = $('uploadArea');
+  const fileInput = $('fileInput');
+  const fileInfo = $('fileInfo');
+  const settings = $('settings');
+  const quality = $('quality');
+  const qualityValue = $('qualityValue');
+  const compressBtn = $('compressBtn');
+  const resetBtn = $('resetBtn');
+  const errorBox = $('error');
+  const result = $('result');
+  const originalPreview = $('originalPreview');
+  const compressedPreview = $('compressedPreview');
+  const originalSize = $('originalSize');
+  const compressedSize = $('compressedSize');
+  const savedSize = $('savedSize');
+  const downloadBtn = $('downloadBtn');
+
+  if (!compressBtn || !fileInput || !uploadArea) return;
+
+  let selectedFile = null;
+  let originalUrl = null;
+  let compressedUrl = null;
+
+  function showError(message) {
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
   }
-  function handleFile(file){
-    clearError(); const allowed=['image/jpeg','image/png','image/webp'];
-    if(!allowed.includes(file.type))return showError('Please choose a JPG, JPEG, PNG or WebP image.');
-    if(file.size>20*1024*1024)return showError('Maximum file size is 20 MB.');
-    selectedFile=file; usageConsumed=false; fileInfo.textContent=file.name+' • '+formatBytes(file.size);
-    if(originalUrl)URL.revokeObjectURL(originalUrl); originalUrl=URL.createObjectURL(file); originalPreview.src=originalUrl; settings.style.display='block'; result.style.display='none';
+
+  function clearError() {
+    if (!errorBox) return;
+    errorBox.textContent = '';
+    errorBox.style.display = 'none';
   }
-  uploadArea?.addEventListener('click',()=>fileInput.click());
-  fileInput.addEventListener('change',()=>{if(fileInput.files?.[0])handleFile(fileInput.files[0])});
-  uploadArea?.addEventListener('dragover',e=>{e.preventDefault();uploadArea.classList.add('dragover')});
-  uploadArea?.addEventListener('dragleave',()=>uploadArea.classList.remove('dragover'));
-  uploadArea?.addEventListener('drop',e=>{e.preventDefault();uploadArea.classList.remove('dragover');if(e.dataTransfer.files?.[0])handleFile(e.dataTransfer.files[0])});
-  quality?.addEventListener('input',()=>qualityValue.textContent=quality.value+'%');
-  compressBtn.addEventListener('click',async e=>{
-    e.preventDefault(); e.stopPropagation();
-    if(!selectedFile)return showError('Please select an image first.');
-    if(compressBtn.disabled)return;
-    clearError(); compressBtn.disabled=true; compressBtn.textContent='Compressing...';
-    try{
-      const image=await loadImage(selectedFile), canvas=document.createElement('canvas'); canvas.width=image.naturalWidth; canvas.height=image.naturalHeight;
-      const ctx=canvas.getContext('2d'); if(!ctx)throw new Error('Your browser does not support image processing.');
-      ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0);
-      const out=await blob(canvas,'image/jpeg',parseInt(quality.value,10)/100); if(!out)throw new Error('Could not create compressed image.');
-      await consumeUsage();
-      if(compressedUrl)URL.revokeObjectURL(compressedUrl); compressedUrl=URL.createObjectURL(out); compressedPreview.src=compressedUrl;
-      originalSize.textContent=formatBytes(selectedFile.size); compressedSize.textContent=formatBytes(out.size); savedSize.textContent=Math.max(0,(1-out.size/selectedFile.size)*100).toFixed(1)+'%'; downloadBtn.href=compressedUrl; downloadBtn.download=filename(selectedFile.name); result.style.display='block';
-      result.scrollIntoView({behavior:'smooth',block:'start'});
-    }catch(err){showError(err.message||'Compression failed.')}
-    finally{compressBtn.disabled=false;compressBtn.textContent='Compress Image'}
+
+  function formatBytes(bytes) {
+    if (bytes <= 0) return '0 Bytes';
+    const units = ['Bytes', 'KB', 'MB', 'GB'];
+    const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const value = bytes / Math.pow(1024, index);
+    return value.toFixed(index === 0 ? 0 : 2) + ' ' + units[index];
+  }
+
+  function createFilename(filename) {
+    return filename
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '-') + '-compressed.jpg';
+  }
+
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Unable to read this image.'));
+      };
+
+      image.src = objectUrl;
+    });
+  }
+
+  function canvasToBlob(canvas, type, qualityValue) {
+    return new Promise(resolve => canvas.toBlob(resolve, type, qualityValue));
+  }
+
+  function handleFile(file) {
+    clearError();
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+      showError('Please choose a JPG, JPEG, PNG or WebP image.');
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      showError('Maximum file size is 20 MB.');
+      return;
+    }
+
+    selectedFile = file;
+    fileInfo.textContent = file.name + ' • ' + formatBytes(file.size);
+
+    if (originalUrl) URL.revokeObjectURL(originalUrl);
+    originalUrl = URL.createObjectURL(file);
+    originalPreview.src = originalUrl;
+
+    settings.style.display = 'block';
+    result.style.display = 'none';
+  }
+
+  uploadArea.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    fileInput.click();
   });
-  resetBtn?.addEventListener('click',e=>{e.preventDefault();selectedFile=null;usageConsumed=false;if(originalUrl)URL.revokeObjectURL(originalUrl);if(compressedUrl)URL.revokeObjectURL(compressedUrl);originalUrl=null;compressedUrl=null;fileInput.value='';fileInfo.textContent='';originalPreview.removeAttribute('src');compressedPreview.removeAttribute('src');settings.style.display='none';result.style.display='none';quality.value='80';qualityValue.textContent='80%';clearError()});
+
+  fileInput.addEventListener('change', event => {
+    event.preventDefault();
+    if (event.target.files && event.target.files[0]) {
+      handleFile(event.target.files[0]);
+    }
+  });
+
+  uploadArea.addEventListener('dragover', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    uploadArea.classList.add('dragover');
+  });
+
+  uploadArea.addEventListener('dragleave', event => {
+    event.preventDefault();
+    uploadArea.classList.remove('dragover');
+  });
+
+  uploadArea.addEventListener('drop', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    uploadArea.classList.remove('dragover');
+    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+      handleFile(event.dataTransfer.files[0]);
+    }
+  });
+
+  quality.addEventListener('input', () => {
+    qualityValue.textContent = quality.value + '%';
+  });
+
+  compressBtn.addEventListener('click', async event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!selectedFile) {
+      showError('Please select an image first.');
+      return false;
+    }
+
+    if (compressBtn.disabled) return false;
+
+    clearError();
+    compressBtn.disabled = true;
+    compressBtn.textContent = 'Compressing...';
+
+    try {
+      const image = await loadImage(selectedFile);
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Your browser does not support image processing.');
+
+      // JPEG does not support transparency, so use a white background.
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0);
+
+      const compressionQuality = parseInt(quality.value, 10) / 100;
+      const blob = await canvasToBlob(canvas, 'image/jpeg', compressionQuality);
+
+      if (!blob) throw new Error('Could not create compressed image.');
+
+      if (compressedUrl) URL.revokeObjectURL(compressedUrl);
+      compressedUrl = URL.createObjectURL(blob);
+
+      compressedPreview.src = compressedUrl;
+      originalSize.textContent = formatBytes(selectedFile.size);
+      compressedSize.textContent = formatBytes(blob.size);
+
+      const reduction = (1 - (blob.size / selectedFile.size)) * 100;
+      savedSize.textContent = Math.max(0, reduction).toFixed(1) + '%';
+
+      downloadBtn.href = compressedUrl;
+      downloadBtn.download = createFilename(selectedFile.name);
+      downloadBtn.setAttribute('download', createFilename(selectedFile.name));
+
+      result.style.display = 'block';
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+      showError(error.message || 'Compression failed.');
+    } finally {
+      compressBtn.disabled = false;
+      compressBtn.textContent = 'Compress Image';
+    }
+
+    return false;
+  });
+
+  resetBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    selectedFile = null;
+
+    if (originalUrl) URL.revokeObjectURL(originalUrl);
+    if (compressedUrl) URL.revokeObjectURL(compressedUrl);
+    originalUrl = null;
+    compressedUrl = null;
+
+    fileInput.value = '';
+    fileInfo.textContent = '';
+    originalPreview.removeAttribute('src');
+    compressedPreview.removeAttribute('src');
+    settings.style.display = 'none';
+    result.style.display = 'none';
+    quality.value = '80';
+    qualityValue.textContent = '80%';
+    clearError();
+  });
 })();

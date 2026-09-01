@@ -538,11 +538,13 @@ if (
             "
             SELECT
                 COALESCE(
-                    NULLIF(country_code, ''),
+                    NULLIF(ap.country_code, ''),
+                    NULLIF(av.country_code, ''),
                     'Unknown'
                 ) AS label,
                 COUNT(*) AS total
-            FROM analytics_pageviews
+            FROM analytics_pageviews ap
+            LEFT JOIN analytics_visitors av ON av.visitor_id = ap.visitor_id
             {$dateCondition}
             GROUP BY label
             ORDER BY total DESC

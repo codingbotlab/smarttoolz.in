@@ -18,8 +18,12 @@ try {
         $id=(int)($_POST['id']??0);if($id>0){$q=$db->prepare('DELETE FROM ads_settings WHERE id=?');$q->execute([$id]);adminAudit('delete_ad','ads_settings',(string)$id);}
     } elseif($action==='setting_save') {
         $id=(int)($_POST['id']??0);$key=trim((string)($_POST['setting_key']??''));$value=(string)($_POST['setting_value']??'');$type=(string)($_POST['setting_type']??'text');$desc=trim((string)($_POST['description']??''));$enabled=!empty($_POST['enabled'])?1:0;
-        if($key===''||!preg_match('/^[a-zA-Z0-9_.-]{1,120}$/',$key))throw new RuntimeException('Invalid setting key.');if(!in_array($type,['text','number','boolean','json'],true))$type='text';if($type==='json'&&$value!=='')json_decode($value,true,512,JSON_THROW_ON_ERROR);
-        if($id>0){$q=$db->prepare('UPDATE smarttoolz_settings SET setting_key=?,setting_value=?,setting_type=?,description=?,enabled=? WHERE id=?');$q->execute([$key,$value,$type,$desc,$enabled,$id]);adminAudit('update_setting','smarttoolz_settings',(string)$id,$key);}else{$q=$db->prepare('INSERT INTO smarttoolz_settings(setting_key,setting_value,setting_type,description,enabled) VALUES(?,?,?,?,?)');$q->execute([$key,$value,$type,$desc,$enabled]);adminAudit('create_setting','smarttoolz_settings',(string)$db->lastInsertId(),$key);}
+        if($key===''||!preg_match('/^[a-zA-Z0-9_.-]{1,120}$/',$key))throw new RuntimeException('Invalid setting key.');
+        if(!in_array($type,['text','number','boolean','json'],true))$type='text';
+        if($type==='number' && !is_numeric($value)) throw new RuntimeException('Number setting requires a numeric value.');
+        if($type==='boolean') $value=in_array(strtolower($value),['1','true','yes','on'],true)?'1':'0';
+        if($type==='json'&&$value!=='')json_decode($value,true,512,JSON_THROW_ON_ERROR);
+        if($id>0){$q=$db->prepare('UPDATE smarttoolz_settings SET setting_key=?,setting_value=?,setting_type=?,description=?,enabled=? WHERE id=?');$q->execute([$key,$value,$type,$desc,$enabled,$id]);adminAudit('update_setting','smarttoolz_settings',(string)$id,$key);}else{$q=$db->prepare('INSERT INTO smarttoolz_settings(setting_key,setting_value,setting_type,description,enabled) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value),setting_type=VALUES(setting_type),description=VALUES(description),enabled=VALUES(enabled)');$q->execute([$key,$value,$type,$desc,$enabled]);adminAudit('upsert_setting','smarttoolz_settings',$key,$key);}
     } elseif($action==='setting_delete') {
         $id=(int)($_POST['id']??0);if($id>0){$q=$db->prepare('DELETE FROM smarttoolz_settings WHERE id=?');$q->execute([$id]);adminAudit('delete_setting','smarttoolz_settings',(string)$id);}
     } elseif($action==='user_role') {

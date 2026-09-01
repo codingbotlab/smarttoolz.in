@@ -1,60 +1,75 @@
 <?php
 declare(strict_types=1);
 
-/*
- * Topic-aware editorial layer. It uses the actual YouTube title/description as
- * source material, then adds clearly generic topic education. It never invents
- * video-specific facts. Every article receives a different combination of
- * headings, search intent, explanations and FAQs.
+/* Source-grounded long-form article engine. It deliberately separates facts
+ * from editorial explanation and never pads an article with invented details.
  */
 function rfWords(string $text): array {
     $words=preg_split('/[^a-z0-9]+/i',strtolower($text))?:[];
-    $stop=array_flip(['this','that','with','from','your','you','the','and','for','are','was','were','have','has','had','into','about','what','when','where','which','while','will','would','could','should','video','videos','watch','official','reddott','films','film','new','just','more','than','their','they','them','there','here','also','only','using','used','use','how','why','who']);
+    $stop=array_flip(['this','that','with','from','your','you','the','and','for','are','was','were','have','has','had','into','about','what','when','where','which','while','will','would','could','should','video','videos','watch','official','reddott','films','film','new','just','more','than','their','they','them','there','here','also','only','using','used','use','how','why','who','like','then','very','some','its','have','been','being','over','under','after','before','through','where','these','those','such']);
     $out=[];foreach($words as $w){if(strlen($w)>=4&&!isset($stop[$w]))$out[]=$w;}
     return array_values(array_unique($out));
 }
 function rfSubject(string $title,string $description): string {
     $clean=trim(preg_replace('/\s+/',' ',$title)??'');
-    $clean=preg_replace('/\s*[|:#–—-]\s*(official|full|hd|4k|video).*$/i','',$clean)??$clean;
+    $clean=preg_replace('/\s*[|:#–—-]\s*(official|full|hd|4k|video|trailer).*$/i','',$clean)??$clean;
     return trim($clean)?:'this video';
 }
 function rfTopic(string $title,string $description): array {
     $x=strtolower($title.' '.$description);
-    if(preg_match('/\b(animation|animated|anime|cartoon|3d|cgi|vfx|visual)\b/',$x))return ['Animation & Visual Storytelling','animation','how animation, visual design and storytelling work together'];
-    if(preg_match('/\b(tutorial|guide|how to|how-to|tips|trick|tool|software|app|coding|php|sql|python|website|seo)\b/',$x))return ['Practical Guide & How-To','tutorial','the concepts, workflow and practical decisions behind the subject'];
-    if(preg_match('/\b(song|music|lyrics|singer|singing|audio|beat|remix|cover)\b/',$x))return ['Music, Audio & Performance','music','the creative and technical ideas listeners can notice in the subject'];
-    if(preg_match('/\b(story|short film|movie|cinema|actor|character|drama|horror|comedy|thriller)\b/',$x))return ['Storytelling & Filmmaking','storytelling','story structure, character, pacing and filmmaking choices relevant to the subject'];
-    return ['Creator Video & Explained','creator video','the main subject, context and viewing questions suggested by the published information'];
+    if(preg_match('/\b(animation|animated|anime|cartoon|3d|cgi|vfx|visual)\b/',$x))return ['Animation & Visual Storytelling','animation','visual design, movement, timing and storytelling'];
+    if(preg_match('/\b(tutorial|guide|how to|how-to|tips|trick|tool|software|app|coding|php|sql|python|website|seo)\b/',$x))return ['Practical Guide & How-To','tutorial','purpose, workflow, implementation choices and practical learning'];
+    if(preg_match('/\b(song|music|lyrics|singer|singing|audio|beat|remix|cover)\b/',$x))return ['Music, Audio & Performance','music','sound, performance, pacing and visual presentation'];
+    if(preg_match('/\b(story|short film|movie|cinema|actor|character|drama|horror|comedy|thriller)\b/',$x))return ['Storytelling & Filmmaking','storytelling','story structure, character, pacing and filmmaking choices'];
+    return ['Creator Video & Explained','creator video','the central subject, context, presentation and questions raised by the source'];
+}
+function rfSentences(string $text): array {
+    $text=trim(preg_replace('/\s+/',' ',$text)??'');
+    $s=preg_split('/(?<=[.!?])\s+/', $text)?:[];
+    return array_values(array_filter(array_map('trim',$s),static fn($x)=>strlen($x)>25));
 }
 function rfFaq(string $subject,string $kind,string $description): array {
+    $q1="What is $subject?";
     $base=[
-      "What is $subject?"=>"The title identifies $subject as the main subject of this Reddott Films video. The article does not add a video-specific claim that is absent from the published source.",
-      "What should viewers look for in $subject?"=>"Start with the details stated in the creator's description, then compare them with what is actually presented in the complete video.",
-      "Where can I watch the original $subject video?"=>"The original is available on the Reddott Films YouTube channel; this page provides the direct YouTube link as well as the embedded player."
+      $q1=>"The title identifies $subject as the main subject of this Reddott Films video. Video-specific details are taken only from the published source and available material.",
+      "What should viewers look for in $subject?"=>"Start with the creator's stated purpose, then compare the explanation, demonstration or presentation in the complete video with the published description.",
+      "Where can I watch the original $subject video?"=>"The original is available on YouTube. This article is a text companion and keeps a direct link to the source video."
     ];
-    if($kind==='tutorial')$base["Who can benefit from this $subject guide?"]="Anyone trying to understand the stated workflow can use the article as a preparation or recap, while the original video provides the practical demonstration.";
-    elseif($kind==='animation')$base["Why does visual storytelling matter for $subject?"]="Visual storytelling can communicate mood, sequence and emphasis through composition, movement and timing. The specific choices in this video should be verified by watching it.";
-    elseif($kind==='music')$base["What makes a music video useful to study?"]="A music video can be considered through audio, performance, pacing and visual presentation. This article avoids assigning specific production details unless the source states them.";
-    elseif($kind==='storytelling')$base["What storytelling elements can viewers notice?"]="Viewers can pay attention to setup, progression, character motivation, pacing and resolution where those elements are present in the video.";
-    else $base["How should I use this article?"]="Use it as a text companion and viewing guide, then rely on the complete YouTube video for details that cannot be represented accurately in text.";
+    if($kind==='tutorial')$base["Who can benefit from this $subject guide?"]="Anyone whose goal matches the stated subject can use the article to understand the concepts before following the practical demonstration in the original video.";
+    elseif($kind==='animation')$base["Why does visual storytelling matter for $subject?"]="Movement, framing, timing, composition and visual rhythm can influence how an audience reads a visual work. The video itself should be used to verify its specific creative choices.";
+    elseif($kind==='music')$base["What can viewers study in a music-focused video?"]="A viewer can consider sound, performance, arrangement, pacing and the relationship between audio and visuals, without assuming production details that the source does not provide.";
+    elseif($kind==='storytelling')$base["What storytelling elements can viewers notice?"]="Where applicable, viewers can examine setup, character motivation, conflict, pacing, information revealed to the audience and resolution.";
+    else $base["How should I use this article?"]="Use it as a searchable explanation and viewing guide, then rely on the complete YouTube video for details that text cannot establish.";
     return $base;
 }
-function rfArticle(string $title,string $description): array {
-    [$topicLabel,$kind,$angle]=rfTopic($title,$description);$subject=rfSubject($title,$description);$words=rfWords($title.' '.$description);$keywords=array_slice($words,0,8);$sent=preg_split('/(?<=[.!?])\s+/',trim($description))?:[];$sent=array_values(array_filter(array_map('trim',$sent)));
-    $sourceSummary=$sent?implode(' ',array_slice($sent,0,min(3,count($sent)))):'The published YouTube description contains limited detail, so this article deliberately avoids adding unsupported video-specific claims.';
-    $headlineVariants=["$subject: What the Video Covers and What to Notice","$subject Explained: Key Ideas, Context and Viewing Guide","Understanding $subject: A Practical Reddott Films Companion","$subject: A Closer Look at the Ideas Behind the Video"];
-    $seed=array_sum(array_map('ord',str_split(substr($title,0,12))));$headline=$headlineVariants[$seed%count($headlineVariants)];
-    $intro="Reddott Films presents <strong>".htmlspecialchars($subject,ENT_QUOTES,'UTF-8')."</strong> through this video. This companion article is designed for people who want more than an embedded player: it explains the topic in plain language, identifies useful questions to consider while watching, and separates source information from general background.";
+function rfArticle(string $title,string $description,string $transcript=''): array {
+    [$topicLabel,$kind,$angle]=rfTopic($title,$description);
+    $subject=rfSubject($title,$description);
+    $combined=trim($description."\n".$transcript);
+    $keywords=rfWords($title.' '.$combined);
+    $sourceSent=rfSentences($combined);
+    $descSent=rfSentences($description);
+    $txSent=rfSentences($transcript);
+    $sourceSummary=$descSent?implode(' ',array_slice($descSent,0,4)):'The published description contains limited detail, so the article avoids unsupported video-specific claims.';
+    $variants=["$subject: What the Video Covers and What to Notice","$subject Explained: Key Ideas, Context and Viewing Guide","Understanding $subject: A Practical Reddott Films Companion","$subject: A Closer Look at the Ideas Behind the Video","A Useful Guide to $subject: Context, Questions and Key Ideas"];
+    $seed=array_sum(array_map('ord',str_split(substr($title,0,20))));
+    $headline=$variants[$seed%count($variants)];
+    $intro="Reddott Films presents <strong>".htmlspecialchars($subject,ENT_QUOTES,'UTF-8')."</strong> through this video. This companion article is built around the information actually available from the creator, then adds clearly labelled educational context so readers can understand the subject before, during or after watching. It does not treat assumptions as facts.";
     $sections=[];
-    $sections[]=['Understanding the subject',"At its simplest, $subject is the starting point for this article. The useful question is not only what the title says, but what a viewer can understand from the material surrounding that title. The creator's published description is therefore treated as the primary textual source. Where it provides a concrete point, that point is retained; where it is silent, this page does not pretend to know a video-specific fact. This approach keeps the article useful without turning assumptions into claims."];
-    $sections[]=['Why this topic matters',"The broader value of $subject comes from understanding the ideas behind it rather than memorising a title. For $angle, readers can focus on purpose, process, presentation and the choices that affect the final result. These are useful lenses for both beginners and experienced viewers because they turn passive watching into active observation. The exact examples should come from the video itself."];
-    $sections[]=['How to read the video critically',"A good companion article should help a reader ask better questions. Begin with the stated subject, identify the central action or message, and notice which details receive the most attention. Then compare those observations with the published description. If a detail is not supported by either source, it should remain an open question rather than becoming a fabricated takeaway. This is especially important when a short title can be interpreted in several ways."];
-    if($kind==='animation')$sections[]=['Animation and visual storytelling lens',"Animation communicates through more than dialogue. Movement, framing, timing, colour, character design, transitions and visual rhythm can all influence how an audience understands a scene. When watching this Reddott Films piece, notice which visual elements carry information and which are mainly decorative. The goal is not to assume how the production was made, but to observe what the finished work actually communicates."];
-    elseif($kind==='tutorial')$sections[]=['Practical learning lens',"For a tutorial-style subject, the strongest way to learn is to connect each demonstrated step with its purpose. A viewer can pause after an important action, reproduce it independently, and check the result before moving on. It is also useful to distinguish a general principle from a step that only applies to the specific setup shown in the video. This makes the article useful as a learning companion without claiming that an unshown workflow is part of the video."];
-    elseif($kind==='music')$sections[]=['Music and performance lens',"Music-focused videos can be appreciated through several layers: the song or audio itself, performance, arrangement, pacing and visual presentation. While watching, notice how sound and image support each other and whether changes in rhythm or performance affect the viewer's attention. This article does not assign technical production credits or musical details unless they are explicitly available in the source information."];
-    elseif($kind==='storytelling')$sections[]=['Storytelling and filmmaking lens',"For a story or film-focused subject, viewers can examine setup, character motivation, conflict, pacing and payoff. Even a short piece can create a sense of progression by deciding what information to reveal and when. Rather than summarising scenes that are not documented in the source, this page provides a framework for analysing what the viewer actually sees and hears."];
-    else $sections[]=['Creator-content lens',"Creator videos often combine a central idea with presentation choices such as pacing, visuals, narration or demonstrations. A useful way to watch is to identify the central promise suggested by the title, then check how the finished video fulfils that promise. The published description provides the safest textual reference; the video supplies the details that text alone cannot capture."];
-    $sections[]=['Key takeaways',"The strongest takeaway is to connect the published source with what is actually shown. Keep the creator's stated information separate from general topic knowledge, verify important details by watching the complete video, and use this page as a searchable reference rather than a replacement for the original. That gives readers a clearer path from search intent to the source material."];
-    $sections[]=['Who should watch this video?',"This page is suitable for readers whose search interest matches $subject and who want a quick explanation before opening YouTube. It can also work as a recap for someone who has already watched the video. The usefulness comes from organising the topic and providing questions to consider, while the original video remains the authority for video-specific details."];
-    return ['headline'=>$headline,'topic'=>$topicLabel,'kind'=>$kind,'subject'=>$subject,'intro'=>$intro,'sourceSummary'=>$sourceSummary,'sections'=>$sections,'keywords'=>$keywords,'faq'=>rfFaq($subject,$kind,$description)];
+    $sections[]=['The subject in context',"$subject is the central subject identified by the published title. The first useful step is to separate that title from everything a reader might assume about the video. The creator's description is therefore used as the primary written source. If it explains a purpose, feature, process or message, the article can organise that information for easier reading. If the source is silent, the article leaves the point open rather than filling the gap with invented details."];
+    $sections[]=['What the source actually tells us', $sourceSummary.' This source-first approach matters because a video page can otherwise become a collection of guesses around a short title. A useful article should make clear which information comes from the creator and which material is general explanation. Readers can then return to the video and verify the details for themselves.'];
+    $sections[]=["Why $angle matters", "Understanding $subject becomes more useful when the reader knows what to pay attention to. The relevant lens here is $angle. Instead of repeating the same keyword, consider the purpose of the content, the choices used to communicate it, the sequence in which information is presented, and the practical questions a viewer may have. These ideas provide context without claiming that the video contains a specific example unless the source supports it."];
+    if($kind==='animation')$sections[]=['Reading animation and visual storytelling',"Animation can communicate through movement, framing, timing, composition, character design and visual rhythm. A viewer can ask what changes from one moment to the next, where attention is directed, and how motion supports the subject. These are general analytical tools, not claims about the production process of this particular video. The finished video remains the correct source for its actual visual choices."];
+    elseif($kind==='tutorial')$sections[]=['Turning a practical video into learning',"For a how-to subject, useful learning comes from understanding why an action is performed, not simply copying a sequence. Before following a step, identify its purpose; after completing it, check the result and note anything that depends on the setup shown. This distinction helps readers carry a principle into a different situation while avoiding the mistake of assuming that every possible workflow was demonstrated in the source video."];
+    elseif($kind==='music')$sections[]=['Listening and viewing with intention',"Music and performance content can be considered through several layers: the audio, performance, pacing and visual presentation. A useful viewing exercise is to notice how changes in rhythm, emphasis or performance affect attention. The article deliberately avoids assigning technical credits, instruments, recording methods or other production facts unless those details are stated in the source."];
+    elseif($kind==='storytelling')$sections[]=['A storytelling lens for the viewer',"Story-focused videos can be approached through setup, motivation, conflict, pacing, revelation and resolution where those elements are present. Even a short work can control audience attention by choosing what information appears first and what is delayed. Rather than inventing a scene-by-scene summary, this article gives readers a framework they can apply to what the complete video actually shows."];
+    else $sections[]=['A practical creator-content lens',"Creator videos often communicate through a mixture of explanation, demonstration, narration and presentation. A useful viewer can identify the central promise suggested by the title, then check whether the video answers that promise. Attention to structure and evidence is more useful than repeating keywords, especially when the published description is brief."];
+    if($txSent){
+        $terms=array_slice(rfWords($transcript),0,10);
+        $sections[]=['What the available captions add',"The available caption track gives additional source context around $subject. Recurring terms include ".htmlspecialchars(implode(', ',$terms),ENT_QUOTES,'UTF-8').". Caption text can help identify subjects and phrases used in the video, but it can also miss tone, visuals, timing and other context. It is therefore treated as supporting source material rather than a substitute for watching the complete video."];
+    }
+    $sections[]=['Questions worth asking while watching',"A strong viewing experience starts with specific questions. What is the central subject? What does the creator spend the most time explaining or showing? Which points are explicitly stated, and which conclusions require interpretation? Does the ending resolve the central purpose suggested by the beginning? These questions help a reader evaluate the content rather than simply consume it."];
+    $sections[]=['Key takeaways',"The main takeaway is to connect the searchable topic with the original source. The title identifies the subject, the published description supplies creator-provided context, and available captions can add further language-level evidence. General explanation should help the reader understand the topic, but video-specific claims should always remain traceable to the source. This keeps the article useful without turning it into a rewritten copy of the video description."];
+    $sections[]=['Who this companion is for',"This page is intended for readers whose search interest matches $subject and who want useful context before opening YouTube. It can also serve as a recap after watching. The article is not intended to replace the original video; its role is to organise source information, explain relevant concepts and give readers better questions to take back to the source."];
+    return ['headline'=>$headline,'topic'=>$topicLabel,'kind'=>$kind,'subject'=>$subject,'intro'=>$intro,'sourceSummary'=>$sourceSummary,'sections'=>$sections,'keywords'=>array_slice($keywords,0,12),'faq'=>rfFaq($subject,$kind,$description),'source_word_count'=>str_word_count($combined),'transcript_word_count'=>str_word_count($transcript)];
 }

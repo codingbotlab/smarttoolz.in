@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-/* SmartToolz application bootstrap: session, database and safe schema upgrades. */
+/* SmartToolz application bootstrap: session, database, runtime settings and safe schema upgrades. */
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params([
         'lifetime' => 0,
@@ -11,6 +11,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         'samesite' => 'Lax'
     ]);
     session_start();
+}
+
+require_once __DIR__ . '/lib/settings.php';
+
+/* Apply the configured timezone to all PHP date/time functions. */
+$smartToolzTimezone = smarttoolz_setting_string('timezone', 'Asia/Kolkata');
+if ($smartToolzTimezone !== '' && in_array($smartToolzTimezone, timezone_identifiers_list(), true)) {
+    date_default_timezone_set($smartToolzTimezone);
 }
 
 const SMARTTOOLZ_DB_HOST = 'localhost';
@@ -47,6 +55,7 @@ function smarttoolz_install_schema(PDO $pdo): void {
 
 function smarttoolz_h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
 function smarttoolz_track(string $slug): void {
+    if (!smarttoolz_setting_bool('analytics_enabled', true)) return;
     try {
         $uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
         $ip = $_SERVER['REMOTE_ADDR'] ?? '';

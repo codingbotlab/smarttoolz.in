@@ -25,37 +25,7 @@ HTML;
 
     if ($courseSlug === 'computer-basics-for-beginners' && $position === 6) {
         return <<<'HTML'
-<article class="lh-prose">
-  <div class="lh-lesson-intro"><p>The <strong>motherboard</strong> is the main circuit board that provides the electrical connections and communication pathways between many important computer components. It does not perform every computation itself; its job is to let the CPU, memory, storage, expansion devices and other hardware work together.</p></div>
-  <h2>What is a motherboard?</h2>
-  <p>A motherboard contains sockets, slots, connectors and circuitry that allow components to communicate. The exact layout differs between desktops, laptops and other devices, but the underlying idea is the same: components need reliable pathways for data, control signals and power.</p>
-  <h2>Important motherboard areas</h2>
-  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Part</th><th>What it is used for</th></tr></thead><tbody>
-    <tr><td>CPU socket</td><td>Holds and electrically connects the processor.</td></tr>
-    <tr><td>DIMM / memory slots</td><td>Connect system RAM to the memory controller.</td></tr>
-    <tr><td>PCIe slots</td><td>Connect expansion hardware such as graphics cards and some other add-in devices.</td></tr>
-    <tr><td>M.2 slots</td><td>Provide a compact connection for supported SSDs or other devices.</td></tr>
-    <tr><td>SATA connectors</td><td>Connect compatible SATA storage drives and some other devices.</td></tr>
-    <tr><td>Rear I/O ports</td><td>Provide external connections such as USB, networking, audio and display outputs depending on the board.</td></tr>
-  </tbody></table></div>
-  <h2>Chipset and platform compatibility</h2>
-  <p>The motherboard must be compatible with the CPU platform, memory type and other hardware. A processor cannot simply be installed into any board: the socket, firmware support, power requirements and platform features all matter. Likewise, a DDR memory module must match the memory technology supported by the board.</p>
-  <div class="alert alert-primary"><strong>Smart tip:</strong> When planning an upgrade, check the motherboard's manual or manufacturer specifications instead of relying only on the physical appearance of a connector.</div>
-  <h2>How the motherboard fits into a real task</h2>
-  <p>Suppose you open a program stored on an SSD. The storage connection transfers data into system memory, the CPU works with that data, and the motherboard provides the physical and electrical pathways that let these components communicate. If you install a graphics card, its PCIe connection provides another high-speed communication path.</p>
-  <h2>Why motherboard problems can be confusing</h2>
-  <p>A motherboard connects many subsystems, so a fault can appear as a problem with another component. A failed memory slot can look like bad RAM. A damaged storage connector can look like a missing drive. A power-delivery problem can prevent a system from starting at all. Diagnosis therefore requires testing components and connections systematically rather than immediately replacing the motherboard.</p>
-  <h2>Practical troubleshooting checklist</h2>
-  <ol><li>Power the computer off before opening a desktop case and follow safe handling procedures.</li><li>Check that major power connectors are firmly seated.</li><li>Check whether RAM, expansion cards and storage are correctly installed.</li><li>Use the motherboard manual to identify diagnostic LEDs, beep codes or status indicators when available.</li><li>Test one change at a time so you know which change affected the result.</li></ol>
-  <h2>Practice task</h2>
-  <p>Find a diagram or photograph of a motherboard you own or can safely inspect. Identify the CPU socket, RAM slots, storage connectors, expansion slots and rear I/O area. Write down what device is connected to each area.</p>
-  <h2>Common mistakes</h2>
-  <ul><li>Thinking the motherboard is the same thing as the CPU.</li><li>Assuming every slot supports every generation of hardware.</li><li>Forcing a connector that does not fit naturally.</li><li>Replacing a motherboard before checking cables, seating and compatibility.</li></ul>
-  <h2>Quick check</h2>
-  <ol><li>What is the motherboard's main role?</li><li>What type of hardware commonly uses a PCIe slot?</li><li>Why should you check compatibility before installing a CPU or RAM?</li></ol>
-  <h2>Key takeaway</h2>
-  <p><strong>The motherboard is the system's central hardware platform: it connects components and provides the pathways that allow them to communicate and receive power.</strong></p>
-</article>
+<article class="lh-prose"><div class="lh-lesson-intro"><p>The <strong>motherboard</strong> is the main circuit board that provides the electrical connections and communication pathways between many important computer components.</p></div><h2>What is a motherboard?</h2><p>A motherboard contains sockets, slots, connectors and circuitry that allow components to communicate.</p><h2>Important motherboard areas</h2><div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Part</th><th>What it is used for</th></tr></thead><tbody><tr><td>CPU socket</td><td>Holds and electrically connects the processor.</td></tr><tr><td>Memory slots</td><td>Connect system RAM.</td></tr><tr><td>PCIe slots</td><td>Connect expansion hardware such as graphics cards.</td></tr><tr><td>M.2 slots</td><td>Connect supported SSDs and other devices.</td></tr><tr><td>SATA connectors</td><td>Connect compatible SATA drives.</td></tr></tbody></table></div><h2>Practical troubleshooting</h2><ol><li>Check power connections.</li><li>Check RAM, expansion cards and storage seating.</li><li>Use motherboard diagnostic indicators when available.</li><li>Test one change at a time.</li></ol><h2>Key takeaway</h2><p><strong>The motherboard connects major hardware and provides pathways for communication and power.</strong></p></article>
 HTML;
     }
 
@@ -63,6 +33,36 @@ HTML;
     if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 1) {
         return <<<'HTML'
 <article class="lh-prose"><div class="lh-lesson-intro"><p><strong>Graphic design is visual problem-solving.</strong> A good design helps a specific audience understand, notice or act on information.</p></div><h2>Start with the goal</h2><p>Before choosing fonts or colours, decide who will see the design, what they should notice first and what action they should take.</p><h2>Core building blocks</h2><ul><li><strong>Typography:</strong> communicates words and tone.</li><li><strong>Colour:</strong> creates emphasis and relationships.</li><li><strong>Images:</strong> show, explain or create emotion.</li><li><strong>Layout:</strong> organises information.</li><li><strong>Whitespace:</strong> creates breathing room.</li></ul><h2>Practice project</h2><p>Create a simple 1080 × 1080 workshop announcement with a title, date, short description and call to action. Make the primary message visually dominant and review it at phone size.</p></article>
+HTML;
+    }
+
+    if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 2) {
+        return <<<'HTML'
+<article class="lh-prose">
+  <div class="lh-lesson-intro"><p>Graphic design becomes easier to discuss when you know the vocabulary. These terms describe the building blocks and decisions you will use in almost every design project.</p></div>
+  <h2>Essential terms</h2>
+  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Term</th><th>Meaning</th><th>Practical use</th></tr></thead><tbody>
+    <tr><td>Composition</td><td>How visual elements are arranged as a whole.</td><td>Controls where the viewer looks and how information feels organised.</td></tr>
+    <tr><td>Hierarchy</td><td>The visual order that tells viewers what to notice first, second and third.</td><td>Make a headline stronger than supporting text.</td></tr>
+    <tr><td>Alignment</td><td>Positioning elements along shared edges, centres or guides.</td><td>Keeps a poster or social post from looking randomly assembled.</td></tr>
+    <tr><td>Contrast</td><td>Visible difference between elements.</td><td>Separate a call-to-action from surrounding information.</td></tr>
+    <tr><td>Whitespace</td><td>Intentional empty space around or between elements.</td><td>Improves readability and gives important content room to stand out.</td></tr>
+    <tr><td>Typography</td><td>The design and arrangement of written text.</td><td>Choose typefaces, sizes, weights, spacing and line length for clarity.</td></tr>
+    <tr><td>Grid</td><td>A system of guides used to organise content consistently.</td><td>Keep cards, columns and text blocks aligned across multiple designs.</td></tr>
+    <tr><td>Palette</td><td>A selected set of colours used together.</td><td>Creates consistency across a brand or campaign.</td></tr>
+  </tbody></table></div>
+  <h2>Terms work together</h2>
+  <p>Good design rarely depends on one principle. For example, a social-media announcement might use a grid to establish alignment, a large heading to create hierarchy, contrast to highlight the date, whitespace to separate sections, and a limited colour palette to maintain consistency.</p>
+  <div class="alert alert-primary"><strong>Designer habit:</strong> Do not ask only “Does this look nice?” Ask “What should the viewer notice first, and which design decision makes that happen?”</div>
+  <h2>Mini analysis task</h2>
+  <ol><li>Choose one poster, advertisement or social post you see today.</li><li>Identify its strongest hierarchy decision.</li><li>Find one example of alignment and one example of contrast.</li><li>Notice where whitespace has been used.</li><li>Write one change that would improve clarity without adding another decorative element.</li></ol>
+  <h2>Common mistakes</h2>
+  <ul><li>Adding more elements when the real problem is weak hierarchy.</li><li>Using contrast everywhere until nothing feels important.</li><li>Treating whitespace as wasted space.</li><li>Choosing terminology without understanding the visual problem it solves.</li></ul>
+  <h2>Quick self-check</h2>
+  <p>Can you explain the difference between hierarchy and alignment? Can you point to one design where whitespace improves readability and describe why?</p>
+  <h2>Key takeaway</h2>
+  <p><strong>Design vocabulary gives you a precise way to diagnose and improve visual communication.</strong></p>
+</article>
 HTML;
     }
 

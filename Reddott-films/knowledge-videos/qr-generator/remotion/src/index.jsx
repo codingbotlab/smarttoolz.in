@@ -1,5 +1,5 @@
 import React from 'react';
-import { Composition, Audio, staticFile } from 'remotion';
+import { Composition, registerRoot } from 'remotion';
 import { Video } from './Video.jsx';
 
 export const RemotionRoot = () => (
@@ -12,3 +12,5 @@ export const RemotionRoot = () => (
     height={720}
   />
 );
+
+registerRoot(RemotionRoot);

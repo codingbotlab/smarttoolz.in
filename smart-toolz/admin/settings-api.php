@@ -1,30 +1,57 @@
 <?php
 declare(strict_types=1);
+
+// JSON-only endpoint: never allow notices/warnings to corrupt the response.
+if (ob_get_level() === 0) ob_start();
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+
 require_once __DIR__ . '/bootstrap.php';
 
-$admin = requireAdmin();
-header('Content-Type: application/json; charset=utf-8');
+function settingsJson(array $data, int $status = 200): never
+{
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 
 try {
-    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-        http_response_code(405);
-        echo json_encode(['ok'=>false,'message'=>'POST required.']);
-        exit;
+    requireAdmin();
+
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        settingsJson(['ok' => false, 'message' => 'POST required.'], 405);
     }
 
-    verifyAdminCsrf();
-    $payload = json_decode((string)file_get_contents('php://input'), true);
-    if (!is_array($payload)) {
-        http_response_code(400);
-        echo json_encode(['ok'=>false,'message'=>'Invalid JSON payload.']);
-        exit;
+    // Accept either JSON or regular form POST, so this endpoint is resilient.
+    $contentType = strtolower((string)($_SERVER['CONTENT_TYPE'] ?? ''));
+    $payload = [];
+
+    if (str_contains($contentType, 'application/json')) {
+        $raw = (string)file_get_contents('php://input');
+        $payload = json_decode($raw, true);
+        if (!is_array($payload)) {
+            settingsJson(['ok' => false, 'message' => 'Invalid JSON payload.'], 400);
+        }
+    } else {
+        $payload = $_POST;
+    }
+
+    $csrf = (string)($payload['csrf'] ?? '');
+    if ($csrf === '') {
+        settingsJson(['ok' => false, 'message' => 'Missing security token. Reload the page and try again.'], 419);
+    }
+    if (!hash_equals(adminCsrf(), $csrf)) {
+        settingsJson(['ok' => false, 'message' => 'Security token expired. Reload the page and try again.'], 419);
     }
 
     $items = $payload['settings'] ?? [];
     if (!is_array($items) || !$items) {
-        http_response_code(400);
-        echo json_encode(['ok'=>false,'message'=>'No settings supplied.']);
-        exit;
+        settingsJson(['ok' => false, 'message' => 'No settings supplied.'], 400);
     }
 
     $db = adminDb();
@@ -42,8 +69,11 @@ try {
     );
 
     $saved = [];
+
     foreach ($items as $item) {
-        if (!is_array($item)) continue;
+        if (!is_array($item)) {
+            continue;
+        }
 
         $key = trim((string)($item['key'] ?? ''));
         $value = (string)($item['value'] ?? '');
@@ -54,16 +84,22 @@ try {
         if ($key === '' || !preg_match('/^[a-zA-Z0-9_.-]{1,120}$/', $key)) {
             throw new RuntimeException('Invalid setting key: ' . $key);
         }
-        if (!in_array($type, ['text','number','boolean','json'], true)) {
+
+        if (!in_array($type, ['text', 'number', 'boolean', 'json'], true)) {
             throw new RuntimeException('Invalid setting type for: ' . $key);
         }
-        if ($type === 'number' && $value !== '' && !is_numeric($value)) {
-            throw new RuntimeException('Invalid number for: ' . $key);
+
+        if ($type === 'number') {
+            if ($value === '' || !is_numeric($value)) {
+                throw new RuntimeException('Invalid number for: ' . $key);
+            }
         }
+
         if ($type === 'boolean') {
-            $value = in_array(strtolower(trim($value)), ['1','true','yes','on'], true) ? '1' : '0';
+            $value = in_array(strtolower(trim($value)), ['1', 'true', 'yes', 'on'], true) ? '1' : '0';
         }
-        if ($type === 'json' && $value !== '') {
+
+        if ($type === 'json' && trim($value) !== '') {
             json_decode($value, true, 512, JSON_THROW_ON_ERROR);
         }
 
@@ -74,16 +110,19 @@ try {
 
     $db->commit();
 
-    echo json_encode([
+    settingsJson([
         'ok' => true,
         'message' => 'Settings saved successfully.',
-        'saved' => $saved
-    ], JSON_UNESCAPED_UNICODE);
+        'saved' => $saved,
+        'count' => count($saved)
+    ]);
 } catch (Throwable $e) {
     if (isset($db) && $db instanceof PDO && $db->inTransaction()) {
         $db->rollBack();
     }
     error_log('SmartToolz settings API: ' . $e->getMessage());
-    http_response_code(400);
-    echo json_encode(['ok'=>false,'message'=>$e->getMessage()]);
+    settingsJson([
+        'ok' => false,
+        'message' => $e->getMessage() ?: 'Unable to save settings.'
+    ], 400);
 }

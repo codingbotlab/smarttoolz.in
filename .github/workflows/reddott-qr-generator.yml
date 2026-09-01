@@ -62,6 +62,7 @@ jobs:
           cp ../output/narration.wav public/narration.wav
           npm install
 
+      # index.jsx is the Remotion entry and registers the root composition.
       - name: Render final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
         run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23 --concurrency=2 --log=verbose

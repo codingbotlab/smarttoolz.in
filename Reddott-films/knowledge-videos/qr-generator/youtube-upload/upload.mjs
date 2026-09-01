@@ -1,8 +1,10 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { google } from 'googleapis';
 
 const videoPath = process.env.VIDEO_PATH;
 const thumbnailPath = process.env.THUMBNAIL_PATH;
+const metaPath = process.env.PUBLISH_META_PATH || path.resolve('youtube.json');
 const clientId = process.env.YT_CLIENT_ID;
 const clientSecret = process.env.YT_CLIENT_SECRET;
 const refreshToken = process.env.YT_REFRESH_TOKEN;
@@ -34,5 +36,19 @@ const uploaded = await youtube.videos.insert({
 
 const id = uploaded.data.id;
 if (!id) throw new Error('YouTube upload returned no video id.');
-await youtube.thumbnails.set({ videoId: id, media: { body: fs.createReadStream(thumbnailPath) } });
+
+await youtube.thumbnails.set({
+  videoId: id,
+  media: { body: fs.createReadStream(thumbnailPath) }
+});
+
+fs.mkdirSync(path.dirname(metaPath), { recursive: true });
+fs.writeFileSync(metaPath, JSON.stringify({
+  video_id: id,
+  youtube_url: `https://www.youtube.com/watch?v=${id}`,
+  title,
+  uploaded_at: new Date().toISOString()
+}, null, 2) + '\n');
+
 console.log(`YouTube upload complete: https://www.youtube.com/watch?v=${id}`);
+console.log(`Publish metadata written to: ${metaPath}`);

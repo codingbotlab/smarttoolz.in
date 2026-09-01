@@ -40,11 +40,30 @@ HTML;
 HTML;
     }
 
+    if ($slug === 'course-16-lesson-4') {
+        $content = <<<'HTML'
+<article class="lh-prose"><div class="lh-lesson-intro"><p><strong>Core elements are the raw visual ingredients of graphic design.</strong> Learning to control line, shape, form, colour, texture, space and scale gives you more deliberate control over what a viewer notices and feels.</p></div>
+<h2>1. Line</h2><p>A line can separate content, guide the eye, create direction or suggest movement. Horizontal lines often feel stable, vertical lines can feel structured, and diagonal lines can add energy. Use line weight carefully: a heavy divider can compete with a headline.</p>
+<h2>2. Shape</h2><p>Shapes are two-dimensional areas such as circles, rectangles, polygons and custom silhouettes. Geometric shapes can feel precise and organised, while organic shapes can feel softer or more natural. Repeating a shape can create consistency across a layout.</p>
+<h2>3. Form</h2><p>Form suggests three-dimensional volume. Shading, highlights, perspective and overlapping can make a flat graphic feel solid. Even in a simple poster, a subtle sense of depth can help separate a subject from its background.</p>
+<h2>4. Colour</h2><p>Colour affects hierarchy, mood and meaning. A limited palette is often easier to control than many unrelated colours. Start with a dominant colour, supporting colours and an accent, then check whether text remains readable against its background.</p>
+<h2>5. Texture</h2><p>Texture describes the visual or implied surface quality of an element. A paper grain, fabric pattern or subtle noise can add character, but texture should not reduce readability or distract from the main message.</p>
+<h2>6. Space</h2><p>Space includes both occupied areas and intentional empty areas. Whitespace gives elements room to breathe and helps establish grouping. If two items belong together, placing them closer can communicate that relationship without adding another graphic.</p>
+<h2>7. Scale and proportion</h2><p>Scale tells the viewer how large one element is relative to another. A large headline communicates priority; a smaller supporting label communicates secondary information. Proportion also matters: an image stretched beyond its natural ratio can look distorted and weaken the design.</p>
+<h2>Element → design decision</h2><div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Element</th><th>Question to ask</th><th>Useful effect</th></tr></thead><tbody><tr><td>Line</td><td>Where should the eye travel?</td><td>Direction and separation</td></tr><tr><td>Shape</td><td>What visual structure should repeat?</td><td>Grouping and identity</td></tr><tr><td>Colour</td><td>What deserves emphasis?</td><td>Hierarchy and mood</td></tr><tr><td>Texture</td><td>Does the surface need character?</td><td>Depth and personality</td></tr><tr><td>Space</td><td>Which items belong together?</td><td>Clarity and breathing room</td></tr><tr><td>Scale</td><td>What should be noticed first?</td><td>Priority and impact</td></tr></tbody></table></div>
+<h2>Practical exercise</h2><ol><li>Create a simple square social graphic with one headline, one image or icon, and one call to action.</li><li>Use no more than three main colours.</li><li>Use one strong size difference to establish hierarchy.</li><li>Add enough whitespace that every major element can be identified quickly.</li><li>Make a second version by changing only one element, then compare which version communicates the message faster.</li></ol>
+<div class="alert alert-primary"><strong>Smart tip:</strong> Do not add an element just because the canvas feels empty. First ask what communication problem the element solves.</div>
+<h2>Common mistakes</h2><ul><li>Using too many colours without a hierarchy.</li><li>Stretching images instead of preserving their proportions.</li><li>Filling every empty area with decoration.</li><li>Using texture or effects that reduce text readability.</li><li>Making every element equally large or visually strong.</li></ul>
+<h2>Quick self-check</h2><ol><li>Which element controls the viewer's first point of attention?</li><li>Where are you using empty space intentionally?</li><li>Can you explain why each colour, shape and decorative element is present?</li></ol>
+<h2>Key takeaway</h2><p><strong>Strong graphic design comes from intentional control of simple visual elements.</strong> Before adding complexity, use line, shape, colour, texture, space and scale to solve the communication problem clearly.</p></article>
+HTML;
+    }
+
     if ($content === null) return;
     $stored = (string)($lesson['content'] ?? '');
     $marker = $slug === 'cpu-what-it-does' || $slug === 'course-4-lesson-3' || trim((string)($lesson['title'] ?? '')) === 'CPU: What It Does'
         ? '<!-- smarttoolz-premium-content:cpu-v2 -->'
-        : '<!-- smarttoolz-premium-content:v1 -->';
+        : ($slug === 'course-16-lesson-4' ? '<!-- smarttoolz-premium-content:course16-l4-v1 -->' : '<!-- smarttoolz-premium-content:v1 -->');
     $needsWrite = !str_contains($stored, $marker);
     if ($needsWrite) {
         $tagged = $marker.$content;

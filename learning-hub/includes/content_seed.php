@@ -136,11 +136,98 @@ function lh_seed_content(PDO $db): void {
             foreach(($lessons[$c[1]]??[]) as $i=>$l){
                 $findLesson->execute([$courseId,$l[1]]);
                 if($findLesson->fetchColumn()) continue;
-                $title=htmlspecialchars($l[0],ENT_QUOTES,'UTF-8');
                 $desc=htmlspecialchars($l[2],ENT_QUOTES,'UTF-8');
                 $content='<article><p>'.$desc.'</p><h2>What you will learn</h2><ul><li>Understand the core concept in simple language.</li><li>Follow a practical example.</li><li>Apply the idea in a small real-world task.</li></ul><h2>Step by step</h2><p>Start with the concept, try the example, then change one part and observe what happens. Keep notes of anything that is unclear and revisit the previous lesson when needed.</p><h2>Practice task</h2><p>Try one practical example based on this lesson. Explain what you did, what result you expected and what result you actually received.</p><h2>Common mistakes</h2><p>Do not rush to memorize steps. Focus on understanding why each step is needed, check your inputs and review the result before moving on.</p><h2>Quick check</h2><p>Can you explain the main idea in your own words and give one practical example?</p><h2>Continue learning</h2><p>Complete this lesson, then continue to the next lesson in the course. Explore a relevant SmartToolz utility when one is available for hands-on practice.</p></article>';
                 $addLesson->execute([$courseId,$l[0],$l[1],$content,$i+1]);
             }
+        }
+
+        /* Real, topic-specific content for the first Computer Basics lesson. */
+        $realLesson = <<<'HTML'
+<article class="lh-lesson-article">
+  <p class="lead">A computer is an electronic machine that takes input, processes it using instructions, stores information, and produces an output. Almost every app you use follows this same basic cycle.</p>
+
+  <h2>Learning objectives</h2>
+  <ul>
+    <li>Explain what a computer does using the input-process-storage-output model.</li>
+    <li>Recognize the main roles of the CPU, RAM, storage, input devices and output devices.</li>
+    <li>Relate everyday tasks such as opening a photo or saving a document to the computer's basic working cycle.</li>
+    <li>Use the right terms when describing a computer to another person.</li>
+  </ul>
+
+  <h2>What is a computer?</h2>
+  <p>A computer is a programmable electronic system that works with data according to instructions. The instruction may come from software, a web application, a document editor, a game, or the operating system.</p>
+  <p>Think about writing a document. You press a key, the computer receives that input, software decides what should happen, the processor performs the necessary work, and the result appears on the screen. When you save the document, the information is written to storage so it can be opened later.</p>
+
+  <div class="lh-callout lh-callout-info"><strong>Simple model:</strong> Input → Processing → Storage/Memory → Output. The parts work together; a computer is not just the CPU sitting inside the case.</div>
+
+  <h2>1. Input</h2>
+  <p>Input is information sent to the computer. Common input devices include a keyboard, mouse, microphone, camera, scanner and touchscreen. A typed word, mouse click, scanned page or recorded sound can all become digital input.</p>
+
+  <h2>2. Processing</h2>
+  <p>Processing is the work performed on the input. The <strong>CPU (Central Processing Unit)</strong> executes instructions and performs calculations and logical operations. Modern computers can perform millions or billions of operations in a short time.</p>
+
+  <h2>3. Memory and storage</h2>
+  <p><strong>RAM</strong> is fast working memory used by programs that are currently running. It is temporary: when power is removed, its contents are lost. <strong>Storage</strong>, such as an SSD or hard drive, keeps files and programs for the long term.</p>
+  <p>That is why adding more RAM can help when many applications are open, while replacing a slow hard drive with an SSD can improve startup and file-access times. They solve different problems.</p>
+
+  <table class="table table-bordered align-middle">
+    <thead><tr><th>Part</th><th>Main role</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>CPU</td><td>Executes instructions and processes data</td><td>Runs calculations for an application</td></tr>
+      <tr><td>RAM</td><td>Holds data and programs currently in use</td><td>Keeps an open browser and document ready</td></tr>
+      <tr><td>SSD / HDD</td><td>Stores data long term</td><td>Photos, documents and installed software</td></tr>
+      <tr><td>Keyboard / Mouse</td><td>Provides user input</td><td>Typing and clicking</td></tr>
+      <tr><td>Monitor / Speakers</td><td>Presents output</td><td>Shows a page or plays audio</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. Output</h2>
+  <p>Output is the result the computer presents to you. A monitor displays text and images; speakers produce sound; a printer creates a paper copy. Output can also be sent to another application, device or network service.</p>
+
+  <h2>Practical example: opening a photo</h2>
+  <ol>
+    <li>You double-click the photo. That click is <strong>input</strong>.</li>
+    <li>The operating system identifies the image file and starts a suitable viewer. This involves <strong>processing</strong>.</li>
+    <li>The file is read from <strong>storage</strong> and working data is placed in <strong>RAM</strong>.</li>
+    <li>The CPU and graphics hardware prepare the image for display.</li>
+    <li>The monitor shows the photo as the final <strong>output</strong>.</li>
+  </ol>
+
+  <h2>Why this model matters</h2>
+  <p>This model helps you troubleshoot problems. A computer that cannot receive input may have a disconnected keyboard or faulty touchpad. A computer that freezes while many programs are running may be low on available memory or processor capacity. A computer that can run programs but cannot find a saved file may have a storage, file-path or permissions problem.</p>
+
+  <div class="lh-callout lh-callout-tip"><strong>SmartTip:</strong> When solving a computer problem, ask four questions: What went in? What should the computer have processed? Where should the data be stored? What output did I expect?</div>
+
+  <h2>Practice task</h2>
+  <p>Choose one everyday action such as opening YouTube, saving a Word document, connecting a USB drive, or printing a file. Write four short lines describing its input, processing, storage or memory use, and output.</p>
+
+  <h2>Common mistakes</h2>
+  <ul>
+    <li>Thinking RAM and storage are the same thing.</li>
+    <li>Assuming a faster CPU automatically fixes every slow-computer problem.</li>
+    <li>Ignoring the role of software and the operating system.</li>
+    <li>Calling every component “the processor” even when you are describing RAM, storage or a peripheral.</li>
+  </ul>
+
+  <h2>Quick check</h2>
+  <ol>
+    <li>What is the difference between RAM and storage?</li>
+    <li>Which part executes instructions?</li>
+    <li>Give one example of input and one example of output.</li>
+  </ol>
+
+  <h2>Continue learning</h2>
+  <p>Next, study <strong>Hardware and Software</strong>. You will identify the physical components of a computer and understand how software tells those components what to do.</p>
+</article>
+HTML;
+
+        $findReal=$db->prepare('SELECT l.id FROM learning_lessons l JOIN learning_courses c ON c.id=l.course_id WHERE c.slug=? AND l.slug=? LIMIT 1');
+        $findReal->execute(['computer-basics-for-beginners','what-is-a-computer']);
+        $realId=(int)$findReal->fetchColumn();
+        if($realId){
+            $updateReal=$db->prepare('UPDATE learning_lessons SET title=?, content=?, sort_order=1, enabled=1 WHERE id=?');
+            $updateReal->execute(['What Is a Computer?',$realLesson,$realId]);
         }
     }catch(Throwable $e){ error_log('Learning Hub content seed: '.$e->getMessage()); }
 }

@@ -21,8 +21,8 @@ $byKey = []; foreach ($settings as $row) $byKey[(string)$row['setting_key']] = $
   </div>
 
   <div class="av4-card">
-    <div class="av4-head"><div><h2>⚙️ SmartToolz Control Settings</h2><p>These are real application controls, not placeholder values. Edit them and the linked features read them dynamically.</p></div><span class="av4-chip green">DATABASE BACKED</span></div>
-    <div class="av4-note"><b>Tip:</b> Change <code>guest_trial_limit</code> to control the free guest uses per tool. Changes take effect on the next request.</div>
+    <div class="av4-head"><div><h2>⚙️ SmartToolz Control Settings</h2><p>These controls are saved directly to the SmartToolz settings table and are read dynamically by linked application features.</p></div><span class="av4-chip green">DATABASE BACKED</span></div>
+    <div class="av4-note"><b>Tip:</b> Change <code>guest_trial_limit</code> to control free guest uses per tool. Save a group and the value is written immediately.</div>
   </div>
 
   <?php foreach ($groups as $group): [$title,$keys] = $group; ?>
@@ -33,12 +33,12 @@ $byKey = []; foreach ($settings as $row) $byKey[(string)$row['setting_key']] = $
         <div>
           <label><?=av4h(ucwords(str_replace(['_','-'],' ',$key)))?></label>
           <?php if ($type==='boolean'): ?>
-            <select name="enabled_value" data-setting="<?=av4h($key)?>">
+            <select data-setting="<?=av4h($key)?>" data-type="boolean" data-description="<?=av4h($row['description']??'')?>">
               <option value="1" <?=($value==='1'||strtolower($value)==='true')?'selected':''?>>Enabled / Yes</option>
               <option value="0" <?=($value==='0'||strtolower($value)==='false')?'selected':''?>>Disabled / No</option>
             </select>
           <?php else: ?>
-            <input type="<?=($type==='number'?'number':'text')?>" value="<?=av4h($value)?>" data-setting="<?=av4h($key)?>">
+            <input type="<?=($type==='number'?'number':'text')?>" value="<?=av4h($value)?>" data-setting="<?=av4h($key)?>" data-type="<?=av4h($type)?>" data-description="<?=av4h($row['description']??'')?>">
           <?php endif; ?>
           <div class="av4-note" style="margin-top:6px"><?=av4h($row['description']??'')?></div>
         </div>
@@ -71,19 +71,32 @@ $byKey = []; foreach ($settings as $row) $byKey[(string)$row['setting_key']] = $
 
 <script>
 (function(){
-  const saveButtons=document.querySelectorAll('[data-save-settings]');
-  saveButtons.forEach(btn=>btn.addEventListener('click',async()=>{
-    const card=btn.closest('.av4-card'); if(!card)return;
+  const csrf=<?=json_encode(adminCsrf())?>;
+  document.querySelectorAll('[data-save-settings]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const card=btn.closest('.av4-card');
+    if(!card)return;
     const status=card.querySelector('[data-setting-status]');
-    const fields=card.querySelectorAll('[data-setting]');
+    const fields=[...card.querySelectorAll('[data-setting]')];
+    btn.disabled=true;
     status.textContent='Saving…';
     try{
-      for(const el of fields){
-        const fd=new FormData(); fd.append('action','setting_save'); fd.append('back','settings'); fd.append('csrf',<?=json_encode(adminCsrf())?>); fd.append('id','0'); fd.append('setting_key',el.dataset.setting); fd.append('setting_value',el.value); fd.append('setting_type',el.type==='number'?'number':(el.tagName==='SELECT'?'boolean':'text')); fd.append('description','Dynamic SmartToolz control'); fd.append('enabled','1');
-        const r=await fetch('/smart-toolz/admin/admin-actions.php',{method:'POST',body:fd,credentials:'same-origin'}); if(!r.ok) throw new Error('Save failed');
-      }
-      status.textContent='Saved ✓'; setTimeout(()=>status.textContent='Ready',1800);
-    }catch(e){status.textContent='Save failed';}
-  });
+      const settings=fields.map(el=>({
+        key:el.dataset.setting,
+        value:el.value,
+        type:el.dataset.type || (el.tagName==='SELECT'?'boolean':'text'),
+        description:el.dataset.description || '',
+        enabled:1
+      }));
+      const r=await fetch('/smart-toolz/admin/settings-api.php',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({csrf,settings})});
+      const d=await r.json().catch(()=>({ok:false,message:'Invalid server response.'}));
+      if(!r.ok || !d.ok) throw new Error(d.message || 'Save failed.');
+      status.textContent='Saved ✓';
+      status.classList.add('green');
+      setTimeout(()=>location.reload(),500);
+    }catch(e){
+      status.textContent='❌ '+(e.message||'Save failed');
+      status.classList.remove('green');
+    }finally{btn.disabled=false;}
+  }));
 })();
 </script>

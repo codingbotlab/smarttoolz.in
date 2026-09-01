@@ -1,0 +1,22 @@
+{
+  "tool": "QR Code Generator",
+  "slug": "qr-generator",
+  "target_duration_seconds": 300,
+  "language": "en-IN",
+  "style": "faceless tutorial",
+  "grounding": {
+    "tool_url": "https://smarttoolz.in/smart-toolz/tools/qr-generator.php",
+    "real_tool_usage_required": true,
+    "do_not_invent_features": true
+  },
+  "scenes": [
+    {"id":"intro","duration":20,"voice":"In this guide, we'll create a QR code online using SmartToolz and walk through the complete process from input to download."},
+    {"id":"open-tool","duration":25,"voice":"Start by opening the SmartToolz QR Code Generator. The tool is designed to create QR codes from text and other supported content."},
+    {"id":"enter-content","duration":45,"voice":"Enter the content you want to encode in the main input area. For this demonstration, use a simple website address or text that you want people to scan."},
+    {"id":"options","duration":55,"voice":"Next, review the available QR options shown by the tool. Choose the settings you need, then keep the design easy to scan and test."},
+    {"id":"generate","duration":45,"voice":"Now generate the QR code. The result area displays the generated code so you can inspect it before using it."},
+    {"id":"result","duration":35,"voice":"Check the preview carefully. A good QR code should be clear and readable, especially when it will be printed or shared at a small size."},
+    {"id":"practical-tips","duration":35,"voice":"For practical use, test the finished QR code with a phone camera before publishing it. Avoid making the code unnecessarily small or difficult to scan."},
+    {"id":"outro","duration":40,"voice":"That's the complete QR Generator workflow on SmartToolz. Use the tool whenever you need a quick QR code, and check the SmartToolz Knowledge Base for more tool guides."}
+  ]
+}

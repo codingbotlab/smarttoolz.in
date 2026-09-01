@@ -35,6 +35,58 @@ HTML;
 HTML;
     }
 
+    if ($courseSlug === 'computer-basics-for-beginners' && $position === 8) {
+        return <<<'HTML'
+<article class="lh-prose">
+  <div class="lh-lesson-intro"><p><strong>Files and folders are the basic organization system on a computer.</strong> Files hold information such as documents, photos or programs; folders group related files so they can be found and managed more easily.</p></div>
+  <h2>1. What is a file?</h2>
+  <p>A file is a named collection of data stored by an operating system or application. A document, photograph, spreadsheet, video and PDF are all examples of files. The file name helps you identify it, while its extension often indicates the format.</p>
+  <h2>2. What is a folder?</h2>
+  <p>A folder is a container used to organize files and other folders. Folders can be nested, creating a hierarchy such as <strong>Projects → Website → Images</strong>. A good hierarchy makes files easier to locate and reduces duplicate copies.</p>
+  <h2>3. Common file operations</h2>
+  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Action</th><th>What it does</th><th>When to use it</th></tr></thead><tbody>
+    <tr><td>Open</td><td>Loads a file in an associated application.</td><td>When you want to view or edit the file.</td></tr>
+    <tr><td>Copy</td><td>Creates another copy while keeping the original.</td><td>When you need the same file in another location.</td></tr>
+    <tr><td>Move</td><td>Changes the file's location.</td><td>When reorganizing folders without keeping two copies.</td></tr>
+    <tr><td>Rename</td><td>Changes the displayed file or folder name.</td><td>When improving clarity or correcting a name.</td></tr>
+    <tr><td>Delete</td><td>Removes the item from its current location.</td><td>When the file is no longer needed; verify first.</td></tr>
+  </tbody></table></div>
+  <h2>4. Build a useful folder structure</h2>
+  <p>Organize around projects or purposes rather than creating one huge folder. For example:</p>
+  <pre><code>Documents/
+├── Personal/
+├── Work/
+│   ├── Reports/
+│   └── Projects/
+└── Learning/
+    ├── Notes/
+    └── Exercises/</code></pre>
+  <p>Keep folder names short and descriptive. Use a consistent naming pattern, especially when many files belong to the same project.</p>
+  <h2>5. Naming files clearly</h2>
+  <p>A name such as <code>report-final-final2.docx</code> is difficult to manage. A clearer approach might be <code>sales-report-2026-09.docx</code>. For versions, use a predictable pattern such as <code>project-v01</code>, <code>project-v02</code> and so on.</p>
+  <div class="alert alert-primary"><strong>Smart tip:</strong> A good filename should tell you what the file is without opening it. Include the project, purpose, date or version when those details matter.</div>
+  <h2>6. Copy vs move: an important difference</h2>
+  <p>If you copy a file from one folder to another, the original remains in place. If you move it, the file is relocated. Before moving important files, make sure you know where the destination is and that you are not accidentally reorganizing a synchronized or shared folder.</p>
+  <h2>7. Deleting safely</h2>
+  <p>Do not treat Delete as a backup strategy. Before removing an important file, confirm that you have another valid copy if you may need it later. Be especially careful with shared folders and cloud-synchronized locations because changes can propagate to other devices.</p>
+  <h2>Practice task</h2>
+  <ol>
+    <li>Create a folder named <code>Learning-Practice</code>.</li>
+    <li>Inside it, create <code>Notes</code>, <code>Projects</code> and <code>Archive</code>.</li>
+    <li>Create a small text or document file in <code>Notes</code>.</li>
+    <li>Copy it to <code>Projects</code>, then rename the copy with a version number.</li>
+    <li>Move the original into <code>Archive</code> and verify both locations.</li>
+  </ol>
+  <h2>Common mistakes</h2>
+  <ul><li>Keeping everything on the desktop.</li><li>Using vague names such as “new document” for important files.</li><li>Creating many nearly identical folders with no clear structure.</li><li>Confusing Copy with Move.</li><li>Deleting files without checking whether another needed copy exists.</li></ul>
+  <h2>Quick check</h2>
+  <ol><li>What is the difference between a file and a folder?</li><li>When should you copy a file instead of moving it?</li><li>What makes a filename easier to manage later?</li></ol>
+  <h2>Key takeaway</h2>
+  <p><strong>Good file organization is predictable: use clear names, logical folders, deliberate copy/move operations, and backups for important data.</strong></p>
+</article>
+HTML;
+    }
+
     /* Course 16 = Graphic Design Foundations in the master curriculum. */
     if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 1) {
         return <<<'HTML'
@@ -50,41 +102,7 @@ HTML;
 
     if (($courseSlug === 'graphic-design-foundations' || $courseSlug === 'course-16') && $position === 3) {
         return <<<'HTML'
-<article class="lh-prose">
-  <div class="lh-lesson-intro"><p><strong>A design process turns a vague idea into a deliberate visual solution.</strong> Instead of opening a design app and decorating until something feels right, a designer moves through a sequence of decisions, tests them, and improves the result.</p></div>
-  <h2>1. Define the problem</h2>
-  <p>Start by identifying the communication goal. Ask: Who is the audience? What must they understand? What action should they take? Where will the design appear?</p>
-  <div class="alert alert-primary"><strong>Example:</strong> “Make a poster” is a task. “Create a mobile-friendly event poster that makes students notice the event name, date and registration action in five seconds” is a design problem.</div>
-  <h2>2. Research and collect references</h2>
-  <p>Study relevant examples before designing. Look at competitors, similar campaigns, typography, colour approaches and layouts. The purpose is not to copy; it is to understand what conventions exist and where your solution can be clearer.</p>
-  <h2>3. Generate ideas</h2>
-  <p>Produce several rough directions instead of polishing the first idea. Thumbnail sketches are useful because they let you test hierarchy and composition quickly without becoming attached to details.</p>
-  <h2>4. Build a first concept</h2>
-  <p>Choose the strongest direction and create a simple version. Establish the headline, supporting information, imagery, spacing and call to action. Keep decorative decisions secondary to communication.</p>
-  <h2>5. Test at the real viewing size</h2>
-  <p>A design that looks excellent when zoomed in may fail on a phone, poster wall or presentation screen. View it at the size and distance your audience will actually use. Check whether the main message is immediately obvious.</p>
-  <h2>6. Get feedback</h2>
-  <p>Ask focused questions rather than “Do you like it?” For example: “What did you notice first?” or “What do you think this poster wants you to do?” If viewers consistently miss the intended message, the hierarchy needs work.</p>
-  <h2>7. Refine and deliver</h2>
-  <p>Make targeted changes, then check alignment, spacing, typography, colour consistency, image quality and export settings. Keep an editable source file and export the format required by the destination.</p>
-  <h2>A simple workflow</h2>
-  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Stage</th><th>Main question</th><th>Useful output</th></tr></thead><tbody>
-    <tr><td>Define</td><td>What problem are we solving?</td><td>Brief and success criteria</td></tr>
-    <tr><td>Research</td><td>What context and conventions matter?</td><td>References and notes</td></tr>
-    <tr><td>Ideate</td><td>What different solutions could work?</td><td>Thumbnail concepts</td></tr>
-    <tr><td>Design</td><td>Which direction communicates best?</td><td>First concept</td></tr>
-    <tr><td>Test</td><td>Does it work for the real viewer?</td><td>Observations</td></tr>
-    <tr><td>Refine</td><td>What specific changes improve it?</td><td>Final design</td></tr>
-  </tbody></table></div>
-  <h2>Practice project</h2>
-  <p>Design a fictional “Design Workshop” social post. First write a three-sentence brief defining the audience, goal and viewing context. Then sketch three different layouts, choose one, create a rough digital version, and ask one person what they noticed first. Record the feedback and make one purposeful revision.</p>
-  <h2>Common mistakes</h2>
-  <ul><li>Starting with decoration before defining the communication goal.</li><li>Polishing one idea before exploring alternatives.</li><li>Asking for vague feedback instead of testing specific communication outcomes.</li><li>Judging a design only at desktop zoom instead of its real viewing size.</li><li>Changing many variables at once, making it hard to learn what improved the design.</li></ul>
-  <h2>Quick check</h2>
-  <ol><li>Why should a designer define the audience before choosing visual style?</li><li>What is the benefit of making several thumbnail concepts?</li><li>What question can reveal whether a viewer understood the intended hierarchy?</li></ol>
-  <h2>Key takeaway</h2>
-  <p><strong>Good design is not a single moment of inspiration; it is a repeatable process of defining, exploring, testing and refining a visual solution.</strong></p>
-</article>
+<article class="lh-prose"><div class="lh-lesson-intro"><p><strong>A design process turns a vague idea into a deliberate visual solution.</strong> Instead of opening a design app and decorating until something feels right, a designer moves through a sequence of decisions, tests them, and improves the result.</p></div><h2>1. Define the problem</h2><p>Start by identifying the communication goal. Ask: Who is the audience? What must they understand? What action should they take? Where will the design appear?</p><div class="alert alert-primary"><strong>Example:</strong> “Make a poster” is a task. “Create a mobile-friendly event poster that makes students notice the event name, date and registration action in five seconds” is a design problem.</div><h2>2. Research and collect references</h2><p>Study relevant examples before designing. Look at competitors, similar campaigns, typography, colour approaches and layouts. The purpose is not to copy; it is to understand what conventions exist and where your solution can be clearer.</p><h2>3. Generate ideas</h2><p>Produce several rough directions instead of polishing the first idea. Thumbnail sketches are useful because they let you test hierarchy and composition quickly without becoming attached to details.</p><h2>4. Build a first concept</h2><p>Choose the strongest direction and create a simple version. Establish the headline, supporting information, imagery, spacing and call to action. Keep decorative decisions secondary to communication.</p><h2>5. Test at the real viewing size</h2><p>A design that looks excellent when zoomed in may fail on a phone, poster wall or presentation screen. View it at the size and distance your audience will actually use.</p><h2>6. Get feedback</h2><p>Ask focused questions such as “What did you notice first?” or “What do you think this poster wants you to do?” If viewers consistently miss the intended message, the hierarchy needs work.</p><h2>7. Refine and deliver</h2><p>Make targeted changes, then check alignment, spacing, typography, colour consistency, image quality and export settings. Keep an editable source file and export the format required by the destination.</p><h2>Practice project</h2><p>Design a fictional “Design Workshop” social post. Write a short brief, sketch three layouts, choose one, create a rough digital version, ask someone what they noticed first, and make one purposeful revision.</p><h2>Key takeaway</h2><p><strong>Good design is a repeatable process of defining, exploring, testing and refining a visual solution.</strong></p></article>
 HTML;
     }
 

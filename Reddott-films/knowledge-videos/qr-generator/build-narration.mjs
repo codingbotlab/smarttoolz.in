@@ -19,6 +19,6 @@ for (const scene of script.scenes) {
 const concat = path.join(out, 'concat.txt');
 fs.writeFileSync(concat, files.map(f => `file '${f.replaceAll("'", "'\\''")}'`).join('\n'));
 const narration = path.join(root, 'output', 'narration.wav');
-const r = spawnSync('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', concat, '-ar', '48000', '-ac', '2', narration], { stdio: 'inherit' });
+const r = spawnSync('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', concat, '-ar', '48000', '-ac', '2', '-af', 'apad', '-t', '300', narration], { stdio: 'inherit' });
 if (r.status !== 0) throw new Error('ffmpeg narration concat failed');
 console.log('Narration created:', narration);

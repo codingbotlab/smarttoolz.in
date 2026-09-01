@@ -19,7 +19,11 @@ HTML;
 HTML;
     }
 
-    if ($slug === 'cpu-what-it-does') {
+    if (
+        $slug === 'cpu-what-it-does' ||
+        $slug === 'course-4-lesson-3' ||
+        trim((string)($lesson['title'] ?? '')) === 'CPU: What It Does'
+    ) {
         $content = <<<'HTML'
 <article class="lh-prose"><div class="lh-lesson-intro"><p>The <strong>CPU (Central Processing Unit)</strong> is the processor that executes instructions from software. It performs calculations, makes logical decisions, and coordinates the active work of a computer. Understanding the CPU helps you understand both everyday performance and why a computer can become slow.</p></div>
 <h2>1. What does a CPU do?</h2><p>Software is made from instructions. When you open a browser, calculate a spreadsheet formula, edit a photo, or run a program, the CPU executes the instructions required for that task.</p><ol><li><strong>Fetch:</strong> get an instruction and the data it needs.</li><li><strong>Decode:</strong> determine what the instruction means.</li><li><strong>Execute:</strong> perform the operation.</li><li><strong>Store or pass on the result:</strong> make the result available to the system or application.</li></ol><p>Real processors are much more sophisticated than this simplified model, using caches, pipelines and multiple cores to improve performance.</p>
@@ -37,11 +41,13 @@ HTML;
     }
 
     if ($content === null) return;
-    $marker = '<!-- smarttoolz-premium-content:v1 -->';
     $stored = (string)($lesson['content'] ?? '');
-    $needsWrite = $content !== null && ($slug === 'cpu-what-it-does' ? !str_contains($stored, '<!-- smarttoolz-premium-content:cpu-v1 -->') : !str_contains($stored, $marker));
+    $marker = $slug === 'cpu-what-it-does' || $slug === 'course-4-lesson-3' || trim((string)($lesson['title'] ?? '')) === 'CPU: What It Does'
+        ? '<!-- smarttoolz-premium-content:cpu-v2 -->'
+        : '<!-- smarttoolz-premium-content:v1 -->';
+    $needsWrite = !str_contains($stored, $marker);
     if ($needsWrite) {
-        $tagged = $slug === 'cpu-what-it-does' ? '<!-- smarttoolz-premium-content:cpu-v1 -->'.$content : $marker.$content;
+        $tagged = $marker.$content;
         $q = $db->prepare('UPDATE learning_lessons SET content=? WHERE id=? LIMIT 1');
         $q->execute([$tagged, (int)$lesson['id']]);
         $lesson['content'] = $tagged;

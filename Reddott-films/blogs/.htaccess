@@ -1,2 +1,2 @@
 RewriteEngine On
-RewriteRule ^([^/]+)/([A-Za-z0-9_-]{6,})/?$ post.php?id=$2 [L,QSA]
+RewriteRule ^([^/]+)/([A-Za-z0-9_-]{6,})/?$ post-v2.php?id=$2 [L,QSA]

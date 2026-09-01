@@ -2,6 +2,9 @@ name: Reddott QR Generator Video
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/reddott-qr-generator.yml'
   schedule:
     - cron: '30 2 * * *'
 

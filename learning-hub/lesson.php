@@ -4,6 +4,7 @@ require_once __DIR__.'/includes/bootstrap.php';
 require_once __DIR__.'/includes/premium_lessons.php';
 require_once __DIR__.'/includes/lesson_overrides.php';
 require_once __DIR__.'/includes/course4_lessons.php';
+require_once __DIR__.'/includes/course16_lessons.php';
 
 $slug=trim((string)($_GET['slug']??''));$lesson=null;$course=null;$lessons=[];$previous=null;$next=null;
 try{$q=$db->prepare("SELECT l.* FROM learning_lessons l WHERE l.slug=? AND l.enabled=1 LIMIT 1");$q->execute([$slug]);$lesson=$q->fetch(PDO::FETCH_ASSOC)?:null;}catch(Throwable){}
@@ -16,7 +17,8 @@ if(!$course&&!empty($lesson['chapter_id'])){try{$q=$db->prepare("SELECT c.*,lc.n
 if(!$course){http_response_code(404);exit('Course not found.');}
 try{$q=$db->prepare("SELECT l.id,l.title,l.slug,l.sort_order FROM learning_lessons l LEFT JOIN learning_chapters ch ON ch.id=l.chapter_id WHERE l.enabled=1 AND ((l.course_id=?) OR (ch.course_id=?)) ORDER BY COALESCE(ch.sort_order,0),COALESCE(ch.id,0),l.sort_order,l.id");$q->execute([$courseId,$courseId]);$lessons=$q->fetchAll(PDO::FETCH_ASSOC);}catch(Throwable){try{$q=$db->prepare('SELECT id,title,slug,sort_order FROM learning_lessons WHERE course_id=? AND enabled=1 ORDER BY sort_order,id');$q->execute([$courseId]);$lessons=$q->fetchAll(PDO::FETCH_ASSOC);}catch(Throwable){$lessons=[];}}
 $position=0;foreach($lessons as $i=>$row){if((int)$row['id']===(int)$lesson['id']){$position=$i+1;$previous=$lessons[$i-1]??null;$next=$lessons[$i+1]??null;break;}}
-$override=lh_lesson_override($course,$lesson,$position);
+$override=lh_course16_override($lesson,$position);
+if($override===null){$override=lh_lesson_override($course,$lesson,$position);}
 if($override===null){$override=lh_course4_override($lesson);}
 $content=$override!==null?$override:(string)($lesson['content']??'');
 $lh_page_title=(string)$lesson['title'];$lh_description='Learn '.(string)$lesson['title'].' in SmartToolz Learning Hub.';include __DIR__.'/includes/header.php';include __DIR__.'/includes/navbar.php';

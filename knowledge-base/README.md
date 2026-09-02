@@ -1,18 +1,52 @@
 # SmartToolz Knowledge Base
 
-Generated how-to guides for SmartToolz tools.
+The Knowledge Base provides a responsive, searchable guide for the SmartToolz tool collection.
 
-Each tool keeps its published article and generated media together:
+## Guide system
+
+Tool guides are generated dynamically from the central SmartToolz registry in `smart-toolz/tool.php`.
+
+```text
+knowledge-base/
+├── index.php        # Guide directory and category browsing
+├── guide.php        # Rich dynamic how-to guide renderer
+├── article.php      # Legacy article renderer kept for compatibility
+└── .htaccess        # /<tool-slug>/article/ routing
+```
+
+A guide URL follows this pattern:
+
+```text
+https://smarttoolz.in/knowledge-base/<tool-slug>/article/
+```
+
+The dynamic guide includes:
+
+- tool-specific title, description, icon, category, and CTA
+- category-aware instructions and input guidance
+- step-by-step workflow
+- practical tips
+- common mistakes to avoid
+- frequently asked questions
+- related tools from the same category
+- responsive mobile navigation and category search
+- canonical URL and HowTo/Breadcrumb structured data
+- Font Awesome 6 icons with a safe fallback
+
+The registry remains the source of truth, so adding a tool to `smart-toolz/tool.php` automatically makes it available to the Knowledge Base renderer.
+
+## Media
+
+Generated tutorial media can still be organized per tool when needed:
 
 ```text
 knowledge-base/<tool-slug>/
-├── article/
 ├── images/
 └── videos/
     ├── long/
     └── shorts/
 ```
 
-Generation history is kept separately under `_generated/<tool-slug>/<date>/` so previous assets are not overwritten.
+Generation history belongs under `_generated/<tool-slug>/<date>/` so previous assets are not overwritten.
 
-The generator must use the real SmartToolz tool URL and workflow as the source of truth. Existing SmartToolz tool code is not modified by the content generator.
+The Knowledge Base content layer must not modify the underlying SmartToolz tool implementation.

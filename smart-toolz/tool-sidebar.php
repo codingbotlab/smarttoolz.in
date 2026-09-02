@@ -32,6 +32,12 @@ $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
         <span class="st-tool-name"><?= htmlspecialchars((string)($tool['name'] ?? 'Tool'), ENT_QUOTES, 'UTF-8') ?></span>
       </a>
     <?php endforeach; ?>
+    <?php if ($currentSlug === 'image-background-remover'): ?>
+      <a class="st-tool-item st-tool-guide" href="/smart-toolz/tools/image-background-remover-guide.php">
+        <span class="st-tool-icon material-symbols-rounded" aria-hidden="true">menu_book</span>
+        <span class="st-tool-name">📖 How to use this tool</span>
+      </a>
+    <?php endif; ?>
   </nav>
 </aside>
 <button class="st-tools-mobile" type="button" aria-label="Open All Tools" aria-expanded="false">
@@ -56,6 +62,8 @@ $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
 .st-tool-item{display:flex;align-items:center;gap:9px;min-height:39px;padding:7px 9px;border-radius:10px;color:#596477;text-decoration:none;transition:.16s ease}
 .st-tool-item:hover{background:#f4f2ff;color:#554bd7;transform:translateX(2px)}
 .st-tool-item.is-active{background:linear-gradient(135deg,#eeecff,#f7f4ff);color:#5146d5;box-shadow:inset 3px 0 0 #665cff}
+.st-tool-guide{margin-top:7px;border-top:1px solid #e9eaf1;border-radius:0 0 10px 10px;padding-top:12px;color:#554bd7;background:#faf9ff}
+.st-tool-guide:hover{background:#f0efff}
 .st-tool-icon{flex:0 0 22px;font-size:19px!important;line-height:1}
 .st-tool-name{font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-tools-mobile,.st-tools-backdrop{display:none}

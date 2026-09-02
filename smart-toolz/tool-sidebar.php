@@ -8,6 +8,38 @@ if (!isset($tools) || !is_array($tools)) {
 }
 
 $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
+
+/* The Vision Studio has its own editing controls; keep the global tools rail
+ * out of this page while still adding the dedicated guide to How to Use. */
+if ($currentSlug === 'image-background-remover') {
+    ?>
+    <style>
+      .how-use .smarttoolz-guide-link{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;margin-top:13px;padding:10px 13px;border:1px solid rgba(99,91,255,.18);border-radius:10px;background:linear-gradient(135deg,#635bff,#806fff);color:#fff;text-decoration:none;font-size:11px;font-weight:850;line-height:1.2;box-shadow:0 7px 18px rgba(99,91,255,.18);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+      .how-use .smarttoolz-guide-link:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(99,91,255,.25);filter:saturate(1.05)}
+      .how-use .smarttoolz-guide-link:focus-visible{outline:3px solid rgba(99,91,255,.22);outline-offset:2px}
+      .how-use .smarttoolz-guide-link .material-symbols-rounded{font-size:17px;flex:0 0 auto}
+      .how-use .smarttoolz-guide-note{margin-top:7px;text-align:center;color:#8a93a5;font-size:9.5px;line-height:1.45}
+    </style>
+    <script>
+    (()=>{
+      const addGuide=()=>{
+        const how=document.querySelector('.how-use');
+        if(!how||how.querySelector('.smarttoolz-guide-link'))return;
+        const link=document.createElement('a');
+        link.className='smarttoolz-guide-link';
+        link.href='/smart-toolz/tools/image-background-remover-guide.php';
+        link.innerHTML='<span class="material-symbols-rounded">menu_book</span><span>Guide: How to use this tool →</span>';
+        const note=document.createElement('div');
+        note.className='smarttoolz-guide-note';
+        note.textContent='Step-by-step guide to get the best results.';
+        how.appendChild(link);how.appendChild(note);
+      };
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addGuide,{once:true});else addGuide();
+    })();
+    </script>
+    <?php
+    return;
+}
 ?>
 <aside class="st-tools-sidebar" aria-label="SmartToolz tools">
   <div class="st-tools-head">
@@ -58,11 +90,6 @@ $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
 .st-tool-icon{flex:0 0 22px;font-size:19px!important;line-height:1}
 .st-tool-name{font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-tools-mobile,.st-tools-backdrop{display:none}
-.how-use .smarttoolz-guide-link{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;margin-top:13px;padding:10px 13px;border:1px solid rgba(99,91,255,.18);border-radius:10px;background:linear-gradient(135deg,#635bff,#806fff);color:#fff;text-decoration:none;font-size:11px;font-weight:850;line-height:1.2;box-shadow:0 7px 18px rgba(99,91,255,.18);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
-.how-use .smarttoolz-guide-link:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(99,91,255,.25);filter:saturate(1.05)}
-.how-use .smarttoolz-guide-link:focus-visible{outline:3px solid rgba(99,91,255,.22);outline-offset:2px}
-.how-use .smarttoolz-guide-link .material-symbols-rounded{font-size:17px;flex:0 0 auto}
-.how-use .smarttoolz-guide-note{margin-top:7px;text-align:center;color:#8a93a5;font-size:9.5px;line-height:1.45}
 @media(max-width:1250px){.wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;grid-template-columns:minmax(0,1fr) 210px}.st-tools-sidebar{width:210px}}
 @media(max-width:900px){.wrap{display:block;width:min(1320px,calc(100% - 12px));margin:auto}.st-tools-sidebar{position:fixed;z-index:40;left:10px;top:76px;bottom:10px;width:min(300px,calc(100vw - 20px));max-height:none;transform:translateX(-115%);transition:transform .22s ease;box-shadow:0 25px 70px rgba(20,25,50,.22)}.st-tools-sidebar.is-open{transform:translateX(0)}.st-tools-mobile{display:grid;place-items:center;position:fixed;z-index:45;right:14px;bottom:16px;width:48px;height:48px;border:0;border-radius:15px;background:#111522;color:#fff;box-shadow:0 14px 35px rgba(17,21,34,.25)}.st-tools-mobile .material-symbols-rounded{font-size:22px}.st-tools-backdrop{position:fixed;inset:0;z-index:39;background:rgba(9,12,24,.35);backdrop-filter:blur(2px)}.st-tools-backdrop:not([hidden]){display:block}.st-tools-sidebar.is-open~.st-tools-backdrop{display:block}}
 </style>
@@ -75,18 +102,5 @@ $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
   btn.addEventListener('click',()=>side.classList.contains('is-open')?close():open());
   back?.addEventListener('click',close);
   search?.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();side.querySelectorAll('.st-tool-item').forEach(a=>a.hidden=q!==''&&!a.textContent.toLowerCase().includes(q))});
-  if(location.pathname.endsWith('/smart-toolz/tools/image-background-remover.php')){
-    const how=document.querySelector('.how-use');
-    if(how&&!how.querySelector('.smarttoolz-guide-link')){
-      const link=document.createElement('a');
-      link.className='smarttoolz-guide-link';
-      link.href='/smart-toolz/tools/image-background-remover-guide.php';
-      link.innerHTML='<span class="material-symbols-rounded">menu_book</span><span>Guide: How to use this tool →</span>';
-      const note=document.createElement('div');
-      note.className='smarttoolz-guide-note';
-      note.textContent='Step-by-step guide to get the best results.';
-      how.appendChild(link);how.appendChild(note);
-    }
-  }
 })();
 </script>

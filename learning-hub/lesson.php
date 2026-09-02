@@ -11,6 +11,7 @@ require_once __DIR__.'/includes/course16_lesson4.php';
 require_once __DIR__.'/includes/course16_lesson5.php';
 require_once __DIR__.'/includes/course16_lesson6.php';
 require_once __DIR__.'/includes/course16_lesson7.php';
+require_once __DIR__.'/includes/course16_lesson8.php';
 require_once __DIR__.'/includes/course16_lesson9.php';
 require_once __DIR__.'/includes/course16_lesson10.php';
 
@@ -32,6 +33,7 @@ if ($slug === 'course-16-lesson-4') {$override=lh_course16_lesson4_override($les
 if ($slug === 'course-16-lesson-5') {$override=lh_course16_lesson5_override($lesson,$position);}
 if ($slug === 'course-16-lesson-6') {$override=lh_course16_lesson6_override($lesson,$position);}
 if ($slug === 'course-16-lesson-7') {$override=lh_course16_lesson7_override($lesson,$position);}
+if ($slug === 'course-16-lesson-8') {$override=lh_course16_lesson8_override($lesson,$position);}
 if (($slug === 'course-16-lesson-10' || $position === 10) && $override===null) {$override=lh_course16_lesson10_override($lesson,$position);}
 if (($slug === 'course-16-lesson-9' || $position === 9) && $override===null) {$override=lh_course16_lesson9_override($lesson,$position);}
 if($override===null){$override=lh_course16_override($lesson,$position);}

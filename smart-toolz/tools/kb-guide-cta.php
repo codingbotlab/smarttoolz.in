@@ -5,22 +5,27 @@ if (!str_contains($path, '/smart-toolz/tools/')) return;
 $slug = basename($path, '.php');
 if ($slug === '' || $slug === 'kb-guide-cta' || str_ends_with($slug, '-guide') || str_starts_with($slug, '_')) return;
 
-// Resolve the tool's actual Knowledge Base guide instead of creating a
-// potentially invalid /article/ URL from the tool filename.
-$kbRoot = dirname(__DIR__, 2) . '/knowledge-base';
-$candidates = [
-    $slug,
-    str_replace('-', '_', $slug),
-];
+// The Knowledge Base is outside smart-toolz/tools and uses one shared guide.php.
+// Scan that registry for the real tool guide before adding the CTA.
+$guideFile = dirname(__DIR__, 2) . '/knowledge-base/guide.php';
+if (!is_file($guideFile) || !is_readable($guideFile)) return;
+$guideSource = (string)file_get_contents($guideFile);
+if ($guideSource === '') return;
+
+$guideSlugs = [];
+if (preg_match_all("~['\"]([a-z0-9]+(?:-[a-z0-9]+)*)['\"]\\s*=>\\s*\\$G\\s*\\(~i", $guideSource, $matches)) {
+    $guideSlugs = array_unique($matches[1]);
+}
+
 $guideSlug = null;
-foreach (array_unique($candidates) as $candidate) {
-    $dir = $kbRoot . '/' . $candidate;
-    if (is_dir($dir) && (is_file($dir . '/article.php') || is_file($dir . '/index.php') || is_file($dir . '/article/index.php'))) {
+foreach ($guideSlugs as $candidate) {
+    if (hash_equals($candidate, $slug)) {
         $guideSlug = $candidate;
         break;
     }
 }
 if ($guideSlug === null) return;
+
 $url = '/knowledge-base/' . rawurlencode($guideSlug) . '/article/';
 
 ob_start(static function (string $html) use ($url): string {

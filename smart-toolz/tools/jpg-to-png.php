@@ -186,7 +186,7 @@ input {
     width:
         calc(100% - 20px);
 
-    max-width: 1400px;
+   
 
     min-height: 72px;
 

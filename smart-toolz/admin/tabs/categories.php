@@ -6,9 +6,6 @@ smarttoolz_category_install();
 $categories=[];
 try{$categories=$db->query('SELECT id,slug,name,icon,description,sort_order,enabled FROM smarttoolz_categories ORDER BY sort_order ASC,name ASC')->fetchAll(PDO::FETCH_ASSOC);}catch(Throwable){}
 
-$assign=[];
-try{$q=$db->query('SELECT tool_slug,category_id FROM smarttoolz_tool_categories');foreach($q->fetchAll(PDO::FETCH_ASSOC) as $r)$assign[(string)$r['tool_slug']]=(int)$r['category_id'];}catch(Throwable){}
-
 $tools=[];
 if (is_file($_SERVER['DOCUMENT_ROOT'].'/smart-toolz/tool.php')) {
     define('SMARTTOOLZ_HOME_REGISTRY',true);
@@ -17,6 +14,15 @@ if (is_file($_SERVER['DOCUMENT_ROOT'].'/smart-toolz/tool.php')) {
     ob_end_clean();
     $tools=is_array($tools??null)?$tools:[];
 }
+
+/* On the first visit after deployment, persist every existing registry
+   tool -> default category mapping. INSERT IGNORE preserves manual changes. */
+if ($tools) {
+    smarttoolz_seed_registry_assignments($tools);
+}
+
+$assign=[];
+try{$q=$db->query('SELECT tool_slug,category_id FROM smarttoolz_tool_categories');foreach($q->fetchAll(PDO::FETCH_ASSOC) as $r)$assign[(string)$r['tool_slug']]=(int)$r['category_id'];}catch(Throwable){}
 
 $selectedCategory=(int)($_GET['filter_category']??0);
 $search=trim((string)($_GET['q']??''));
@@ -41,6 +47,8 @@ if($selectedCategory>0){
     <div class="av4-stat green"><b><?=number_format(count(array_filter($categories,fn($c)=>(int)$c['enabled']===1)))?></b><span>Enabled categories</span></div>
     <div class="av4-stat"><b><?=number_format(count($assign))?></b><span>Assigned tools</span></div>
   </div>
+
+  <div class="av4-note"><b>Automatic setup:</b> existing tools are now saved to the database using their current registry category. Manual category changes are preserved.</div>
 
   <div class="av4-card">
     <div class="av4-head"><div><h2>Categories</h2><p>Create, edit or remove the categories used by SmartToolz.</p></div></div>
@@ -81,7 +89,7 @@ if($selectedCategory>0){
   </div>
 
   <div class="av4-card">
-    <div class="av4-head"><div><h2>Tool category assignment</h2><p>Filter tools below, then choose exactly which category they belong to.</p></div></div>
+    <div class="av4-head"><div><h2>Tool category assignment</h2><p>Filter the existing tools and choose their category. Every tool already has its registry category saved in DB.</p></div></div>
     <form class="av4-head" method="get" action="">
       <input type="hidden" name="tab" value="categories">
       <input class="av4-search" name="q" value="<?=av4h($search)?>" placeholder="Search tool name, category or slug…">

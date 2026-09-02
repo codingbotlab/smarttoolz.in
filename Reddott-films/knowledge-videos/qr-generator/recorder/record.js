@@ -4,12 +4,15 @@ import path from 'node:path';
 
 const toolUrl = 'https://smarttoolz.in/smart-toolz/tools/qr-generator.php';
 const outDir = path.resolve(process.cwd(), '../output');
-const targetMs = 300_000;
+const maxDurationMs = 60_000;
 fs.mkdirSync(outDir, { recursive: true });
 
+// Keep the browser demo deliberately shorter than one minute.
+// Page-load and real interaction time are included in the recording, so the
+// scene holds total 47 seconds and leave a small safety margin below 60s.
 const scenes = [
-  ['intro', 20], ['open-tool', 25], ['enter-content', 45], ['options', 55],
-  ['generate', 45], ['result', 35], ['practical-tips', 35], ['outro', 40]
+  ['intro', 5], ['open-tool', 6], ['enter-content', 7], ['options', 7],
+  ['generate', 7], ['result', 6], ['practical-tips', 5], ['outro', 4]
 ];
 
 const browser = await chromium.launch({ headless: true });
@@ -23,34 +26,33 @@ const recordingStart = Date.now();
 
 try {
   await page.goto(toolUrl, { waitUntil: 'networkidle', timeout: 90_000 });
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(1000);
 
   for (const [scene, seconds] of scenes) {
     if (scene === 'enter-content') {
       const input = page.locator('#qrText');
       await input.scrollIntoViewIfNeeded();
       await input.fill('https://smarttoolz.in/');
-      await page.waitForTimeout(900);
+      await page.waitForTimeout(500);
     }
 
     if (scene === 'generate') {
       const generate = page.getByRole('button', { name: /generate/i }).first();
       if (await generate.count()) {
         await generate.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(700);
+        await page.waitForTimeout(400);
         await generate.click();
-        await page.waitForTimeout(2500);
+        await page.waitForTimeout(1800);
       }
     }
 
     console.log(`Recording scene: ${scene}`);
     await page.waitForTimeout(seconds * 1000);
-  }
 
-  const remaining = targetMs - (Date.now() - recordingStart);
-  if (remaining > 0) {
-    console.log(`Holding final frame for ${remaining}ms to reach 300 seconds.`);
-    await page.waitForTimeout(remaining);
+    if (Date.now() - recordingStart >= maxDurationMs) {
+      console.log('Reached the one-minute recording safety limit.');
+      break;
+    }
   }
 } finally {
   const video = page.video();

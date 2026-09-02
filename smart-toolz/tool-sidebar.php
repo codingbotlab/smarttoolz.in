@@ -39,7 +39,11 @@ $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
 </button>
 <div class="st-tools-backdrop" hidden></div>
 <style>
-.st-tools-sidebar{position:fixed;z-index:40;left:14px;top:92px;bottom:18px;width:238px;padding:12px;background:rgba(255,255,255,.94);border:1px solid #e4e7ef;border-radius:18px;box-shadow:0 18px 55px rgba(24,30,60,.10);backdrop-filter:blur(16px);display:flex;flex-direction:column}
+/* Desktop: keep the navigation in the same right-side column used by the other tools. */
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 238px;gap:20px;align-items:start}
+.wrap > .st-tools-sidebar{grid-column:2;grid-row:1 / span 50}
+.wrap > *:not(.st-tools-sidebar){grid-column:1;min-width:0}
+.st-tools-sidebar{position:sticky;z-index:5;top:92px;align-self:start;width:238px;max-height:calc(100vh - 110px);padding:12px;background:rgba(255,255,255,.94);border:1px solid #e4e7ef;border-radius:18px;box-shadow:0 18px 55px rgba(24,30,60,.10);backdrop-filter:blur(16px);display:flex;flex-direction:column}
 .st-tools-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 5px 11px}
 .st-tools-brand{display:flex;align-items:center;gap:8px;color:#171b2a;font-size:13px;font-weight:950}
 .st-tools-brand .material-symbols-rounded{font-size:20px;color:#635bff}
@@ -55,8 +59,8 @@ $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
 .st-tool-icon{flex:0 0 22px;font-size:19px!important;line-height:1}
 .st-tool-name{font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-tools-mobile,.st-tools-backdrop{display:none}
-@media(max-width:1250px){.st-tools-sidebar{width:210px}.wrap{width:min(1050px,calc(100% - 250px));margin-left:236px;margin-right:14px}}
-@media(max-width:900px){.st-tools-sidebar{position:fixed;left:10px;top:76px;bottom:10px;width:min(300px,calc(100vw - 20px));transform:translateX(-115%);transition:transform .22s ease;box-shadow:0 25px 70px rgba(20,25,50,.22)}.st-tools-sidebar.is-open{transform:translateX(0)}.st-tools-mobile{display:grid;place-items:center;position:fixed;z-index:45;right:14px;bottom:16px;width:48px;height:48px;border:0;border-radius:15px;background:#111522;color:#fff;box-shadow:0 14px 35px rgba(17,21,34,.25)}.st-tools-mobile .material-symbols-rounded{font-size:22px}.st-tools-backdrop{position:fixed;inset:0;z-index:39;background:rgba(9,12,24,.35);backdrop-filter:blur(2px)}.st-tools-backdrop:not([hidden]){display:block}.st-tools-sidebar.is-open~.st-tools-backdrop{display:block}.wrap{width:min(1320px,calc(100% - 12px));margin:auto}}
+@media(max-width:1250px){.wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;grid-template-columns:minmax(0,1fr) 210px}.st-tools-sidebar{width:210px}}
+@media(max-width:900px){.wrap{display:block;width:min(1320px,calc(100% - 12px));margin:auto}.st-tools-sidebar{position:fixed;z-index:40;left:10px;top:76px;bottom:10px;width:min(300px,calc(100vw - 20px));max-height:none;transform:translateX(-115%);transition:transform .22s ease;box-shadow:0 25px 70px rgba(20,25,50,.22)}.st-tools-sidebar.is-open{transform:translateX(0)}.st-tools-mobile{display:grid;place-items:center;position:fixed;z-index:45;right:14px;bottom:16px;width:48px;height:48px;border:0;border-radius:15px;background:#111522;color:#fff;box-shadow:0 14px 35px rgba(17,21,34,.25)}.st-tools-mobile .material-symbols-rounded{font-size:22px}.st-tools-backdrop{position:fixed;inset:0;z-index:39;background:rgba(9,12,24,.35);backdrop-filter:blur(2px)}.st-tools-backdrop:not([hidden]){display:block}.st-tools-sidebar.is-open~.st-tools-backdrop{display:block}}
 </style>
 <script>
 (()=>{

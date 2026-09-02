@@ -24,7 +24,7 @@ ob_start(static function (string $html): string {
             $name = trim($m[2]);
             if (!isset($icons[$name])) return $m[0];
             $attrs = $m[1];
-            return '<span class="material-symbols-outlined st-icon-fallback"'.$attrs.' aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'.$icons[$name].'</svg></span>';
+            return '<span class="material-symbols-outlined st-icon-fallback"'.$attrs.' aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="display:block;width:1em;height:1em">'.$icons[$name].'</svg></span>';
         },
         $html
     ) ?? $html;

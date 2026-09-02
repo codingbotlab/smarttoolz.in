@@ -5,6 +5,7 @@ require_once __DIR__.'/includes/premium_lessons.php';
 require_once __DIR__.'/includes/lesson_overrides.php';
 require_once __DIR__.'/includes/course4_lessons.php';
 require_once __DIR__.'/includes/course16_lessons.php';
+require_once __DIR__.'/includes/course16_lesson1.php';
 require_once __DIR__.'/includes/course16_lesson9.php';
 require_once __DIR__.'/includes/course16_lesson10.php';
 
@@ -20,7 +21,10 @@ if(!$course){http_response_code(404);exit('Course not found.');}
 try{$q=$db->prepare("SELECT l.id,l.title,l.slug,l.sort_order FROM learning_lessons l LEFT JOIN learning_chapters ch ON ch.id=l.chapter_id WHERE l.enabled=1 AND ((l.course_id=?) OR (ch.course_id=?)) ORDER BY COALESCE(ch.sort_order,0),COALESCE(ch.id,0),l.sort_order,l.id");$q->execute([$courseId,$courseId]);$lessons=$q->fetchAll(PDO::FETCH_ASSOC);}catch(Throwable){try{$q=$db->prepare('SELECT id,title,slug,sort_order FROM learning_lessons WHERE course_id=? AND enabled=1 ORDER BY sort_order,id');$q->execute([$courseId]);$lessons=$q->fetchAll(PDO::FETCH_ASSOC);}catch(Throwable){$lessons=[];}}
 $position=0;foreach($lessons as $i=>$row){if((int)$row['id']===(int)$lesson['id']){$position=$i+1;$previous=$lessons[$i-1]??null;$next=$lessons[$i+1]??null;break;}}
 $override=null;
-if (($slug === 'course-16-lesson-10' || $position === 10)) {
+if (($slug === 'course-16-lesson-1' || $position === 1)) {
+    $override=lh_course16_lesson1_override($lesson,$position);
+}
+if (($slug === 'course-16-lesson-10' || $position === 10) && $override===null) {
     $override=lh_course16_lesson10_override($lesson,$position);
 }
 if (($slug === 'course-16-lesson-9' || $position === 9) && $override===null) {

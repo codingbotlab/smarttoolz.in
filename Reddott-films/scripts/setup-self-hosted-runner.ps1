@@ -13,18 +13,24 @@ Write-Host "Repository: $RepoUrl"
 Write-Host "Runner directory: $RunnerDir"
 Write-Host ''
 
-function Require-Command([string]$Name, [string]$InstallHint) {
-    if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-        throw "$Name is not installed or not on PATH. $InstallHint"
+function Ensure-Command([string]$Name, [string]$WingetId, [string]$Hint) {
+    if (Get-Command $Name -ErrorAction SilentlyContinue) { return }
+
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Host "Installing $Name with winget..." -ForegroundColor Yellow
+        winget install -e --id $WingetId --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -ne 0) { throw "winget could not install $Name." }
+        $env:Path = [System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')
+        if (Get-Command $Name -ErrorAction SilentlyContinue) { return }
     }
+
+    throw "$Name is not installed or not on PATH. $Hint"
 }
 
-Require-Command 'git' 'Install Git for Windows first.'
-Require-Command 'node' 'Install Node.js 20+ first.'
-Require-Command 'npm' 'Install Node.js 20+ first.'
-Require-Command 'python' 'Install Python 3.11+ first and enable the PATH option.'
-Require-Command 'ffmpeg' 'Install FFmpeg and add its bin directory to PATH first.'
-Require-Command 'ffprobe' 'Install FFmpeg and add its bin directory to PATH first.'
+# Only system tools that the workflow cannot supply itself are required here.
+Ensure-Command 'git' 'Git.Git' 'Install Git for Windows first.'
+Ensure-Command 'ffmpeg' 'Gyan.FFmpeg.Shared' 'Install FFmpeg first.'
+Ensure-Command 'ffprobe' 'Gyan.FFmpeg.Shared' 'Install FFmpeg first.'
 
 if (-not (Test-Path $RunnerDir)) {
     New-Item -ItemType Directory -Path $RunnerDir -Force | Out-Null

@@ -6,7 +6,7 @@ function stSettingValue(array $row): string { return (string)($row['setting_valu
 $settings = stSettingsRows($db);
 $groups = [
     'site' => ['🏠 Site & Experience', ['site_name','site_tagline','timezone','maintenance_mode']],
-    'tools' => ['🛠️ Tools & Limits', ['guest_trial_enabled','guest_trial_limit','tool_credit_cost','max_upload_mb']],
+    'tools' => ['🛠️ Tools & Limits', ['guest_trial_enabled','guest_trial_limit','max_upload_mb']],
     'analytics' => ['📊 Analytics & Tracking', ['analytics_enabled','analytics_live_enabled','analytics_live_refresh_seconds','download_tracking_enabled']],
     'admin' => ['🔐 Admin & System', ['admin_session_minutes','ads_enabled']],
 ];
@@ -79,17 +79,10 @@ $byKey = []; foreach ($settings as $row) $byKey[(string)$row['setting_key']] = $
     if(!status || !fields.length) return;
     btn.disabled=true; status.textContent='Saving…'; status.classList.remove('green');
     try{
-      const settings=fields.map(el=>({
-        key:el.dataset.setting,
-        value:el.value,
-        type:el.dataset.type || 'text',
-        description:el.dataset.description || '',
-        enabled:1
-      }));
+      const settings=fields.map(el=>({key:el.dataset.setting,value:el.value,type:el.dataset.type || 'text',description:el.dataset.description || '',enabled:1}));
       const r=await fetch('/smart-toolz/admin/settings-api.php',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({csrf,settings})});
       const raw=await r.text();
-      let d;
-      try{d=JSON.parse(raw);}catch(_){throw new Error('Server returned an invalid response.');}
+      let d; try{d=JSON.parse(raw);}catch(_){throw new Error('Server returned an invalid response.');}
       if(!r.ok || !d.ok) throw new Error(d.message || 'Save failed.');
       status.textContent='Saved ✓'; status.classList.add('green');
       setTimeout(()=>location.reload(),350);

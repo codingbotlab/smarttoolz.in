@@ -1,1 +1,2 @@
 SmartToolz installer marker. Shared bootstrap/schema/header updates are installed from main.
+KB links batch trigger: 2026-09-02

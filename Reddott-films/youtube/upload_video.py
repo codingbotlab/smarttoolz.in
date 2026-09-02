@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.error
@@ -10,6 +11,8 @@ from pathlib import Path
 
 API = "https://www.googleapis.com/youtube/v3"
 UPLOAD = "https://www.googleapis.com/upload/youtube/v3"
+MAX_VIDEO_SECONDS = 60.0
+CHUNK_SIZE = 8 * 1024 * 1024
 
 
 def request(url, method="GET", data=None, headers=None, timeout=120):
@@ -19,7 +22,9 @@ def request(url, method="GET", data=None, headers=None, timeout=120):
             return r.status, r.read(), dict(r.headers)
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", "replace")
-        raise RuntimeError(f"HTTP {e.code}: {body[:2000]}") from e
+        raise RuntimeError(f"HTTP {e.code}: {body[:3000]}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Network error: {e.reason}") from e
 
 
 def oauth_token():
@@ -48,6 +53,34 @@ def api_json(token, path, method="GET", payload=None):
         headers["Content-Type"] = "application/json; charset=UTF-8"
     _, body, _ = request(API + path, method, data, headers)
     return json.loads(body)
+
+
+def retry_call(label, fn, attempts=3):
+    last = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return fn()
+        except Exception as exc:
+            last = exc
+            if attempt == attempts:
+                break
+            delay = attempt * 3
+            print(f"{label} failed (attempt {attempt}/{attempts}): {exc}; retrying in {delay}s...", flush=True)
+            time.sleep(delay)
+    raise RuntimeError(f"{label} failed after {attempts} attempts: {last}") from last
+
+
+def video_duration(video_path):
+    result = subprocess.run([
+        "ffprobe", "-v", "error", "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1", str(video_path)
+    ], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(f"ffprobe failed: {result.stderr.strip()}")
+    try:
+        return float(result.stdout.strip())
+    except ValueError as exc:
+        raise RuntimeError(f"Invalid video duration: {result.stdout!r}") from exc
 
 
 def find_or_create_playlist(token, title, description):
@@ -84,19 +117,49 @@ def upload_video(token, video_path, metadata):
     if not location:
         raise RuntimeError("YouTube did not return a resumable upload URL.")
 
+    total = video_path.stat().st_size
+    sent = 0
+    print(f"Uploading {total / 1024 / 1024:.2f} MB in {CHUNK_SIZE / 1024 / 1024:.0f} MB chunks...", flush=True)
+
     with video_path.open("rb") as f:
-        video = f.read()
-    put_headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "video/mp4",
-        "Content-Length": str(len(video)),
-    }
-    _, body, _ = request(location, "PUT", video, put_headers, timeout=600)
-    result = json.loads(body)
-    video_id = result.get("id")
-    if not video_id:
-        raise RuntimeError(f"YouTube upload returned no video id: {result}")
-    return video_id
+        while sent < total:
+            chunk = f.read(CHUNK_SIZE)
+            if not chunk:
+                break
+            end = sent + len(chunk) - 1
+            chunk_headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "video/mp4",
+                "Content-Length": str(len(chunk)),
+                "Content-Range": f"bytes {sent}-{end}/{total}",
+            }
+
+            completed = False
+            for attempt in range(1, 6):
+                try:
+                    status, body, response_headers = request(
+                        location, "PUT", chunk, chunk_headers, timeout=600
+                    )
+                    if status in (200, 201):
+                        result = json.loads(body)
+                        video_id = result.get("id")
+                        if not video_id:
+                            raise RuntimeError(f"YouTube upload returned no video id: {result}")
+                        return video_id
+                    raise RuntimeError(f"Unexpected YouTube upload response: HTTP {status}")
+                except urllib.error.HTTPError:
+                    raise
+                except RuntimeError as exc:
+                    if attempt == 5:
+                        raise RuntimeError(f"Chunk {sent}-{end} failed: {exc}") from exc
+                    time.sleep(attempt * 2)
+
+            if not completed:
+                raise RuntimeError(f"Chunk {sent}-{end} was not accepted.")
+            sent = end + 1
+            print(f"Uploaded {sent / total * 100:.0f}%", flush=True)
+
+    raise RuntimeError("Upload ended without a final YouTube response.")
 
 
 def set_thumbnail(token, video_id, thumbnail_path):
@@ -126,10 +189,15 @@ def main():
     if not thumb.is_file() or thumb.stat().st_size == 0:
         raise RuntimeError(f"Thumbnail missing or empty: {thumb}")
 
-    title = "QR Code Generator Tutorial | Create & Download QR Codes Free | SmartToolz"
-    description = """Learn how to create a QR code quickly with SmartToolz QR Code Generator.
+    duration = video_duration(video)
+    print(f"Verified MP4 duration: {duration:.3f} seconds", flush=True)
+    if duration > MAX_VIDEO_SECONDS + 0.25:
+        raise RuntimeError(f"Refusing to upload a video longer than 60 seconds: {duration:.3f}s")
 
-In this step-by-step tutorial, we use the real SmartToolz QR Generator to enter content, customize the available options, generate the QR code, preview the result, and download it.
+    title = "QR Code Generator in Under 1 Minute | Create QR Codes Free | SmartToolz"
+    description = """Create a QR code in under a minute with the real SmartToolz QR Code Generator.
+
+This quick step-by-step tutorial shows the real SmartToolz tool: enter your content, review the available options, generate the QR code, check the result, and test it before publishing.
 
 🔗 Try the free QR Code Generator:
 https://smarttoolz.in/smart-toolz/tools/qr-generator.php
@@ -137,9 +205,9 @@ https://smarttoolz.in/smart-toolz/tools/qr-generator.php
 📚 Read the full written guide:
 https://smarttoolz.in/knowledge-base/qr-generator/article/
 
-SmartToolz provides practical online tools for everyday tasks. Subscribe for more real tool tutorials and how-to videos.
+SmartToolz provides practical online tools for everyday tasks. Subscribe for more real tool tutorials and quick how-to guides.
 
-#QRCode #QRGenerator #SmartToolz #QRCodeGenerator #OnlineTools"""
+#QRCode #QRGenerator #SmartToolz #QRCodeGenerator #OnlineTools #Tutorial"""
     tags = [
         "qr code generator", "qr code", "qr generator", "create qr code", "make qr code",
         "free qr code generator", "online qr code generator", "qr code maker", "SmartToolz",
@@ -158,19 +226,25 @@ SmartToolz provides practical online tools for everyday tasks. Subscribe for mor
         "status": {"privacyStatus": "public", "selfDeclaredMadeForKids": False},
     }
 
+    print("Refreshing YouTube OAuth token...", flush=True)
     token = oauth_token()
+    print("OAuth token refreshed successfully.", flush=True)
+
     playlist_title = "Smart Toolz"
     playlist_description = "SmartToolz tutorials: practical step-by-step guides for SmartToolz online tools."
-    playlist_id = find_or_create_playlist(token, playlist_title, playlist_description)
+    playlist_id = retry_call(
+        "Find/create Smart Toolz playlist",
+        lambda: find_or_create_playlist(token, playlist_title, playlist_description),
+    )
     print(f"Playlist ready: {playlist_title} ({playlist_id})", flush=True)
 
     video_id = upload_video(token, video, metadata)
     print(f"Video uploaded: https://www.youtube.com/watch?v={video_id}", flush=True)
 
-    set_thumbnail(token, video_id, thumb)
+    retry_call("Thumbnail upload", lambda: set_thumbnail(token, video_id, thumb))
     print("Thumbnail uploaded.", flush=True)
 
-    add_to_playlist(token, playlist_id, video_id)
+    retry_call("Playlist add", lambda: add_to_playlist(token, playlist_id, video_id))
     print(f"Added to playlist: {playlist_title}", flush=True)
     print(json.dumps({"video_id": video_id, "playlist_id": playlist_id}, indent=2))
 

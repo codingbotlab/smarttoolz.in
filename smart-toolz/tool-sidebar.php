@@ -10,6 +10,22 @@ declare(strict_types=1);
  */
 
 $currentSlug = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
+?>
+<style>
+/* Normalize legacy tool wrappers that were capped at ~1200/1320px. */
+body > .page-layout,
+body > .wrap,
+body > .tool-page,
+body > .tool-container,
+body > .tool-wrapper,
+body > main.page-layout,
+body > main.wrap,
+body > main.tool-page,
+body > main.tool-container,
+body > main.tool-wrapper{width:100%!important;max-width:none!important}
+.page-layout,.wrap,.tool-page,.tool-container,.tool-wrapper{max-width:none!important}
+</style>
+<?php
 
 if ($currentSlug === 'image-background-remover') {
     ?>

@@ -47,21 +47,33 @@ $sitePromo = '<div class="st-site-promo" role="region" aria-label="SmartToolz si
     . '.st-hero-tool-copy strong{display:block;font-size:14px;line-height:1.25}'
     . '.st-hero-tool-copy span{display:block;margin-top:3px;color:#707b8e;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
     . '.st-hero-tool-arrow{color:#635bff;display:grid;place-items:center}'
+    . '.st-hero-learning{border-color:rgba(37,99,235,.15)}'
+    . '.st-hero-learning .st-hero-tool-icon{background:linear-gradient(135deg,#2563eb,#06b6d4)}'
+    . '.st-hero-learning .st-hero-tool-copy small{color:#2563eb}'
+    . '.st-hero-learning .st-hero-tool-arrow{color:#2563eb}'
+    . '.st-hero-stack{width:min(560px,100%);margin:0 auto;display:grid;gap:10px}'
     . '@media(max-width:900px){.st-site-promo-inner{align-items:flex-start;flex-direction:column;gap:9px}.st-site-promo-links{justify-content:flex-start}}'
-    . '@media(max-width:560px){.st-site-promo-inner{padding:10px 14px}.st-site-promo-copy span:last-child{display:none}.st-site-promo-links{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.st-site-promo-links a{font-size:10px;padding:7px 9px}.st-hero-tool{margin-top:14px;padding:10px 11px}.st-hero-tool-icon{width:43px;height:43px;flex-basis:43px}.st-hero-tool-copy strong{font-size:13px}.st-hero-tool-copy span{font-size:9.5px}}'
+    . '@media(max-width:560px){.st-site-promo-inner{padding:10px 14px}.st-site-promo-copy span:last-child{display:none}.st-site-promo-links{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.st-site-promo-links a{font-size:10px;padding:7px 9px}.st-hero-tool{margin-top:0;padding:10px 11px}.st-hero-stack{gap:8px}.st-hero-tool-icon{width:43px;height:43px;flex-basis:43px}.st-hero-tool-copy strong{font-size:13px}.st-hero-tool-copy span{font-size:9.5px}}'
     . '</style>';
 
 $html = preg_replace('/(<body\\b[^>]*>)/i', '$1' . $sitePromo, $html, 1) ?? $html;
 
-$heroTool = '<a class="st-hero-tool" href="/smart-toolz/tools/image-background-remover.php" aria-label="Open Image Background Remover">'
+$heroTools = '<div class="st-hero-stack">'
+    . '<a class="st-hero-tool" href="/smart-toolz/tools/image-background-remover.php" aria-label="Open Image Background Remover">'
     . '<span class="st-hero-tool-icon"><span class="material-symbols-rounded">content_cut</span></span>'
     . '<span class="st-hero-tool-copy"><small>FEATURED TOOL</small><strong>Image Background Remover</strong><span>Remove backgrounds from images in a few clicks.</span></span>'
     . '<span class="st-hero-tool-arrow"><span class="material-symbols-rounded">arrow_forward</span></span>'
-    . '</a>';
+    . '</a>'
+    . '<a class="st-hero-tool st-hero-learning" href="/learning-hub/" aria-label="Open SmartToolz Learning Hub">'
+    . '<span class="st-hero-tool-icon"><span class="material-symbols-rounded">school</span></span>'
+    . '<span class="st-hero-tool-copy"><small>LEARNING HUB</small><strong>Learn • Practice • Build</strong><span>Practical courses, lessons and hands-on learning paths.</span></span>'
+    . '<span class="st-hero-tool-arrow"><span class="material-symbols-rounded">arrow_forward</span></span>'
+    . '</a>'
+    . '</div>';
 
 $heroImg = '<img class="hero-art" src="/smart-toolz/assets/home/hero-tools.svg" alt="SmartToolz tools illustration">';
 if (strpos($html, $heroImg) !== false) {
-    $html = str_replace($heroImg, $heroImg . $heroTool, $html);
+    $html = str_replace($heroImg, $heroImg . $heroTools, $html);
 }
 
 echo $html;

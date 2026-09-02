@@ -20,7 +20,7 @@ $sitePromo = '<div class="st-site-promo" role="region" aria-label="SmartToolz si
     . '</div>'
     . '<style>'
     . '.st-site-promo{width:100%;box-sizing:border-box;background:linear-gradient(135deg,#111827,#243b67 55%,#4f46e5);color:#fff;position:relative;z-index:20;box-shadow:0 5px 22px rgba(15,23,42,.16)}'
-    . '.st-site-promo-inner{max-width:1240px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px}'
+    . '.st-site-promo-inner{max-width:none;width:100%;box-sizing:border-box;margin:0;padding:11px 32px;display:flex;align-items:center;justify-content:space-between;gap:18px}'
     . '.st-site-promo-copy{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;line-height:1.35}'
     . '.st-site-promo-copy strong{font-size:14px}'
     . '.st-site-promo-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:900;letter-spacing:.7px;padding:5px 8px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(255,255,255,.1)}'
@@ -44,8 +44,9 @@ $sitePromo = '<div class="st-site-promo" role="region" aria-label="SmartToolz si
     . '.st-hero-learning .st-hero-tool-copy small{color:#2563eb}'
     . '.st-hero-learning .st-hero-tool-arrow{color:#2563eb}'
     . '.st-hero-stack{width:min(560px,100%);margin:0 auto;display:grid;gap:10px}'
+    . '.wrap{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;padding-left:32px!important;padding-right:32px!important}'
     . '@media(max-width:900px){.st-site-promo-inner{align-items:flex-start;flex-direction:column;gap:9px}.st-site-promo-links{justify-content:flex-start}}'
-    . '@media(max-width:560px){.st-site-promo-inner{padding:10px 14px}.st-site-promo-copy span:last-child{display:none}.st-site-promo-links{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.st-site-promo-links a{font-size:10px;padding:7px 9px}.st-hero-tool{margin-top:0;padding:10px 11px}.st-hero-stack{gap:8px}.st-hero-tool-icon{width:43px;height:43px;flex-basis:43px}.st-hero-tool-copy strong{font-size:13px}.st-hero-tool-copy span{font-size:9.5px}}'
+    . '@media(max-width:560px){.st-site-promo-inner{padding:10px 14px}.st-site-promo-copy span:last-child{display:none}.st-site-promo-links{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.st-site-promo-links a{font-size:10px;padding:7px 9px}.st-hero-tool{margin-top:0;padding:10px 11px}.st-hero-stack{gap:8px}.st-hero-tool-icon{width:43px;height:43px;flex-basis:43px}.st-hero-tool-copy strong{font-size:13px}.st-hero-tool-copy span{font-size:9.5px}.wrap{padding-left:12px!important;padding-right:12px!important}}'
     . '</style>';
 
 $html = preg_replace('/(<body\\b[^>]*>)/i', '$1' . $sitePromo, $html, 1) ?? $html;

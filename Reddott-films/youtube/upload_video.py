@@ -125,7 +125,7 @@ def upload_video(token, video_path, metadata):
         while sent < total:
             chunk = f.read(CHUNK_SIZE)
             if not chunk:
-                break
+                raise RuntimeError(f"Unexpected end of file at byte {sent} of {total}")
             end = sent + len(chunk) - 1
             chunk_headers = {
                 "Authorization": f"Bearer {token}",
@@ -134,28 +134,45 @@ def upload_video(token, video_path, metadata):
                 "Content-Range": f"bytes {sent}-{end}/{total}",
             }
 
-            completed = False
+            accepted = False
             for attempt in range(1, 6):
+                req = urllib.request.Request(location, data=chunk, method="PUT", headers=chunk_headers)
                 try:
-                    status, body, response_headers = request(
-                        location, "PUT", chunk, chunk_headers, timeout=600
-                    )
-                    if status in (200, 201):
-                        result = json.loads(body)
-                        video_id = result.get("id")
-                        if not video_id:
-                            raise RuntimeError(f"YouTube upload returned no video id: {result}")
-                        return video_id
-                    raise RuntimeError(f"Unexpected YouTube upload response: HTTP {status}")
-                except urllib.error.HTTPError:
-                    raise
-                except RuntimeError as exc:
+                    with urllib.request.urlopen(req, timeout=600) as response:
+                        status = response.status
+                        response_body = response.read()
+                        if status in (200, 201):
+                            result = json.loads(response_body)
+                            video_id = result.get("id")
+                            if not video_id:
+                                raise RuntimeError(f"YouTube upload returned no video id: {result}")
+                            print("Final upload response received.", flush=True)
+                            return video_id
+                        if status == 308:
+                            accepted = True
+                except urllib.error.HTTPError as exc:
+                    response_body = exc.read().decode("utf-8", "replace")
+                    if exc.code == 308:
+                        accepted = True
+                    elif 500 <= exc.code < 600 and attempt < 5:
+                        print(f"Chunk {sent}-{end} got HTTP {exc.code}; retrying...", flush=True)
+                        time.sleep(attempt * 2)
+                        continue
+                    else:
+                        raise RuntimeError(f"Chunk {sent}-{end} failed: HTTP {exc.code}: {response_body[:3000]}") from exc
+                except urllib.error.URLError as exc:
                     if attempt == 5:
-                        raise RuntimeError(f"Chunk {sent}-{end} failed: {exc}") from exc
+                        raise RuntimeError(f"Chunk {sent}-{end} network failure: {exc.reason}") from exc
+                    print(f"Chunk {sent}-{end} network error; retrying...", flush=True)
                     time.sleep(attempt * 2)
+                    continue
 
-            if not completed:
-                raise RuntimeError(f"Chunk {sent}-{end} was not accepted.")
+                if accepted:
+                    break
+
+            if not accepted:
+                raise RuntimeError(f"Chunk {sent}-{end} was not accepted by YouTube.")
+
             sent = end + 1
             print(f"Uploaded {sent / total * 100:.0f}%", flush=True)
 

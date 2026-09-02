@@ -4,16 +4,34 @@ $path = (string)($_SERVER['SCRIPT_NAME'] ?? '');
 if (!str_contains($path, '/smart-toolz/tools/')) return;
 $slug = basename($path, '.php');
 if ($slug === '' || $slug === 'kb-guide-cta' || str_ends_with($slug, '-guide') || str_starts_with($slug, '_')) return;
-$url = '/knowledge-base/' . rawurlencode($slug) . '/article/';
+
+// Resolve the tool's actual Knowledge Base guide instead of creating a
+// potentially invalid /article/ URL from the tool filename.
+$kbRoot = dirname(__DIR__, 2) . '/knowledge-base';
+$candidates = [
+    $slug,
+    str_replace('-', '_', $slug),
+];
+$guideSlug = null;
+foreach (array_unique($candidates) as $candidate) {
+    $dir = $kbRoot . '/' . $candidate;
+    if (is_dir($dir) && (is_file($dir . '/article.php') || is_file($dir . '/index.php') || is_file($dir . '/article/index.php'))) {
+        $guideSlug = $candidate;
+        break;
+    }
+}
+if ($guideSlug === null) return;
+$url = '/knowledge-base/' . rawurlencode($guideSlug) . '/article/';
+
 ob_start(static function (string $html) use ($url): string {
     if (str_contains($html, 'smarttoolz-kb-guide')) return $html;
     $safe = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
     $cta = '<div class="smarttoolz-kb-guide"><a href="'.$safe.'" aria-label="Read the Knowledge Base guide for this tool"><span aria-hidden="true">📖</span><strong>Guide: How to use this tool</strong><span aria-hidden="true">→</span></a></div>';
     $css = '<style>.smarttoolz-kb-guide{width:100%;margin:14px 0 0}.smarttoolz-kb-guide a{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid rgba(99,91,255,.18);border-radius:12px;background:linear-gradient(135deg,#f1efff,#faf9ff);color:#5146d5;text-decoration:none;font-size:12px;font-weight:800}.smarttoolz-kb-guide a span:last-child{margin-left:auto;font-size:18px}.smarttoolz-kb-guide a:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(99,91,255,.12)}</style>';
-    $pattern = '/(<(?:div|section|article)\\b[^>]*class=["\\\'][^"\\\']*\\btool-seo-intro\\b[^"\\\']*["\\\'][^>]*>)/i';
+    $pattern = '/(<(?:div|section|article)\b[^>]*class=["\'][^"\']*\btool-seo-intro\b[^"\']*["\'][^>]*>)/i';
     if (preg_match($pattern, $html, $m, PREG_OFFSET_CAPTURE)) {
         $at = $m[0][1] + strlen($m[0][0]);
-        return substr($html, 0, $at)."\\n".$cta.$css."\\n".substr($html, $at);
+        return substr($html, 0, $at)."\n".$cta.$css."\n".substr($html, $at);
     }
     return $html;
 });

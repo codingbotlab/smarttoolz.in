@@ -39,6 +39,23 @@ require_once __DIR__.'/includes/course16_lesson30_computer_basics.php';
 require_once __DIR__.'/includes/course16_lesson31_computer_basics.php';
 require_once __DIR__.'/includes/course16_lesson32_computer_basics.php';
 require_once __DIR__.'/includes/course16_lesson33_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson34_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson35_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson36_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson37_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson38_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson39_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson40_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson41_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson42_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson43_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson44_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson45_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson46_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson47_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson48_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson49_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson50_computer_basics.php';
 
 $slug=trim((string)($_GET['slug']??''));$lesson=null;$course=null;$lessons=[];$previous=null;$next=null;
 try{$q=$db->prepare("SELECT l.* FROM learning_lessons l WHERE l.slug=? AND l.enabled=1 LIMIT 1");$q->execute([$slug]);$lesson=$q->fetch(PDO::FETCH_ASSOC)?:null;}catch(Throwable){}
@@ -84,6 +101,23 @@ if ($slug === 'course-16-lesson-30') {$override=lh_course16_lesson30_computer_ba
 if ($slug === 'course-16-lesson-31') {$override=lh_course16_lesson31_computer_basics_override($lesson,$position);}
 if ($slug === 'course-16-lesson-32') {$override=lh_course16_lesson32_computer_basics_override($lesson,$position);}
 if ($slug === 'course-16-lesson-33') {$override=lh_course16_lesson33_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-34') {$override=lh_course16_lesson34_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-35') {$override=lh_course16_lesson35_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-36') {$override=lh_course16_lesson36_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-37') {$override=lh_course16_lesson37_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-38') {$override=lh_course16_lesson38_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-39') {$override=lh_course16_lesson39_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-40') {$override=lh_course16_lesson40_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-41') {$override=lh_course16_lesson41_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-42') {$override=lh_course16_lesson42_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-43') {$override=lh_course16_lesson43_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-44') {$override=lh_course16_lesson44_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-45') {$override=lh_course16_lesson45_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-46') {$override=lh_course16_lesson46_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-47') {$override=lh_course16_lesson47_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-48') {$override=lh_course16_lesson48_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-49') {$override=lh_course16_lesson49_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-50') {$override=lh_course16_lesson50_computer_basics_override($lesson,$position);}
 if (($slug === 'course-16-lesson-10' || $position === 10) && $override===null) {$override=lh_course16_lesson10_override($lesson,$position);}
 if (($slug === 'course-16-lesson-9' || $position === 9) && $override===null) {$override=lh_course16_lesson9_override($lesson,$position);}
 if($override===null){$override=lh_course16_override($lesson,$position);}

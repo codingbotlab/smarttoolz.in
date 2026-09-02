@@ -12,30 +12,22 @@ function lh_course16_override(array $lesson, int $position): ?string
   <div class="lh-lesson-intro">
     <p><strong>Design principles are the rules that help visual elements work together.</strong> The elements from the previous lesson are your raw materials; principles such as hierarchy, contrast, balance, alignment, proximity, repetition and unity help you turn those materials into a clear composition.</p>
   </div>
-
   <h2>1. Hierarchy: decide what gets noticed first</h2>
   <p>Hierarchy creates a visual order. A viewer should be able to recognise the most important message before reading every detail. Size, weight, colour, position and whitespace can all create hierarchy.</p>
   <p>For a workshop poster, the event name might be largest, the date and time next, and supporting details smaller. If every line is equally large and bold, the viewer has to work harder to understand the message.</p>
-
   <h2>2. Contrast: create useful difference</h2>
   <p>Contrast separates things that should not look the same. You can create contrast through size, colour, weight, shape, texture or spacing. Good contrast improves scanning and can make an important call to action easier to find.</p>
   <div class="alert alert-primary"><strong>Smart tip:</strong> Contrast is not the same as making everything loud. One strong difference is often more effective than many competing effects.</div>
-
   <h2>3. Balance: control visual weight</h2>
   <p>Balance is about how visual weight is distributed across a composition. A large dark image can visually outweigh several small light elements. Symmetrical layouts often feel stable, while asymmetrical layouts can feel more dynamic when their visual weights are still controlled.</p>
-
   <h2>4. Alignment: create relationships</h2>
   <p>Alignment gives elements an invisible structure. Shared left edges, centres or baselines make a layout feel intentional. Use guides or a grid when possible.</p>
-
   <h2>5. Proximity: group related information</h2>
   <p>Items placed close together are usually perceived as related. Put an event date near the event title rather than leaving the date floating elsewhere on the canvas. Increase the gap between unrelated groups to make the structure easier to understand.</p>
-
   <h2>6. Repetition: build consistency</h2>
   <p>Repeating a visual treatment creates a system. The same heading style, button treatment, icon style or spacing rhythm can make several pieces of content feel like one brand.</p>
-
   <h2>7. Unity: make the design feel like one thing</h2>
   <p>Unity is the overall sense that the parts belong together. Consistent typography, colour, spacing, imagery and visual language help create unity.</p>
-
   <h2>How the principles work together</h2>
   <div class="table-responsive"><table class="table table-bordered align-middle">
     <thead><tr><th>Principle</th><th>Main question</th><th>Useful result</th></tr></thead>
@@ -49,10 +41,8 @@ function lh_course16_override(array $lesson, int $position): ?string
       <tr><td>Unity</td><td>Do all parts feel like one system?</td><td>Coherence</td></tr>
     </tbody>
   </table></div>
-
   <h2>Real-world example: a mobile event poster</h2>
   <p>Imagine a 1080 × 1350 social post for a free design workshop. Make the workshop name visually dominant, keep the date and time close to it, use one deliberate accent for registration, align supporting details consistently and leave enough space around the main message for quick phone reading.</p>
-
   <h2>Practical exercise</h2>
   <ol>
     <li>Create an event poster containing a title, date, location, short description and call to action.</li>
@@ -62,7 +52,6 @@ function lh_course16_override(array $lesson, int $position): ?string
     <li>Use one deliberate contrast point for the call to action.</li>
     <li>Duplicate the poster and change only alignment or spacing. Compare which version is easier to scan.</li>
   </ol>
-
   <h2>Common mistakes</h2>
   <ul>
     <li>Making every element bold, large or brightly coloured.</li>
@@ -71,7 +60,6 @@ function lh_course16_override(array $lesson, int $position): ?string
     <li>Using contrast without checking text readability.</li>
     <li>Repeating decorative effects until the design loses hierarchy.</li>
   </ul>
-
   <h2>Quick self-check</h2>
   <ol>
     <li>What should a viewer notice first in your design?</li>
@@ -80,7 +68,6 @@ function lh_course16_override(array $lesson, int $position): ?string
     <li>Can you point to the alignment system?</li>
     <li>Which repeated choices make the design feel consistent?</li>
   </ol>
-
   <h2>Key takeaway</h2>
   <p><strong>Design principles turn individual visual elements into an organised communication system.</strong> When a design feels confusing, check hierarchy, contrast, balance, alignment, proximity, repetition and unity before adding more decoration.</p>
 </article>
@@ -93,11 +80,9 @@ HTML;
   <div class="lh-lesson-intro">
     <p><strong>Typography is the design of written language.</strong> It is not simply choosing a font. A designer uses typeface, size, weight, spacing, line length and hierarchy to make information readable and to give it an appropriate visual voice.</p>
   </div>
-
   <h2>1. Typeface, font and family</h2>
   <p>A <strong>typeface</strong> is the broader design of a set of letters, while a font traditionally refers to a particular style or cut within that design. In everyday design software, people often use “font” for both. A type family can contain regular, medium, semibold, bold and italic styles.</p>
   <p>For beginners, the important skill is not memorising terminology. It is learning to choose type that supports the purpose of the message.</p>
-
   <h2>2. Serif and sans-serif</h2>
   <div class="table-responsive"><table class="table table-bordered align-middle">
     <thead><tr><th>Category</th><th>Visual characteristic</th><th>Common use</th></tr></thead>
@@ -108,32 +93,24 @@ HTML;
     </tbody>
   </table></div>
   <p>These are tendencies, not rules. A typeface should be judged by readability, context and the personality you want to communicate.</p>
-
   <h2>3. Build hierarchy with type</h2>
   <p>Typography can tell the viewer what to read first. A useful hierarchy might contain a large headline, a medium-sized supporting line and smaller body copy. You can create this difference with size, weight, spacing and placement instead of using many unrelated fonts.</p>
   <div class="alert alert-primary"><strong>Smart tip:</strong> If everything is visually important, nothing is clearly important. Give the main message the strongest typographic treatment and let supporting information stay quieter.</div>
-
   <h2>4. Font pairing</h2>
   <p>Two typefaces can work together when they have a clear relationship but enough difference to create hierarchy. A common beginner approach is to pair a distinctive heading face with a simple, highly readable body face.</p>
   <p>Avoid pairing fonts that are almost identical but not quite. That small difference can look accidental rather than intentional. Also avoid using many typefaces simply because they are available.</p>
-
   <h2>5. Readability: size, line height and line length</h2>
   <p>Readable type needs enough space to breathe. <strong>Line height</strong> controls the vertical distance between lines. Very tight leading can make paragraphs feel dense; excessive leading can break the relationship between lines.</p>
   <p><strong>Line length</strong> also matters. Extremely wide paragraphs force the eyes to travel a long distance and make it easier to lose the next line. Shorter text blocks are especially useful on mobile screens.</p>
-
   <h2>6. Letter spacing and kerning</h2>
   <p><strong>Tracking</strong> changes the overall spacing across a range of letters. <strong>Kerning</strong> adjusts the space between specific letter pairs. These controls become especially visible in large headlines, logos and all-caps text.</p>
   <p>Do not use extra letter spacing as a universal fix. First choose an appropriate typeface and size; then make small spacing adjustments when the design actually needs them.</p>
-
   <h2>7. Weight and emphasis</h2>
   <p>Weight can create emphasis without changing the typeface. Regular body text paired with a semibold heading often creates a cleaner hierarchy than using bold, italic, underline, colour and a different font all at once.</p>
-
   <h2>8. Typography and accessibility</h2>
   <p>Good typography should remain understandable for people with different visual needs and devices. Maintain sufficient contrast between text and its background, avoid tiny body text, and do not communicate important information through colour alone.</p>
-
   <h2>Practical example: design a workshop announcement</h2>
   <p>Imagine a mobile poster that says “Graphic Design Workshop”. Make the title large enough to recognise quickly. Place the date and time immediately below it with a smaller but still strong treatment. Use a readable body style for the description. Give the registration action a distinct typographic treatment, but keep the overall type system limited and consistent.</p>
-
   <h2>Typography checklist</h2>
   <div class="table-responsive"><table class="table table-bordered align-middle">
     <thead><tr><th>Check</th><th>Question</th></tr></thead>
@@ -146,7 +123,6 @@ HTML;
       <tr><td>Contrast</td><td>Does text remain clearly distinguishable from its background?</td></tr>
     </tbody>
   </table></div>
-
   <h2>Practical exercise</h2>
   <ol>
     <li>Create a small event poster with a headline, date, description and call to action.</li>
@@ -156,7 +132,6 @@ HTML;
     <li>Ask someone to read the poster for five seconds, then tell you what they noticed first.</li>
     <li>Adjust the typography based on the result instead of adding more decorative effects.</li>
   </ol>
-
   <h2>Common mistakes</h2>
   <ul>
     <li>Using too many typefaces in one design.</li>
@@ -166,7 +141,6 @@ HTML;
     <li>Ignoring line height and paragraph width.</li>
     <li>Judging typography only while zoomed in on a large screen.</li>
   </ul>
-
   <h2>Quick self-check</h2>
   <ol>
     <li>What is the main job of typography in a design?</li>
@@ -175,9 +149,81 @@ HTML;
     <li>What is the difference between tracking and kerning?</li>
     <li>Can you explain why you selected a particular typeface for your audience?</li>
   </ol>
-
   <h2>Key takeaway</h2>
   <p><strong>Good typography makes information easier to understand while reinforcing the character of the design.</strong> Choose type for purpose, establish a clear hierarchy, protect readability, and make spacing decisions deliberately.</p>
+</article>
+HTML;
+    }
+
+    if ($slug === 'course-16-lesson-7' || $position === 7) {
+        return <<<'HTML'
+<article class="lh-prose">
+  <div class="lh-lesson-intro">
+    <p><strong>Colour is a communication tool, not just decoration.</strong> In graphic design, colour can create emphasis, separate information, establish mood and connect a piece of work to a brand. Good colour choices also protect readability and accessibility.</p>
+  </div>
+
+  <h2>1. Hue, saturation and value</h2>
+  <p><strong>Hue</strong> is the basic colour family, such as red, blue or green. <strong>Saturation</strong> describes how intense or muted a colour appears. <strong>Value</strong> describes how light or dark it is. Changing these three properties can produce very different visual results from the same basic hue.</p>
+  <p>For example, a highly saturated blue can feel energetic, while a low-saturation blue-grey may feel calmer and more restrained. A very light tint and a very dark shade of the same hue can create strong hierarchy when used together.</p>
+
+  <h2>2. Warm and cool colours</h2>
+  <p>Reds, oranges and yellows are commonly described as warm colours, while blues and many blue-greens are described as cool. This is a useful design shorthand rather than a rigid emotional rule. Context, saturation and surrounding colours can change how a colour feels.</p>
+
+  <h2>3. Useful colour relationships</h2>
+  <div class="table-responsive"><table class="table table-bordered align-middle">
+    <thead><tr><th>Relationship</th><th>How it works</th><th>Useful when</th></tr></thead>
+    <tbody>
+      <tr><td>Monochromatic</td><td>Different values or saturations of one hue.</td><td>You want a controlled, cohesive palette.</td></tr>
+      <tr><td>Analogous</td><td>Neighbouring hues on the colour wheel.</td><td>You want related colours with gentle variation.</td></tr>
+      <tr><td>Complementary</td><td>Opposing hues on the colour wheel.</td><td>You need strong contrast or a clear accent.</td></tr>
+      <tr><td>Split complementary</td><td>One hue paired with the neighbours of its complement.</td><td>You want contrast with a little more flexibility.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>4. Build a functional palette</h2>
+  <p>A practical design system often needs more than a single “main colour”. Start with a background or neutral, a primary colour, a secondary or supporting colour, and an accent for actions or important information. You can then create lighter and darker variants as needed.</p>
+  <div class="alert alert-primary"><strong>Smart tip:</strong> Pick colours based on the job they perform. If every colour is an accent, the viewer loses the ability to tell what deserves attention.</div>
+
+  <h2>5. Contrast and readability</h2>
+  <p>Colour contrast must support the content. Light grey text on a white background may look subtle in a design editor but become difficult to read in real use. Check text against its actual background and test the design on the device where it will be viewed.</p>
+  <p>Do not rely on colour alone to communicate status or meaning. For example, instead of showing only green for success and red for failure, include a word, icon or other clear cue as well.</p>
+
+  <h2>6. Colour and brand consistency</h2>
+  <p>When creating a series of posts, thumbnails or pages, record the exact colour values you choose. Reusing the same palette makes the work feel connected. If the palette changes for every design, even good individual pieces can look like unrelated projects.</p>
+
+  <h2>Real-world example: a workshop poster</h2>
+  <p>Imagine a poster for a beginner design workshop. Use a neutral background, one confident primary colour for the title, a quieter supporting colour for secondary information, and a contrasting accent for registration. Keep the body text in a high-contrast colour and leave enough empty space around the accent so it remains meaningful.</p>
+
+  <h2>Practical exercise</h2>
+  <ol>
+    <li>Choose one subject for a social post, such as a design workshop or product announcement.</li>
+    <li>Create a four-colour palette: neutral, primary, supporting and accent.</li>
+    <li>Make one version using a monochromatic approach.</li>
+    <li>Make another version using a complementary accent.</li>
+    <li>Check the smallest text first. If it is hard to read, adjust the colour or background rather than adding a shadow and hoping it fixes the problem.</li>
+    <li>Save the final colour values so you can reproduce the palette later.</li>
+  </ol>
+
+  <h2>Common mistakes</h2>
+  <ul>
+    <li>Choosing colours only because they look attractive in isolation.</li>
+    <li>Using too many saturated colours at the same visual strength.</li>
+    <li>Putting low-contrast text over a busy or similarly coloured background.</li>
+    <li>Changing brand colours from one graphic to the next.</li>
+    <li>Using colour as the only signal for an important message.</li>
+  </ul>
+
+  <h2>Quick self-check</h2>
+  <ol>
+    <li>What is the difference between hue, saturation and value?</li>
+    <li>Why might a monochromatic palette be useful?</li>
+    <li>Where is the accent colour in your design, and what job does it perform?</li>
+    <li>Can every important piece of information still be understood without relying only on colour?</li>
+    <li>Have you checked the smallest text for sufficient contrast?</li>
+  </ol>
+
+  <h2>Key takeaway</h2>
+  <p><strong>Use colour deliberately: establish hierarchy, support readability, create a consistent visual language and reserve strong accents for information that truly needs attention.</strong></p>
 </article>
 HTML;
     }

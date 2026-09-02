@@ -1,15 +1,16 @@
 import React from 'react';
 import fs from 'node:fs';
+import path from 'node:path';
 import { Composition, registerRoot } from 'remotion';
 import { Video } from './Video.jsx';
 
-const durationFile = new URL('../public/narration-duration.txt', import.meta.url);
+const durationFile = path.join(process.cwd(), 'public', 'narration-duration.txt');
 
 export const RemotionRoot = () => (
   <Composition
     id="QRGenerator"
     component={Video}
-    durationInFrames={Math.ceil(60 * 30)}
+    durationInFrames={60 * 30}
     fps={30}
     width={1280}
     height={720}

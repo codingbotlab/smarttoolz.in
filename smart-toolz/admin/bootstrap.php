@@ -67,7 +67,6 @@ function adminInstall(): void
         'site_tagline' => ['Free, Fast & Simple Tools','text','Default site tagline'],
         'guest_trial_limit' => ['5','number','Free guest uses per tool before login is required'],
         'guest_trial_enabled' => ['1','boolean','Allow non-logged-in visitors to use free trials'],
-        'tool_credit_cost' => ['1','number','Credits deducted for one normal logged-in tool use'],
         'download_tracking_enabled' => ['1','boolean','Record successful tool downloads'],
         'analytics_enabled' => ['1','boolean','Enable site analytics/pageview tracking'],
         'analytics_live_enabled' => ['1','boolean','Maintain live visitor presence data'],
@@ -98,11 +97,14 @@ function currentAdmin(): ?array
 {
     if (empty($_SESSION['user_id'])) return null;
     try {
-        $q = adminDb()->prepare('SELECT id,name,email,avatar,role,credits,daily_credits,plan FROM creator_users WHERE id=? LIMIT 1');
+        $q = adminDb()->prepare('SELECT id,name,email,avatar,role FROM creator_users WHERE id=? LIMIT 1');
         $q->execute([(int)$_SESSION['user_id']]);
         $u = $q->fetch(PDO::FETCH_ASSOC);
         return $u ?: null;
-    } catch (Throwable) { return null; }
+    } catch (Throwable $e) {
+        error_log('SmartToolz currentAdmin: '.$e->getMessage());
+        return null;
+    }
 }
 
 function requireAdmin(): array

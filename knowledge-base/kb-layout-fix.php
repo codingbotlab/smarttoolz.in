@@ -49,9 +49,9 @@ if (PHP_SAPI !== 'cli') {
 html,body{width:100%!important;max-width:none!important}
 .kb-nav,.kb-main,.kb-footer,.footer-inner,.footer-bottom,.layout,.main,.footer,.bottom{width:100%!important;max-width:none!important}
 .kb-nav{margin-left:0!important;margin-right:0!important}
-.kb-layout,.layout{margin-left:0!important;margin-right:0!important}
+.kb-layout,.layout{margin-left:0!important;margin-right:0!important;width:100%!important;max-width:none!important}
 .layout{display:grid!important;grid-template-columns:minmax(245px,265px) minmax(0,1fr)!important;align-items:start!important;padding-left:28px!important;padding-right:28px!important;gap:20px!important}
-.side{width:auto!important;min-width:0!important}.main{display:block!important;min-width:0!important}
+.main{display:block!important;min-width:0!important}
 .hero,.grid2,.steps,.tips,.mistakes,.faq,.related{width:100%!important;max-width:none!important}.grid2{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.related-grid{width:100%!important}
 .kb-article-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0;padding:16px;border:1px solid #e1e6ef;border-radius:20px;background:#f8f9fd}
 .kb-link-card{display:flex;align-items:center;gap:12px;min-width:0;padding:14px;background:#fff;border:1px solid #e2e6ef;border-radius:14px}.kb-link-card.kb-link-primary{border-color:#d6d1ff;background:#fbfaff}

@@ -1,5 +1,5 @@
 <?php
-// Knowledge Base compatibility + visual walkthrough layer.
+// Knowledge Base compatibility + article navigation layer.
 // This file is auto-prepended by knowledge-base/.user.ini.
 
 if (PHP_SAPI !== 'cli') {
@@ -10,49 +10,47 @@ if (PHP_SAPI !== 'cli') {
 
     if ($isGuideRequest) {
         ob_start(static function (string $html) use ($toolSlug): string {
+            $guideUrl = '/knowledge-base/' . rawurlencode($toolSlug) . '/article/';
+            $toolUrl = '/smart-toolz/tools/' . rawurlencode($toolSlug) . '.php';
+            $kbUrl = '/knowledge-base/';
             $visualUrl = '/knowledge-base/visual.php?tool=' . rawurlencode($toolSlug);
-            $block = '<section class="kb-visual-walkthrough" aria-label="Visual walkthrough">'
-                . '<div class="kb-visual-head"><div><span class="kb-visual-kicker">VISUAL WALKTHROUGH</span><h2>See the exact workflow</h2><p>Use this visual as a quick reference while following the steps on the tool page.</p></div>'
-                . '<a href="' . htmlspecialchars($visualUrl, ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener">Open visual</a></div>'
-                . '<div class="kb-visual-frame"><img src="' . htmlspecialchars($visualUrl, ENT_QUOTES, 'UTF-8') . '" alt="SmartToolz visual walkthrough" loading="lazy"></div>'
+
+            $nav = '<section class="kb-article-links" aria-label="Guide navigation">'
+                . '<div class="kb-link-card kb-link-primary">'
+                . '<span class="kb-link-icon">▣</span><div><strong>Detailed Guide</strong><small>Read the complete step-by-step instructions for this tool.</small></div>'
+                . '<a href="' . htmlspecialchars($guideUrl, ENT_QUOTES, 'UTF-8') . '">Open guide →</a></div>'
+                . '<div class="kb-link-card">'
+                . '<span class="kb-link-icon">↗</span><div><strong>Open Tool</strong><small>Jump directly to the tool and follow the guide alongside it.</small></div>'
+                . '<a href="' . htmlspecialchars($toolUrl, ENT_QUOTES, 'UTF-8') . '">Use tool →</a></div>'
+                . '<div class="kb-link-card">'
+                . '<span class="kb-link-icon">◈</span><div><strong>Reference Tools</strong><small>Browse related and other SmartToolz guides from the Knowledge Base.</small></div>'
+                . '<a href="' . htmlspecialchars($kbUrl, ENT_QUOTES, 'UTF-8') . '">Browse guides →</a></div>'
+                . '<div class="kb-link-card">'
+                . '<span class="kb-link-icon">▤</span><div><strong>Visual Walkthrough</strong><small>Quick visual reference for the tool workflow.</small></div>'
+                . '<a href="' . htmlspecialchars($visualUrl, ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener">View visual →</a></div>'
                 . '</section>';
 
-            if (stripos($html, 'kb-visual-walkthrough') !== false) {
+            if (stripos($html, 'kb-article-links') !== false) {
                 return $html;
             }
             if (stripos($html, '</main>') !== false) {
-                return preg_replace('~</main>~i', $block . '</main>', $html, 1) ?? ($html . $block);
+                return preg_replace('~</main>~i', $nav . '</main>', $html, 1) ?? ($html . $nav);
             }
             if (stripos($html, '</body>') !== false) {
-                return preg_replace('~</body>~i', $block . '</body>', $html, 1) ?? ($html . $block);
+                return preg_replace('~</body>~i', $nav . '</body>', $html, 1) ?? ($html . $nav);
             }
-            return $html . $block;
+            return $html . $nav;
         });
     }
 }
 ?>
 <style>
 .layout{display:grid!important;grid-template-columns:minmax(245px,265px) minmax(0,1fr)!important;align-items:start!important;width:min(1420px,calc(100% - 28px))!important;margin:22px auto!important;gap:20px!important}
-.side{width:auto!important;min-width:0!important}
-.main{display:block!important;width:auto!important;min-width:0!important;max-width:none!important}
-.hero,.grid2,.steps,.tips,.mistakes,.faq,.related{width:100%!important;max-width:none!important}
-.grid2{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
-.related-grid{width:100%!important}
-.kb-visual-walkthrough{margin:24px 0;padding:20px;border:1px solid #e4e8f0;border-radius:20px;background:#fff;box-shadow:0 10px 28px rgba(23,32,51,.06)}
-.kb-visual-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px}
-.kb-visual-kicker{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;color:#635bff;margin-bottom:5px}
-.kb-visual-head h2{margin:0 0 5px;font-size:24px;line-height:1.2;color:#172033}
-.kb-visual-head p{margin:0;color:#697487;font-size:14px}
-.kb-visual-head a{flex:0 0 auto;text-decoration:none;border:1px solid #dfe3ec;border-radius:10px;padding:9px 13px;color:#172033;font-weight:700;font-size:13px;background:#fafbff}
-.kb-visual-frame{overflow:hidden;border-radius:16px;border:1px solid #e1e6ef;background:#f6f8fc}
-.kb-visual-frame img{display:block;width:100%;height:auto}
-@media(max-width:700px){
-  .layout{display:block!important;width:calc(100% - 20px)!important}
-  .side{position:fixed!important;z-index:1200!important;left:12px!important;top:76px!important;width:min(320px,calc(100% - 24px))!important;height:calc(100vh - 88px)!important;max-height:none!important;transform:translateX(-120%)!important;transition:.22s!important}
-  .side.open{transform:translateX(0)!important}
-  .grid2{grid-template-columns:1fr!important}
-  .kb-visual-walkthrough{padding:14px;border-radius:16px}
-  .kb-visual-head{display:block}
-  .kb-visual-head a{display:inline-block;margin-top:12px}
-}
+.side{width:auto!important;min-width:0!important}.main{display:block!important;width:auto!important;min-width:0!important;max-width:none!important}
+.hero,.grid2,.steps,.tips,.mistakes,.faq,.related{width:100%!important;max-width:none!important}.grid2{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.related-grid{width:100%!important}
+.kb-article-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0;padding:16px;border:1px solid #e1e6ef;border-radius:20px;background:#f8f9fd}
+.kb-link-card{display:flex;align-items:center;gap:12px;min-width:0;padding:14px;background:#fff;border:1px solid #e2e6ef;border-radius:14px}.kb-link-card.kb-link-primary{border-color:#d6d1ff;background:#fbfaff}
+.kb-link-icon{flex:0 0 36px;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#eeedff;color:#635bff;font-weight:900;font-size:17px}
+.kb-link-card div{min-width:0;flex:1}.kb-link-card strong{display:block;color:#172033;font-size:13px}.kb-link-card small{display:block;color:#697487;font-size:11px;line-height:1.45;margin-top:3px}.kb-link-card a{flex:0 0 auto;text-decoration:none;color:#635bff;font-size:11px;font-weight:900;white-space:nowrap}
+@media(max-width:700px){.layout{display:block!important;width:calc(100% - 20px)!important}.side{position:fixed!important;z-index:1200!important;left:12px!important;top:76px!important;width:min(320px,calc(100% - 24px))!important;height:calc(100vh - 88px)!important;max-height:none!important;transform:translateX(-120%)!important;transition:.22s!important}.side.open{transform:translateX(0)!important}.grid2{grid-template-columns:1fr!important}.kb-article-links{grid-template-columns:1fr;padding:12px}.kb-link-card{align-items:flex-start}.kb-link-card a{margin-top:4px}}
 </style>

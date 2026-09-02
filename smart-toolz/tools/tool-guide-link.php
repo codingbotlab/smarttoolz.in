@@ -1,8 +1,8 @@
 <?php
 /**
  * SmartToolz Knowledge Base CTA injector for individual tool pages.
- * This file is loaded automatically from tools/.user.ini and injects the
- * matching guide link into the rendered page without changing tool logic.
+ * Loaded automatically from tools/.user.ini. Adds each tool's matching
+ * Knowledge Base guide button inside the tool SEO intro.
  */
 if (PHP_SAPI === 'cli') {
     return;
@@ -28,12 +28,27 @@ ob_start(static function (string $html) use ($url, $title): string {
 
     $safeUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
     $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
-    $cta = '<div class="smarttoolz-kb-guide" style="margin:0 0 20px;padding:14px 16px;border:1px solid #dedcff;border-radius:14px;background:#f7f6ff">'
-        . '<a href="' . $safeUrl . '" aria-label="Read the detailed ' . $safeTitle . ' guide" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;text-decoration:none;color:#4f46d8;font-weight:800">'
-        . '<span>📖 Read the Detailed ' . $safeTitle . ' Guide →</span>'
-        . '<small style="color:#6b7280;font-size:12px;font-weight:600">Step-by-step instructions, tips &amp; visual walkthrough</small>'
-        . '</a></div>';
 
+    $cta = '<div class="smarttoolz-kb-guide" aria-label="Knowledge Base guide">'
+        . '<a href="' . $safeUrl . '" aria-label="Read the detailed ' . $safeTitle . ' guide">'
+        . '<span class="smarttoolz-kb-guide-icon" aria-hidden="true">📖</span>'
+        . '<span class="smarttoolz-kb-guide-copy">'
+        . '<strong>Guide: How to use this tool</strong>'
+        . '<small>Step-by-step instructions, tips &amp; visual walkthrough</small>'
+        . '</span>'
+        . '<span class="smarttoolz-kb-guide-arrow" aria-hidden="true">→</span>'
+        . '</a>'
+        . '</div>'
+        . '<style>.smarttoolz-kb-guide{width:100%;margin:14px 0 0}.smarttoolz-kb-guide a{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;padding:11px 14px;border:1px solid rgba(99,91,255,.18);border-radius:12px;background:linear-gradient(135deg,#f1efff,#faf9ff);color:#5146d5;text-decoration:none;box-sizing:border-box;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.smarttoolz-kb-guide a:hover{transform:translateY(-1px);border-color:rgba(99,91,255,.35);box-shadow:0 8px 22px rgba(99,91,255,.12)}.smarttoolz-kb-guide-icon{font-size:18px;line-height:1}.smarttoolz-kb-guide-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.smarttoolz-kb-guide-copy strong{font-size:12px;line-height:1.3}.smarttoolz-kb-guide-copy small{color:#727b8c;font-size:10px;line-height:1.4;font-weight:600}.smarttoolz-kb-guide-arrow{font-size:18px;font-weight:900;line-height:1}.smarttoolz-kb-guide a:focus-visible{outline:3px solid rgba(99,91,255,.22);outline-offset:2px}@media(max-width:560px){.smarttoolz-kb-guide-copy small{font-size:9px}.smarttoolz-kb-guide a{padding:10px 12px}}</style>';
+
+    // Prefer the dedicated SEO intro container on every tool page.
+    $pattern = '/(<(?:div|section|article)\b[^>]*class=["\'][^"\']*\btool-seo-intro\b[^"\']*["\'][^>]*>)/i';
+    if (preg_match($pattern, $html, $m, PREG_OFFSET_CAPTURE)) {
+        $insertAt = $m[0][1] + strlen($m[0][0]);
+        return substr($html, 0, $insertAt) . "\n" . $cta . "\n" . substr($html, $insertAt);
+    }
+
+    // Fallback for older tool templates that do not expose .tool-seo-intro.
     if (preg_match('/<body(?:\s[^>]*)?>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
         $end = $m[0][1] + strlen($m[0][0]);
         return substr($html, 0, $end) . "\n" . $cta . "\n" . substr($html, $end);

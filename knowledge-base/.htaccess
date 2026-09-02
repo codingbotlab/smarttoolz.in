@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /knowledge-base/
+
+# Keep real files/directories working normally.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Tool-specific how-to article URLs.
+RewriteRule ^([^/]+)/article/?$ article.php?tool=$1 [L,QSA]

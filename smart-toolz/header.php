@@ -38,7 +38,6 @@ if ($isLoggedIn) {
     } catch (Throwable $e) {}
 
     try {
-        require_once $_SERVER['DOCUMENT_ROOT'] . '/creator-ai/auth/config.php';
         if (($_SESSION['smarttoolz_login_notice_sid'] ?? '') !== session_id()) {
             $notify = db()->prepare('INSERT INTO smarttoolz_notifications(user_id,type,title,message) VALUES(?,?,?,?)');
             $notify->execute([(int)$_SESSION['user_id'], 'login', 'Login activity', 'You signed in to ' . $siteName . ' successfully.']);

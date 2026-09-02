@@ -2,7 +2,6 @@
 /**
  * SmartToolz: automatically inject each tool's own Knowledge Base guide CTA.
  * Loaded through tools/.user.ini so individual tool files stay untouched.
- * Batch-link workflow is also available for direct source-level CTAs.
  */
 if (defined('SMARTTOOLZ_TOOL_GUIDE_LINK')) {
     return;

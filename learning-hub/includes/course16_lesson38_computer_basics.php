@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+
+function lh_course16_lesson38_computer_basics_override(array $lesson, int $position): ?string
+{
+    if ((string)($lesson['slug'] ?? '') !== 'course-16-lesson-38') return null;
+    return <<<'HTML'
+<section class="lh-section"><h2>Accessibility Is for Everyone</h2><p>Windows accessibility tools help people see, hear, read, type and control the computer more comfortably. They can be useful for permanent disabilities, temporary difficulties, fatigue or simply personal preference.</p></section>
+<section class="lh-section"><h2>Useful Accessibility Features</h2><table class="table table-bordered"><thead><tr><th>Feature</th><th>What it helps with</th></tr></thead><tbody><tr><td>Magnifier</td><td>Zooms parts of the screen.</td></tr><tr><td>Narrator</td><td>Reads screen content aloud.</td></tr><tr><td>Text size</td><td>Makes text easier to read.</td></tr><tr><td>Contrast themes</td><td>Improves visual distinction between interface elements.</td></tr><tr><td>Mouse pointer</td><td>Changes pointer size or appearance.</td></tr><tr><td>Keyboard accessibility</td><td>Features such as Sticky Keys can help with keyboard combinations.</td></tr><tr><td>Captions</td><td>Displays spoken audio as text when supported.</td></tr><tr><td>Voice access</td><td>Can allow voice-based control on supported Windows versions.</td></tr></tbody></table></section>
+<section class="lh-section"><h2>Open Accessibility Settings</h2><p>Open <strong>Settings → Accessibility</strong> in Windows 11. You can also search for a feature such as “Magnifier”, “Narrator” or “captions” from Start.</p></section>
+<section class="lh-section"><h2>Choose the Right Tool</h2><ol><li>If text is too small, try Text size or Magnifier.</li><li>If reading the screen is difficult, explore Narrator or another supported screen reader.</li><li>If the pointer is hard to see, adjust pointer size or appearance.</li><li>If audio is difficult to follow, explore captions.</li><li>If keyboard combinations are difficult, review keyboard accessibility options.</li></ol></section>
+<section class="lh-section"><h2>Accessibility and Privacy</h2><p>Some accessibility or voice features may process information from your device or microphone. Read the relevant Windows privacy information and app permissions before enabling features that access sensitive data.</p></section>
+<section class="lh-section"><h2>Practical Activity</h2><ol><li>Open Settings → Accessibility.</li><li>Find Text size and inspect the available control.</li><li>Find Mouse pointer and touch.</li><li>Find Captions.</li><li>Find Magnifier.</li><li>Choose one feature that could make your daily computer use easier and learn where its settings are.</li></ol></section>
+<section class="lh-section"><h2>Quick Self-Check</h2><ol><li>What does Magnifier do?</li><li>What is Narrator designed to provide?</li><li>Which feature can show spoken audio as text?</li><li>Why can accessibility settings benefit many different users?</li></ol><details class="mt-3"><summary><strong>Show Answers</strong></summary><ol class="mt-3"><li>It enlarges parts of the screen.</li><li>Screen content read aloud.</li><li>Captions.</li><li>They can improve comfort, readability and control for many situations.</li></ol></details></section>
+<section class="lh-section"><h2>Key Takeaway</h2><div class="lh-callout"><strong>Accessibility is built into Windows. Learn a few core tools so you can adapt the computer to the way you see, hear, read and interact.</strong></div></section>
+HTML;
+}

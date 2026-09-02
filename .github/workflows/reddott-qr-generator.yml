@@ -33,16 +33,16 @@ jobs:
           node-version: 20
 
       - name: Verify local Python
-        shell: pwsh
+        shell: powershell
         run: |
           $python = Get-Command python -ErrorAction SilentlyContinue
-          if (-not $python) { throw 'Python 3.11 is required on the self-hosted Windows runner. Install Python.Python.3.11 and restart the runner service.' }
+          if (-not $python) { throw 'Python 3.11 is required on the self-hosted Windows runner. Install Python 3.11 and restart the runner service.' }
           $version = (& python --version 2>&1).ToString()
           Write-Host "Python detected: $version"
           if ($version -notmatch '^Python 3\.11\.') { throw "Python 3.11 is required. Detected: $version" }
 
       - name: Verify local tools
-        shell: pwsh
+        shell: powershell
         run: |
           node --version
           npm --version
@@ -52,13 +52,13 @@ jobs:
 
       - name: Install Playwright
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
-        shell: pwsh
+        shell: powershell
         run: |
           npm install
           npx playwright install chromium
 
       - name: Install Kokoro TTS
-        shell: pwsh
+        shell: powershell
         run: |
           $venv = Join-Path $env:GITHUB_WORKSPACE 'tts-venv'
           if (-not (Test-Path $venv)) {
@@ -69,12 +69,12 @@ jobs:
 
       - name: Record the real SmartToolz page
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
-        shell: pwsh
+        shell: powershell
         run: node record.js
 
       - name: Verify browser recording is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        shell: pwsh
+        shell: powershell
         run: |
           if (-not (Test-Path output/browser-demo.webm)) { throw 'browser-demo.webm was not created.' }
           $duration = [double](& ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/browser-demo.webm)
@@ -83,7 +83,7 @@ jobs:
 
       - name: Build natural narration
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        shell: pwsh
+        shell: powershell
         env:
           KOKORO_PYTHON: ${{ github.workspace }}\tts-venv\Scripts\python.exe
           KOKORO_VOICE: af_heart
@@ -92,7 +92,7 @@ jobs:
 
       - name: Verify narration is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        shell: pwsh
+        shell: powershell
         run: |
           if (-not (Test-Path output/narration.wav)) { throw 'narration.wav was not created.' }
           if (-not (Test-Path output/narration-duration.txt)) { throw 'narration-duration.txt was not created.' }
@@ -102,7 +102,7 @@ jobs:
 
       - name: Prepare Remotion public assets
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
-        shell: pwsh
+        shell: powershell
         run: |
           New-Item -ItemType Directory -Force public, out | Out-Null
           Copy-Item ..\output\browser-demo.webm public\browser-demo.webm -Force
@@ -112,12 +112,12 @@ jobs:
 
       - name: Render final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
-        shell: pwsh
+        shell: powershell
         run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23 --concurrency=2 --log=verbose
 
       - name: Verify final MP4 is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        shell: pwsh
+        shell: powershell
         run: |
           if (-not (Test-Path remotion/out/qr-generator.mp4)) { throw 'Final MP4 was not created.' }
           $duration = [double](& ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 remotion/out/qr-generator.mp4)
@@ -126,12 +126,12 @@ jobs:
 
       - name: Create thumbnail
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        shell: pwsh
+        shell: powershell
         run: ffmpeg -y -ss 00:00:05 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
 
       - name: Upload to YouTube with SEO and Smart Toolz playlist
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        shell: pwsh
+        shell: powershell
         env:
           VIDEO_PATH: remotion/out/qr-generator.mp4
           THUMBNAIL_PATH: output/thumbnail.png
@@ -153,4 +153,5 @@ jobs:
 # This workflow intentionally targets the user's self-hosted Windows PC so the private-repo
 # video pipeline does not consume GitHub-hosted Actions minutes. Python is preinstalled on the
 # Windows runner instead of using actions/setup-python, avoiding the host's PowerShell policy.
+# Windows PowerShell is used because PowerShell 7 (pwsh) is not installed on the runner.
 # Upload happens only after the real browser recording, natural narration, and final MP4 pass <=60s checks.

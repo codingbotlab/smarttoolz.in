@@ -5,7 +5,7 @@ $admin = requireAdmin();
 $db = adminDb();
 function av4h(mixed $v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 $tab = (string)($_GET['tab'] ?? 'dashboard');
-$allowed = ['dashboard','analytics','downloads','ads','settings','users','database','categories'];
+$allowed = ['dashboard','analytics','user-events','downloads','ads','settings','users','database','categories'];
 if (!in_array($tab, $allowed, true)) $tab = 'dashboard';
 $tabFile = __DIR__ . '/tabs/' . $tab . '.php';
 if (!is_file($tabFile)) $tabFile = __DIR__ . '/tabs/dashboard.php';
@@ -15,6 +15,7 @@ $flash = (string)($_SESSION['admin_flash'] ?? ''); unset($_SESSION['admin_flash'
 $labels = [
     'dashboard' => ['Dashboard','Live site overview'],
     'analytics' => ['Analytics','Traffic, audience and acquisition intelligence'],
+    'user-events' => ['User Events','Lifetime visitor history and investigation'],
     'downloads' => ['Downloads','Download activity and conversion details'],
     'ads' => ['Ads Manager','Placements, status and ad inventory'],
     'settings' => ['Settings','Application configuration'],
@@ -41,6 +42,7 @@ $labels = [
   <nav class="av4-nav">
     <a class="<?= $tab==='dashboard'?'active':'' ?>" href="?tab=dashboard">🏠<span>Dashboard</span></a>
     <a class="<?= $tab==='analytics'?'active':'' ?>" href="?tab=analytics">📈<span>Analytics</span></a>
+    <a class="<?= $tab==='user-events'?'active':'' ?>" href="?tab=user-events">🕵️<span>User Events</span></a>
     <a class="<?= $tab==='downloads'?'active':'' ?>" href="?tab=downloads">📥<span>Downloads</span></a>
     <a class="<?= $tab==='users'?'active':'' ?>" href="?tab=users">👥<span>Users & Credits</span></a>
     <a class="<?= $tab==='ads'?'active':'' ?>" href="?tab=ads">📣<span>Ads Manager</span></a>

@@ -60,7 +60,7 @@ body > main.tool-wrapper{width:100%!important;max-width:none!important}
     if(!how||how.querySelector('.smarttoolz-guide-link'))return;
 
     const file=(location.pathname.split('/').pop()||'').replace(/\.php$/,'');
-    if(!file||file==='image-background-remover')return;
+    if(!file)return;
 
     const href=`/knowledge-base/${encodeURIComponent(file)}/article/`;
     const link=document.createElement('a');

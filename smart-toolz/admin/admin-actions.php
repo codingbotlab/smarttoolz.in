@@ -28,8 +28,6 @@ try {
         $id=(int)($_POST['id']??0);if($id>0){$q=$db->prepare('DELETE FROM smarttoolz_settings WHERE id=?');$q->execute([$id]);adminAudit('delete_setting','smarttoolz_settings',(string)$id);}
     } elseif($action==='user_role') {
         $id=(int)($_POST['id']??0);$role=(string)($_POST['role']??'user');if(!in_array($role,['user','admin','superadmin'],true))$role='user';$q=$db->prepare('SELECT email FROM creator_users WHERE id=? LIMIT 1');$q->execute([$id]);$email=(string)$q->fetchColumn();if(strtolower($email)===strtolower(SMARTTOOLZ_ADMIN_EMAIL))$role='admin';$q=$db->prepare('UPDATE creator_users SET role=? WHERE id=?');$q->execute([$role,$id]);adminAudit('change_user_role','creator_users',(string)$id,$email.' => '.$role);
-    } elseif($action==='user_credits') {
-        $id=(int)($_POST['id']??0);$credits=max(0,(int)($_POST['credits']??0));$daily=max(0,(int)($_POST['daily_credits']??0));$q=$db->prepare('UPDATE creator_users SET credits=?,daily_credits=? WHERE id=?');$q->execute([$credits,$daily,$id]);adminAudit('update_user_credits','creator_users',(string)$id,'credits='.$credits.',daily='.$daily);
     }
     $_SESSION['admin_flash']='Saved successfully.';
 } catch(Throwable $e){$_SESSION['admin_flash']=$e->getMessage();}

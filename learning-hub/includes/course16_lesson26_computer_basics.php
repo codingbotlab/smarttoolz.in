@@ -39,7 +39,7 @@ function lh_course16_lesson26_computer_basics_override(array $lesson, int $posit
     <li><strong>Sync:</strong> keep a local folder and cloud copy coordinated so changes can be reflected across devices.</li>
     <li><strong>Share:</strong> give other people access to a file or folder according to the permissions you choose.</li>
   </ul>
-  <p>For example, OneDrive can sync files between your computer and the cloud, so changes made in the synced folder can be reflected online and across other connected devices. citeturn0search0</p>
+  <p>For example, OneDrive can sync files between your computer and the cloud, so changes made in the synced folder can be reflected online and across other connected devices.</p>
 </section>
 
 <section class="lh-topic">
@@ -53,7 +53,7 @@ function lh_course16_lesson26_computer_basics_override(array $lesson, int $posit
     <li>Wait for the upload to finish.</li>
     <li>Confirm that the file appears in the correct cloud folder.</li>
   </ol>
-  <p>For example, OneDrive supports uploading files or folders through its website, and Google Drive provides file and folder upload options. citeturn0search6turn0search12</p>
+  <p>OneDrive supports uploading files or folders through its website, and Google Drive provides file and folder upload options.</p>
 </section>
 
 <section class="lh-topic">
@@ -100,20 +100,20 @@ function lh_course16_lesson26_computer_basics_override(array $lesson, int $posit
   <h2>🛡️ Cloud Storage Is Not Automatically a Backup</h2>
   <p>People often say “my files are in the cloud, so they are backed up.” That can be misleading. If a synced file is deleted or changed, that change may also synchronize to the cloud. A separate backup strategy can still be important.</p>
   <div class="lh-callout"><strong>Remember:</strong> <strong>sync</strong> keeps locations coordinated; <strong>backup</strong> is a separate recoverable copy designed to help you restore data after loss or damage.</div>
-  <p>Some cloud services provide folder backup and recovery features, but you should understand exactly what the service protects before treating it as your only backup. OneDrive, for example, provides options for backing up important Windows folders such as Desktop, Documents, Pictures, and Videos. citeturn0search1</p>
+  <p>Some cloud services provide folder backup and recovery features, but you should understand exactly what the service protects before treating it as your only backup. OneDrive, for example, provides options for backing up important Windows folders such as Desktop, Documents, Pictures, and Videos.</p>
 </section>
 
 <section class="lh-topic">
   <h2>💾 Files On-Demand and Device Space</h2>
   <p>Some cloud applications let you see cloud files in File Explorer without keeping every file fully downloaded on the device. This can save local disk space.</p>
-  <p>OneDrive's Files On-Demand can show files that are online-only, locally available, or always available, allowing you to choose what stays downloaded on the computer. citeturn0search0turn0search8</p>
+  <p>OneDrive's Files On-Demand can show files that are online-only, locally available, or always available, allowing you to choose what stays downloaded on the computer.</p>
   <div class="lh-callout"><strong>Important:</strong> online-only files may require an Internet connection before you can open their full contents.</div>
 </section>
 
 <section class="lh-topic">
   <h2>📱 Access From Multiple Devices</h2>
   <p>One major benefit of cloud storage is access from more than one device. You can sign in to the same service on a computer, phone, tablet, or browser and access files according to the service's settings.</p>
-  <p>For example, Microsoft describes OneDrive as allowing synced files to be accessed from a computer, mobile device, or the OneDrive website. citeturn0search0</p>
+  <p>For example, Microsoft describes OneDrive as allowing synced files to be accessed from a computer, mobile device, or the OneDrive website.</p>
   <p>This is useful when you start work on one device and need the same file on another.</p>
 </section>
 
@@ -140,7 +140,7 @@ function lh_course16_lesson26_computer_basics_override(array $lesson, int $posit
     <li>Check whether synchronization has completed.</li>
     <li>Look for version history or recovery options if the service provides them.</li>
   </ol>
-  <p>Microsoft recommends starting a missing-file search on the OneDrive website because it represents the cloud storage used across devices. citeturn0search10</p>
+  <p>Microsoft recommends starting a missing-file search on the OneDrive website because it represents the cloud storage used across devices.</p>
 </section>
 
 <section class="lh-topic">

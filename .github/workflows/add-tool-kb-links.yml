@@ -1,0 +1,125 @@
+name: Add KB links to tool pages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-tool-kb-links.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  add-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add direct Knowledge Base links
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          tools = {
+              'image-background-remover':'Image Background Remover',
+              'image-compressor':'Image Compressor',
+              'image-resizer':'Image Resizer',
+              'jpg-to-png':'JPG to PNG',
+              'png-to-jpg':'PNG to JPG',
+              'word-counter':'Word Counter',
+              'case-converter':'Case Converter',
+              'qr-generator':'QR Code Generator',
+              'password-generator':'Password Generator',
+              'json-formatter':'JSON Formatter',
+              'url-encoder':'URL Encoder',
+              'pdf-to-jpg':'PDF to JPG',
+              'remove-duplicate-lines':'Duplicate Line Remover',
+              'image-cropper':'Image Cropper',
+              'image-rotator':'Image Rotator',
+              'image-flipper':'Image Flipper',
+              'webp-to-jpg':'WebP to JPG',
+              'jpg-to-webp':'JPG to WebP',
+              'png-to-webp':'PNG to WebP',
+              'gif-to-jpg':'GIF to JPG',
+              'gif-maker':'GIF Maker',
+              'meme-generator':'Meme Generator',
+              'color-picker':'Color Picker',
+              'color-converter':'Color Converter',
+              'base64-encoder':'Base64 Encoder',
+              'base64-decoder':'Base64 Decoder',
+              'url-decoder':'URL Decoder',
+              'html-encoder':'HTML Encoder',
+              'html-decoder':'HTML Decoder',
+              'markdown-to-html':'Markdown to HTML',
+              'text-to-slug':'Text to Slug',
+              'remove-extra-spaces':'Remove Extra Spaces',
+              'sort-lines':'Sort Lines',
+              'reverse-text':'Reverse Text',
+              'pdf-merger':'PDF Merger',
+              'pdf-splitter':'PDF Splitter',
+              'pdf-compressor':'PDF Compressor',
+              'pdf-to-png':'PDF to PNG',
+              'png-to-pdf':'PNG to PDF',
+              'text-to-pdf':'Text to PDF',
+              'qr-reader':'QR Code Reader',
+              'random-number-generator':'Random Number Generator',
+              'uuid-generator':'UUID Generator',
+              'timestamp-converter':'Timestamp Converter',
+              'unix-timestamp':'Unix Timestamp',
+              'lorem-ipsum-generator':'Lorem Ipsum Generator',
+              'age-calculator':'Age Calculator',
+              'percentage-calculator':'Percentage Calculator',
+              'bmi-calculator':'BMI Calculator',
+              'unit-converter':'Unit Converter',
+              'stopwatch-timer':'Stopwatch / Timer',
+          }
+
+          style = '''\n<style id="smarttoolz-kb-link-style">.guide-link{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 20px;padding:14px 16px;border:1px solid #dedcff;border-radius:14px;background:#f7f6ff;text-decoration:none;color:#4f46d8;font-weight:800}.guide-link span{display:block}.guide-link small{color:#6b7280;font-size:12px;font-weight:600}@media(max-width:800px){.guide-link{align-items:flex-start;flex-direction:column;gap:5px}}</style>\n'''
+
+          root = Path('smart-toolz/tools')
+          for slug, name in tools.items():
+              path = root / f'{slug}.php'
+              if not path.exists():
+                  print(f'SKIP missing: {path}')
+                  continue
+              text = path.read_text(encoding='utf-8')
+              if f'/knowledge-base/{slug}/article/' in text:
+                  print(f'OK already linked: {path}')
+                  continue
+
+              link = f'''<a class="guide-link" href="/knowledge-base/{slug}/article/" aria-label="Read the detailed {name} guide"><span>📖 Read the Detailed {name} Guide →</span><small>Step-by-step instructions, tips &amp; visual walkthrough</small></a>'''
+
+              # Prefer the tool's main wrapper. Fall back to the first <main> if needed.
+              match = re.search(r'(<div[^>]*class=["\'][^"\']*\btool\b[^"\']*["\'][^>]*>)', text, re.I)
+              if not match:
+                  match = re.search(r'(<main\b[^>]*>)', text, re.I)
+              if not match:
+                  print(f'SKIP no insertion point: {path}')
+                  continue
+
+              insert_at = match.end()
+              text = text[:insert_at] + '\n' + link + text[insert_at:]
+
+              # Add CSS only when this page does not already define the class.
+              if 'guide-link{' not in text and '.guide-link' not in text:
+                  head = re.search(r'</head>', text, re.I)
+                  if head:
+                      text = text[:head.start()] + style + text[head.start():]
+                  else:
+                      text = style + text
+
+              path.write_text(text, encoding='utf-8')
+              print(f'UPDATED: {path}')
+
+      - name: Commit and push
+        run: |
+          git config user.name "smarttoolz-bot"
+          git config user.email "actions@smarttoolz.in"
+          git add smart-toolz/tools/*.php
+          if git diff --cached --quiet; then
+            echo "No tool pages needed changes."
+            exit 0
+          fi
+          git commit -m "Add direct Knowledge Base links to all tool pages"
+          git push

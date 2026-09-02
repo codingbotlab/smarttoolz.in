@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const root = path.dirname(new URL(import.meta.url).pathname);
-const python = process.env.KOKORO_PYTHON || 'python3';
+const root = path.dirname(fileURLToPath(import.meta.url));
+const python = process.env.KOKORO_PYTHON || 'python';
 const ttsScript = path.join(root, 'tts_kokoro.py');
 const out = path.join(root, 'output', 'voice');
 fs.mkdirSync(out, { recursive: true });

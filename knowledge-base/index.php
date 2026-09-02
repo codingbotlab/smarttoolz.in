@@ -1,42 +1,10 @@
 <?php
 declare(strict_types=1);
-
-// Knowledge Base landing page. Generated guides are linked here automatically.
-$root = __DIR__;
+define('SMARTTOOLZ_HOME_REGISTRY', true);
+require_once __DIR__ . '/../smart-toolz/tool.php';
 $entries = [];
-
-foreach (glob($root . '/*', GLOB_ONLYDIR) ?: [] as $dir) {
-    $slug = basename($dir);
-    if ($slug === '_generated' || str_starts_with($slug, '.')) {
-        continue;
-    }
-    $article = $dir . '/article/index.php';
-    if (is_file($article)) {
-        $entries[] = $slug;
-    }
+foreach ($tools as $tool) {
+    $path = trim((string)parse_url($tool['url'], PHP_URL_PATH), '/');
+    $entries[] = ['slug'=>basename($path, '.php'), 'name'=>$tool['name'], 'category'=>$tool['category'], 'description'=>$tool['description'], 'icon'=>$tool['icon']];
 }
-sort($entries, SORT_NATURAL | SORT_FLAG_CASE);
-?><!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SmartToolz How-to Knowledge Base</title>
-<meta name="description" content="Step-by-step how-to guides, images and videos for SmartToolz.">
-<style>
-body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#f7f8fc;color:#172033}main{max-width:1100px;margin:auto;padding:48px 20px}h1{margin:0 0 10px;font-size:36px}p{color:#657084}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:28px}.card{display:block;padding:22px;background:#fff;border:1px solid #e5e8ef;border-radius:16px;text-decoration:none;color:inherit}.card:hover{box-shadow:0 10px 28px rgba(20,30,60,.08)}.empty{padding:24px;background:#fff;border-radius:16px;border:1px dashed #ccd2df}
-</style>
-</head>
-<body><main>
-<h1>SmartToolz How-to Guides</h1>
-<p>Learn how to use SmartToolz tools with step-by-step instructions, images and videos.</p>
-<?php if (!$entries): ?>
-<div class="empty">Guides are being prepared. Generated guides will appear here automatically.</div>
-<?php else: ?>
-<div class="grid">
-<?php foreach ($entries as $slug): ?>
-<a class="card" href="<?= htmlspecialchars('/knowledge-base/' . rawurlencode($slug) . '/article/', ENT_QUOTES, 'UTF-8') ?>"><strong><?= htmlspecialchars(ucwords(str_replace('-', ' ', $slug)), ENT_QUOTES, 'UTF-8') ?></strong><br><small>Open how-to guide →</small></a>
-<?php endforeach; ?>
-</div>
-<?php endif; ?>
-</main></body></html>
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SmartToolz Knowledge Base — How to Use Every Tool</title><meta name="description" content="Step-by-step how-to guides for every SmartToolz tool."><style>body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#f7f8fc;color:#172033}main{max-width:1180px;margin:auto;padding:44px 18px 70px}.hero{background:#fff;border:1px solid #e4e8f0;border-radius:22px;padding:32px;margin-bottom:22px}.tag{color:#635bff;font-size:11px;font-weight:900;letter-spacing:1px}.hero h1{font-size:clamp(32px,5vw,50px);letter-spacing:-2px;margin:8px 0}.hero p{color:#667184;line-height:1.7;margin:0}.search{width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid #e0e5ed;border-radius:13px;background:#fff;outline:none;margin:0 0 18px;font-size:14px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{display:flex;flex-direction:column;padding:19px;background:#fff;border:1px solid #e4e8f0;border-radius:17px;text-decoration:none;color:inherit;min-height:170px}.card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(20,30,60,.08)}.icon{font-size:23px}.cat{font-size:10px;color:#635bff;font-weight:900;text-transform:uppercase;margin-top:12px}.card strong{font-size:16px;margin-top:5px}.card p{font-size:12px;color:#6b7688;line-height:1.5;margin:7px 0}.open{margin-top:auto;color:#635bff;font-size:12px;font-weight:900}.count{color:#687387;font-size:12px;margin-bottom:10px}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.grid{grid-template-columns:1fr}.hero{padding:25px}}</style></head><body><main><section class="hero"><div class="tag">SMARTTOOLZ KNOWLEDGE BASE</div><h1>How to Use Every Tool</h1><p>Choose a tool to get its matching step-by-step guide. No random articles, no video section — each guide points directly to the tool it explains.</p></section><div class="count"><?=count($entries)?> tool guides available</div><input class="search" id="kbSearch" type="search" placeholder="Search a tool or category…" autocomplete="off"><div class="grid" id="kbGrid"><?php foreach($entries as $e): ?><a class="card" data-search="<?=htmlspecialchars(strtolower($e['name'].' '.$e['category'].' '.$e['description']),ENT_QUOTES,'UTF-8')?>" href="/knowledge-base/<?=rawurlencode($e['slug'])?>/article/"><span class="icon"><?=htmlspecialchars($e['icon'],ENT_QUOTES,'UTF-8')?></span><span class="cat"><?=htmlspecialchars($e['category'],ENT_QUOTES,'UTF-8')?></span><strong><?=htmlspecialchars($e['name'],ENT_QUOTES,'UTF-8')?></strong><p><?=htmlspecialchars($e['description'],ENT_QUOTES,'UTF-8')?></p><span class="open">Read how-to guide →</span></a><?php endforeach;?></div></main><script>const q=document.getElementById('kbSearch'),cards=[...document.querySelectorAll('.card')];q.addEventListener('input',()=>{const v=q.value.toLowerCase().trim();cards.forEach(c=>c.hidden=!!v&&!c.dataset.search.includes(v))});</script></body></html>

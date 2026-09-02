@@ -25,32 +25,35 @@ jobs:
           header = Path('smart-toolz/header.php')
           s = header.read_text()
 
-          # Remove trial configuration/state and guest-status lookup.
           s = re.sub(r"\n\$guestTrialEnabled\s*=.*?;\n\$guestTrialTotal\s*=.*?;", "", s, count=1, flags=re.S)
           s = re.sub(r"\n\$guestTrialUsed\s*=.*?;\n\$guestTrialExhausted\s*=.*?;\n\nif \(!\$isLoggedIn && \$isToolPage.*?\n}\n", "\n", s, count=1, flags=re.S)
 
-          # Keep login notification functionality without the trial library.
           old = """    try {\n        require_once $_SERVER['DOCUMENT_ROOT'] . '/smart-toolz/lib/trials.php';\n        if (($_SESSION['smarttoolz_login_notice_sid'] ?? '') !== session_id()) {\n            smarttoolz_notify((int)$_SESSION['user_id'], 'login', 'Login activity', 'You signed in to ' . $siteName . ' successfully.');\n            $_SESSION['smarttoolz_login_notice_sid'] = session_id();\n        }\n    } catch (Throwable $e) {}\n"""
           new = """    try {\n        if (($_SESSION['smarttoolz_login_notice_sid'] ?? '') !== session_id()) {\n            $notify = db()->prepare('INSERT INTO smarttoolz_notifications(user_id,type,title,message) VALUES(?,?,?,?)');\n            $notify->execute([(int)$_SESSION['user_id'], 'login', 'Login activity', 'You signed in to ' . $siteName . ' successfully.']);\n            $_SESSION['smarttoolz_login_notice_sid'] = session_id();\n        }\n    } catch (Throwable $e) {}\n"""
           if old not in s:
               raise SystemExit('header login-notification block not found')
           s = s.replace(old, new, 1)
 
-          # Remove the guest trial lock/notice while keeping the normal SEO intro.
-          s = re.sub(r"\n<\?php if \(\$isToolPage && !\$isLoggedIn && \$guestTrialEnabled.*?\?>\n.*?\n<\?php else: \?>", "\n<?php if (false): ?>", s, count=1, flags=re.S)
-          s = s.replace('<?php if (false): ?>\n<section class="trial-lock"', '<?php if (false): ?>\n<section class="trial-lock"', 1)
-          # The previous replacement intentionally leaves the dead branch; remove it cleanly.
-          s = re.sub(r"\n<\?php if \(false\): \?>\n<section class=\"trial-lock\".*?\n<\?php else: \?>", "", s, count=1, flags=re.S)
-          s = re.sub(r"\n<\?php if \(\$isToolPage && !\$isLoggedIn && \$guestTrialEnabled.*?\n<\?php elseif \(\$isToolPage && !\$isLoggedIn && !\$guestTrialEnabled\): \?>.*?\n<\?php endif; \?>", "", s, count=1, flags=re.S)
-          # Remove trial-specific CSS.
-          s = re.sub(r"\.trial-note\{.*?\}\.trial-note \.material-symbols-rounded\{.*?\}\.trial-lock\{.*?\}@media", "@media", s, count=1, flags=re.S)
-          s = re.sub(r"\.trial-login,.trial-other\{.*?\}\.trial-login\{.*?\}\.trial-other\{.*?\}", "", s, count=1, flags=re.S)
-          s = re.sub(r"\.trial-lock-icon\{.*?\}\.trial-lock-icon \.material-symbols-rounded\{.*?\}\.trial-lock h1\{.*?\}\.trial-lock p\{.*?\}\.trial-lock-actions\{.*?\}", "", s, count=1, flags=re.S)
-          s = re.sub(r"\.trial-lock\{.*?\}@media", "@media", s, count=1, flags=re.S)
-          s = s.replace('.trial-lock{width:min(100% - 24px,1400px);padding:22px;flex-direction:column}.trial-lock-icon{width:50px;height:50px;flex-basis:50px}.trial-lock h1{font-size:23px}', '')
+          # Remove trial lock and the entire trial-note branches, retaining the SEO intro.
+          s = re.sub(r"\n<\?php if \(\$isToolPage && !\$isLoggedIn && \$guestTrialEnabled.*?\?>\n.*?\n<\?php else: \?>", "", s, count=1, flags=re.S)
+          s = re.sub(r"\n<\?php if \(\$isToolPage && !\$isLoggedIn && \$guestTrialEnabled.*?\n<\?php endif; \?>", "", s, count=1, flags=re.S)
+
+          # Remove all CSS rules whose selectors are dedicated to the old trial UI.
+          s = re.sub(r"\.trial-note\{[^}]*\}\.trial-note \.material-symbols-rounded\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-login,.trial-other\{[^}]*\}\.trial-login\{[^}]*\}\.trial-other\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock\{[^}]*\}\.trial-lock-icon\{[^}]*\}\.trial-lock-icon \.material-symbols-rounded\{[^}]*\}\.trial-lock h1\{[^}]*\}\.trial-lock p\{[^}]*\}\.trial-lock-actions\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock-icon\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock h1\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock h1\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock p\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-lock-actions\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-login\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-other\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-note\{[^}]*\}", "", s)
+          s = re.sub(r"\.trial-note \.material-symbols-rounded\{[^}]*\}", "", s)
           header.write_text(s)
 
-          # Notifications API no longer depends on the trial library.
           api = Path('smart-toolz/api/notifications.php')
           a = api.read_text()
           a = a.replace("require_once dirname(__DIR__) . '/lib/trials.php';", "require_once dirname(__DIR__, 2) . '/creator-ai/auth/config.php';")
@@ -60,11 +63,9 @@ jobs:
           a = a.replace("smarttoolz_notification_list($userId, 25)", "(function() use ($db, $userId) { $q=$db->prepare('SELECT id,type,title,message,read_at,created_at FROM smarttoolz_notifications WHERE user_id=? ORDER BY id DESC LIMIT 25'); $q->execute([$userId]); return $q->fetchAll(PDO::FETCH_ASSOC); })()")
           api.write_text(a)
 
-          # Remove the dedicated trial endpoints/library.
-          for p in ['smart-toolz/lib/trials.php', 'smart-toolz/api/trial.php']:
-              Path(p).unlink(missing_ok=True)
+          Path('smart-toolz/lib/trials.php').unlink(missing_ok=True)
+          Path('smart-toolz/api/trial.php').unlink(missing_ok=True)
 
-          # Remove trial table definition from the Creator AI schema.
           dbsql = Path('creator-ai/auth/database.sql')
           d = dbsql.read_text()
           d = re.sub(r"\nCREATE TABLE IF NOT EXISTS smarttoolz_tool_trials \(.*?\n\) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n", "\n", d, count=1, flags=re.S)
@@ -79,7 +80,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git commit -m 'chore: remove site-wide trial system' || exit 0
+          git commit -m 'chore: remove site-wide trial system'
           git push
 
           rm -f .github/workflows/remove-trial-system.yml

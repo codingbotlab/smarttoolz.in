@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+
+function lh_course16_lesson39_computer_basics_override(array $lesson, int $position): ?string
+{
+    if ((string)($lesson['slug'] ?? '') !== 'course-16-lesson-39') return null;
+    return <<<'HTML'
+<section class="lh-section"><h2>Why Date, Time and Language Matter</h2><p>Windows uses date, time, time zone, region and language settings for calendars, timestamps, file information, scheduled tasks and many applications. A wrong clock can also cause problems with websites and security certificates.</p></section>
+<section class="lh-section"><h2>Automatic Time</h2><p>For most users, Windows should be configured to set the time automatically and use the correct time zone. Open <strong>Settings → Time & language → Date & time</strong> to review these settings.</p><ol><li>Check the displayed date and time.</li><li>Check the time zone.</li><li>Use automatic time when appropriate.</li><li>Use the sync option when Windows provides it.</li></ol></section>
+<section class="lh-section"><h2>Language and Keyboard</h2><p>Windows can support multiple display languages and keyboard layouts. The display language controls much of the interface, while the keyboard layout controls how physical keys produce characters.</p><div class="lh-callout"><strong>Example:</strong> You can have an English Windows interface while also installing another keyboard layout for typing in a different language.</div></section>
+<section class="lh-section"><h2>Region and Formats</h2><p>Regional settings influence formats such as dates, numbers and currency. If a date appears in an unexpected order or a decimal separator looks different, check the region and format settings before assuming the file or application is wrong.</p></section>
+<section class="lh-section"><h2>Common Problems</h2><table class="table table-bordered"><thead><tr><th>Problem</th><th>First checks</th></tr></thead><tbody><tr><td>Wrong clock</td><td>Automatic time, time zone and synchronization.</td></tr><tr><td>Wrong keyboard characters</td><td>Active keyboard layout/input language.</td></tr><tr><td>Unexpected date format</td><td>Region and regional format.</td></tr><tr><td>Missing language</td><td>Installed language packs and keyboard layouts.</td></tr></tbody></table></section>
+<section class="lh-section"><h2>Practical Activity</h2><ol><li>Open Settings → Time & language.</li><li>Check Date & time.</li><li>Check the time zone.</li><li>Review Language & region.</li><li>Identify the active keyboard layout.</li><li>Observe how changing input language affects typing, without changing your normal settings permanently.</li></ol></section>
+<section class="lh-section"><h2>Quick Self-Check</h2><ol><li>Why is the time zone important?</li><li>What is the difference between display language and keyboard layout?</li><li>What can regional settings change?</li><li>What should you check when the Windows clock is wrong?</li></ol><details class="mt-3"><summary><strong>Show Answers</strong></summary><ol class="mt-3"><li>It determines the correct local time.</li><li>Display language affects the interface; keyboard layout affects typing/input.</li><li>Date, number and other regional formats.</li><li>Automatic time, time zone and synchronization.</li></ol></details></section>
+<section class="lh-section"><h2>Key Takeaway</h2><div class="lh-callout"><strong>Keep the clock, time zone, region and keyboard settings correct. These small settings affect everyday work across Windows and many applications.</strong></div></section>
+HTML;
+}

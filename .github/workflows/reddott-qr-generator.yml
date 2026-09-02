@@ -20,7 +20,8 @@ env:
 
 jobs:
   build-publish:
-    runs-on: ubuntu-latest
+    # Self-hosted Windows runner: no GitHub-hosted Actions minutes are consumed.
+    runs-on: [self-hosted, windows, x64]
     timeout-minutes: 40
     steps:
       - name: Checkout
@@ -36,99 +37,103 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install system tools
+      - name: Verify local tools
+        shell: pwsh
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          node --version
+          npm --version
+          python --version
+          ffmpeg -version
+          ffprobe -version
 
       - name: Install Playwright
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
+        shell: pwsh
         run: |
           npm install
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
 
       - name: Install Kokoro TTS
+        shell: pwsh
         run: |
-          python -m venv "$GITHUB_WORKSPACE/tts-venv"
-          "$GITHUB_WORKSPACE/tts-venv/bin/python" -m pip install --upgrade pip
-          "$GITHUB_WORKSPACE/tts-venv/bin/pip" install "kokoro>=0.9.4" soundfile
+          $venv = Join-Path $env:GITHUB_WORKSPACE 'tts-venv'
+          if (-not (Test-Path $venv)) {
+            python -m venv $venv
+          }
+          & (Join-Path $venv 'Scripts/python.exe') -m pip install --upgrade pip
+          & (Join-Path $venv 'Scripts/pip.exe') install 'kokoro>=0.9.4' soundfile
 
       - name: Record the real SmartToolz page
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
+        shell: pwsh
         run: node record.js
 
       - name: Verify browser recording is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        shell: pwsh
         run: |
-          test -s output/browser-demo.webm
-          DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/browser-demo.webm)
-          echo "Browser recording duration: ${DURATION}s"
-          python - "$DURATION" <<'PY'
-          import sys
-          duration = float(sys.argv[1])
-          if duration > 60.25:
-              raise SystemExit(f"Browser recording exceeds 60 seconds: {duration:.3f}s")
-          PY
+          if (-not (Test-Path output/browser-demo.webm)) { throw 'browser-demo.webm was not created.' }
+          $duration = [double](& ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/browser-demo.webm)
+          Write-Host "Browser recording duration: $duration seconds"
+          if ($duration -gt 60.25) { throw "Browser recording exceeds 60 seconds: $duration" }
 
       - name: Build natural narration
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        shell: pwsh
         env:
-          KOKORO_PYTHON: ${{ github.workspace }}/tts-venv/bin/python
+          KOKORO_PYTHON: ${{ github.workspace }}\tts-venv\Scripts\python.exe
           KOKORO_VOICE: af_heart
           KOKORO_SPEED: '1.0'
         run: node build-narration.mjs
 
       - name: Verify narration is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        shell: pwsh
         run: |
-          test -s output/narration.wav
-          test -s output/narration-duration.txt
-          cat output/narration-duration.txt
-          python - <<'PY'
-          from pathlib import Path
-          duration = float(Path('output/narration-duration.txt').read_text().strip())
-          if duration > 60:
-              raise SystemExit(f'Narration exceeds 60 seconds: {duration:.3f}s')
-          PY
+          if (-not (Test-Path output/narration.wav)) { throw 'narration.wav was not created.' }
+          if (-not (Test-Path output/narration-duration.txt)) { throw 'narration-duration.txt was not created.' }
+          $duration = [double](Get-Content output/narration-duration.txt)
+          Write-Host "Narration duration: $duration seconds"
+          if ($duration -gt 60) { throw "Narration exceeds 60 seconds: $duration" }
 
       - name: Prepare Remotion public assets
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
+        shell: pwsh
         run: |
-          mkdir -p public out
-          cp ../output/browser-demo.webm public/browser-demo.webm
-          cp ../output/narration.wav public/narration.wav
-          cp ../output/narration-duration.txt public/narration-duration.txt
+          New-Item -ItemType Directory -Force public, out | Out-Null
+          Copy-Item ..\output\browser-demo.webm public\browser-demo.webm -Force
+          Copy-Item ..\output\narration.wav public\narration.wav -Force
+          Copy-Item ..\output\narration-duration.txt public\narration-duration.txt -Force
           npm install
 
       - name: Render final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
+        shell: pwsh
         run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23 --concurrency=2 --log=verbose
 
       - name: Verify final MP4 is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        shell: pwsh
         run: |
-          test -s remotion/out/qr-generator.mp4
-          DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 remotion/out/qr-generator.mp4)
-          echo "Final MP4 duration: ${DURATION}s"
-          python - "$DURATION" <<'PY'
-          import sys
-          duration = float(sys.argv[1])
-          if duration > 60.25:
-              raise SystemExit(f'Final MP4 exceeds 60 seconds: {duration:.3f}s')
-          PY
+          if (-not (Test-Path remotion/out/qr-generator.mp4)) { throw 'Final MP4 was not created.' }
+          $duration = [double](& ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 remotion/out/qr-generator.mp4)
+          Write-Host "Final MP4 duration: $duration seconds"
+          if ($duration -gt 60.25) { throw "Final MP4 exceeds 60 seconds: $duration" }
 
       - name: Create thumbnail
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        shell: pwsh
         run: ffmpeg -y -ss 00:00:05 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
 
       - name: Upload to YouTube with SEO and Smart Toolz playlist
         working-directory: Reddott-films/knowledge-videos/qr-generator
+        shell: pwsh
         env:
           VIDEO_PATH: remotion/out/qr-generator.mp4
           THUMBNAIL_PATH: output/thumbnail.png
-        run: python "$GITHUB_WORKSPACE/Reddott-films/youtube/upload_video.py"
+        run: python "$env:GITHUB_WORKSPACE/Reddott-films/youtube/upload_video.py"
 
-      - name: Upload workflow artifacts
+      - name: Save workflow artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
@@ -141,4 +146,6 @@ jobs:
             Reddott-films/knowledge-videos/qr-generator/output/narration.wav
             Reddott-films/knowledge-videos/qr-generator/output/narration-duration.txt
 
-# Upload happens only after the real browser recording, natural narration, and final MP4 pass the <=60s checks.
+# This workflow intentionally targets the user's self-hosted Windows PC so the private-repo
+# video pipeline does not consume GitHub-hosted Actions minutes. Upload happens only after
+# the real browser recording, natural narration, and final MP4 pass the <=60s checks.

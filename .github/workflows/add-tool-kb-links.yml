@@ -12,7 +12,7 @@ permissions:
 jobs:
   add-kb-links:
     if: github.actor != 'github-actions[bot]'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,30 +35,18 @@ jobs:
               guide = f'/knowledge-base/{slug}/article/'
               if guide in text:
                   continue
-
               title = re.sub(r'[-_]+', ' ', slug).title()
-              link = (
-                  f'<div class="smarttoolz-kb-guide" style="margin:0 0 20px;padding:14px 16px;'
-                  f'border:1px solid #dedcff;border-radius:14px;background:#f7f6ff">'
-                  f'<a href="{guide}" aria-label="Read the detailed {title} guide" '
-                  f'style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;'
-                  f'gap:8px;text-decoration:none;color:#4f46d8;font-weight:800">'
-                  f'<span>📖 Read the Detailed {title} Guide →</span>'
-                  f'<small style="color:#6b7280;font-size:12px;font-weight:600">'
-                  f'Step-by-step instructions, tips &amp; visual walkthrough</small></a></div>'
-              )
-
-              # Put the guide immediately after <body> when possible, before tool UI.
+              link = (f'<div class="smarttoolz-kb-guide" style="margin:0 0 20px;padding:14px 16px;border:1px solid #dedcff;border-radius:14px;background:#f7f6ff">'
+                      f'<a href="{guide}" aria-label="Read the detailed {title} guide" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;text-decoration:none;color:#4f46d8;font-weight:800">'
+                      f'<span>📖 Read the Detailed {title} Guide →</span><small style="color:#6b7280;font-size:12px;font-weight:600">Step-by-step instructions, tips &amp; visual walkthrough</small></a></div>')
               match = re.search(r'(<body(?:\s[^>]*)?>)', text, flags=re.I)
               if match:
                   pos = match.end()
                   text = text[:pos] + '\n' + link + '\n' + text[pos:]
               else:
-                  # Safe fallback for PHP/HTML tool files without a body tag.
                   text = link + '\n' + text
               path.write_text(text, encoding='utf-8')
               changed.append(str(path))
-
           print(f'Updated {len(changed)} tool pages')
           for item in changed:
               print(item)

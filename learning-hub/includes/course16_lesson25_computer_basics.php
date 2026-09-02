@@ -30,7 +30,7 @@ function lh_course16_lesson25_computer_basics_override(array $lesson, int $posit
       <tr><td><strong>Pirated/cracked software site</strong></td><td>High risk of malware, modified installers, or scams.</td><td>Avoid it and use legitimate sources.</td></tr>
     </tbody>
   </table>
-  <p>Microsoft recommends downloading and installing programs only from trusted publishers and retail websites. citeturn0search0turn0search4</p>
+  <p>Microsoft recommends downloading and installing programs only from trusted publishers and retail websites.</p>
 </section>
 
 <section class="lh-topic">
@@ -79,7 +79,7 @@ function lh_course16_lesson25_computer_basics_override(array $lesson, int $posit
 
 <section class="lh-topic">
   <h2>🛡️ Browser and Windows Security Warnings</h2>
-  <p>Modern browsers and Windows can warn you when a downloaded file looks suspicious. Windows can keep security information about files downloaded from the Internet and may show a warning before opening them. citeturn0search3turn0search5</p>
+  <p>Modern browsers and Windows can warn you when a downloaded file looks suspicious. Windows can keep security information about files downloaded from the Internet and may show a warning before opening them.</p>
   <ul>
     <li>Read the warning instead of automatically clicking through it.</li>
     <li>If you do not recognize the file or source, cancel the download or delete the file.</li>
@@ -98,7 +98,7 @@ function lh_course16_lesson25_computer_basics_override(array $lesson, int $posit
     <li>Let Windows Security or your antivirus protection scan the file when available.</li>
     <li>Do not ignore a serious malware warning just because you want the file.</li>
   </ol>
-  <p>Microsoft Defender Antivirus is built into modern Windows and can help protect against malware and potentially unwanted applications. citeturn0search1</p>
+  <p>Microsoft Defender Antivirus is built into modern Windows and can help protect against malware and potentially unwanted applications.</p>
 </section>
 
 <section class="lh-topic">
@@ -121,7 +121,7 @@ function lh_course16_lesson25_computer_basics_override(array $lesson, int $posit
     <li>Be suspicious of “Your PC is infected,” “Update now,” or similar messages that appear on unrelated websites.</li>
     <li>Do not install a “cleaner,” “driver updater,” or remote-support tool just because a pop-up tells you to.</li>
   </ul>
-  <p>Microsoft specifically warns users to be careful with third-party software downloads and tech-support scams. citeturn0search8</p>
+  <p>Be especially cautious with third-party software downloads and unexpected tech-support messages.</p>
 </section>
 
 <section class="lh-topic">

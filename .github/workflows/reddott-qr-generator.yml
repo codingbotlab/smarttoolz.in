@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/reddott-qr-generator.yml'
       - 'Reddott-films/youtube/upload_video.py'
+      - 'Reddott-films/knowledge-videos/qr-generator/**'
   schedule:
     - cron: '30 2 * * *'
 
@@ -38,7 +39,7 @@ jobs:
       - name: Install system tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg espeak-ng
+          sudo apt-get install -y ffmpeg
 
       - name: Install Playwright
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
@@ -56,19 +57,39 @@ jobs:
         working-directory: Reddott-films/knowledge-videos/qr-generator/recorder
         run: node record.js
 
-      - name: Verify browser recording
+      - name: Verify browser recording is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
         run: |
           test -s output/browser-demo.webm
-          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 output/browser-demo.webm
+          DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/browser-demo.webm)
+          echo "Browser recording duration: ${DURATION}s"
+          python - "$DURATION" <<'PY'
+          import sys
+          duration = float(sys.argv[1])
+          if duration > 60.25:
+              raise SystemExit(f"Browser recording exceeds 60 seconds: {duration:.3f}s")
+          PY
 
       - name: Build natural narration
         working-directory: Reddott-films/knowledge-videos/qr-generator
         env:
           KOKORO_PYTHON: ${{ github.workspace }}/tts-venv/bin/python
           KOKORO_VOICE: af_heart
-          KOKORO_SPEED: '1.02'
+          KOKORO_SPEED: '1.0'
         run: node build-narration.mjs
+
+      - name: Verify narration is under one minute
+        working-directory: Reddott-films/knowledge-videos/qr-generator
+        run: |
+          test -s output/narration.wav
+          test -s output/narration-duration.txt
+          cat output/narration-duration.txt
+          python - <<'PY'
+          from pathlib import Path
+          duration = float(Path('output/narration-duration.txt').read_text().strip())
+          if duration > 60:
+              raise SystemExit(f'Narration exceeds 60 seconds: {duration:.3f}s')
+          PY
 
       - name: Prepare Remotion public assets
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
@@ -76,21 +97,29 @@ jobs:
           mkdir -p public out
           cp ../output/browser-demo.webm public/browser-demo.webm
           cp ../output/narration.wav public/narration.wav
+          cp ../output/narration-duration.txt public/narration-duration.txt
           npm install
 
       - name: Render final MP4
         working-directory: Reddott-films/knowledge-videos/qr-generator/remotion
         run: npx remotion render src/index.jsx QRGenerator out/qr-generator.mp4 --codec=h264 --crf=23 --concurrency=2 --log=verbose
 
-      - name: Verify final MP4
+      - name: Verify final MP4 is under one minute
         working-directory: Reddott-films/knowledge-videos/qr-generator
         run: |
           test -s remotion/out/qr-generator.mp4
-          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 remotion/out/qr-generator.mp4
+          DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 remotion/out/qr-generator.mp4)
+          echo "Final MP4 duration: ${DURATION}s"
+          python - "$DURATION" <<'PY'
+          import sys
+          duration = float(sys.argv[1])
+          if duration > 60.25:
+              raise SystemExit(f'Final MP4 exceeds 60 seconds: {duration:.3f}s')
+          PY
 
       - name: Create thumbnail
         working-directory: Reddott-films/knowledge-videos/qr-generator
-        run: ffmpeg -y -ss 00:00:08 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
+        run: ffmpeg -y -ss 00:00:05 -i remotion/out/qr-generator.mp4 -frames:v 1 -q:v 2 output/thumbnail.png
 
       - name: Upload to YouTube with SEO and Smart Toolz playlist
         working-directory: Reddott-films/knowledge-videos/qr-generator
@@ -110,5 +139,6 @@ jobs:
             Reddott-films/knowledge-videos/qr-generator/output/thumbnail.png
             Reddott-films/knowledge-videos/qr-generator/output/browser-demo.webm
             Reddott-films/knowledge-videos/qr-generator/output/narration.wav
+            Reddott-films/knowledge-videos/qr-generator/output/narration-duration.txt
 
-# Upload is intentionally run only after MP4 verification.
+# Upload happens only after the real browser recording, natural narration, and final MP4 pass the <=60s checks.

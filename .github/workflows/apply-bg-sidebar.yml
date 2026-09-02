@@ -19,6 +19,7 @@ jobs:
       - name: Add sidebar include
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           $path = 'smart-toolz/tools/image-background-remover.php'
           $marker = "<?php require_once __DIR__.'/../tool-sidebar.php'; ?>"
           $text = Get-Content -Raw -LiteralPath $path
@@ -27,7 +28,7 @@ jobs:
             if ($text -notlike "*$needle*") { throw 'Background remover main wrapper not found.' }
             $replacement = $needle + "`r`n" + $marker
             $text = $text.Replace($needle, $replacement)
-            Set-Content -LiteralPath $path -Value $text -Encoding utf8 -NoNewline
+            [System.IO.File]::WriteAllText((Resolve-Path $path), $text, (New-Object System.Text.UTF8Encoding($false)))
             git config user.name 'SmartToolz Runner'
             git config user.email 'actions@smarttoolz.in'
             git add $path

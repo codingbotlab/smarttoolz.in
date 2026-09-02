@@ -8,178 +8,187 @@ function lh_course16_lesson29_computer_basics_override(array $lesson, int $posit
     }
 
     return <<<'HTML'
-<section class="lh-lesson-section">
-  <h2>What Is External Storage?</h2>
-  <p><strong>External storage</strong> is a storage device that connects to your computer from outside the computer's main internal drive. It is useful for storing, moving, archiving, and backing up files.</p>
-  <div class="lh-callout"><strong>Simple idea:</strong> Your internal drive is the storage inside your PC. An external drive gives you additional storage that you can connect when you need it.</div>
+<section class="lh-section">
+  <h2>What Is a Backup?</h2>
+  <p>A <strong>backup</strong> is a separate copy of important data that you can use if the original files are deleted, corrupted, damaged, lost, or made unavailable.</p>
+  <div class="lh-callout"><strong>Simple idea:</strong> Your original file is the working copy. A backup is another copy kept so you can recover when something goes wrong.</div>
 </section>
 
-<section class="lh-lesson-section">
-  <h2>Common Types of External Storage</h2>
+<section class="lh-section">
+  <h2>Why Backups Matter</h2>
   <ul>
-    <li><strong>USB flash drive:</strong> Small, portable, and convenient for transferring files.</li>
-    <li><strong>External HDD:</strong> Usually offers large capacity at a relatively low cost, but contains moving parts.</li>
-    <li><strong>External SSD:</strong> Faster and more resistant to physical movement than a traditional HDD, with no spinning platters.</li>
-    <li><strong>Memory card:</strong> Common in cameras, phones, and other devices. A card reader may be needed.</li>
+    <li>A laptop or storage drive can fail unexpectedly.</li>
+    <li>Files can be deleted by mistake.</li>
+    <li>Malware or ransomware can make files unavailable.</li>
+    <li>A device can be lost, stolen, or physically damaged.</li>
+    <li>Software or synchronization mistakes can affect files.</li>
   </ul>
+  <p>Backups reduce the impact of these events. They are about protecting your <strong>data</strong>, not simply keeping the computer running.</p>
 </section>
 
-<section class="lh-lesson-section">
-  <h2>Why Use an External Drive?</h2>
-  <ul>
-    <li>Keep extra copies of important documents and photos.</li>
-    <li>Move large files between computers.</li>
-    <li>Free space on an internal drive by moving appropriate files.</li>
-    <li>Keep an archive of files you do not need every day.</li>
-    <li>Create an additional backup that is not stored on the computer's internal drive.</li>
-  </ul>
-  <div class="lh-callout"><strong>Important:</strong> An external drive is not automatically a backup. If the only copy of a file is on that external drive, losing or damaging the drive can still mean losing the file.</div>
+<section class="lh-section">
+  <h2>Backup vs Copy vs Sync</h2>
+  <table class="table table-bordered">
+    <thead><tr><th>Concept</th><th>Meaning</th><th>Important point</th></tr></thead>
+    <tbody>
+      <tr><td>Copy</td><td>Creates another copy of a file or folder.</td><td>The original normally remains unchanged.</td></tr>
+      <tr><td>Backup</td><td>Keeps a recoverable copy for protection against loss.</td><td>It should be available when the original is unavailable.</td></tr>
+      <tr><td>Sync</td><td>Keeps data synchronized between locations or devices.</td><td>A change or deletion can sometimes be synchronized too, so sync alone is not always a backup.</td></tr>
+    </tbody>
+  </table>
 </section>
 
-<section class="lh-lesson-section">
-  <h2>Connecting an External Drive</h2>
+<section class="lh-section">
+  <h2>The 3-2-1 Backup Idea</h2>
+  <p>A useful general strategy is the <strong>3-2-1 rule</strong>:</p>
   <ol>
-    <li>Connect the drive to a compatible USB port or other supported connection.</li>
-    <li>Wait for Windows to detect the device.</li>
+    <li><strong>3 copies</strong> of important data.</li>
+    <li>Stored on at least <strong>2 different types of storage</strong>.</li>
+    <li>Keep at least <strong>1 copy in a separate location</strong>.</li>
+  </ol>
+  <div class="lh-callout"><strong>Example:</strong> Keep your working files on the PC, a backup on an external drive, and another copy in a trusted cloud or separate physical location.</div>
+</section>
+
+<section class="lh-section">
+  <h2>Common Backup Destinations</h2>
+  <ul>
+    <li><strong>External HDD:</strong> Useful for large local backups at relatively low cost.</li>
+    <li><strong>External SSD:</strong> Fast and portable, useful for frequently accessed backup sets.</li>
+    <li><strong>USB flash drive:</strong> Convenient for smaller sets of files, but do not treat one flash drive as your only backup.</li>
+    <li><strong>Cloud storage:</strong> Provides an off-device copy and can help when a local device is lost or damaged.</li>
+    <li><strong>Network storage:</strong> Useful for households or organizations that need centralized storage and backup.</li>
+  </ul>
+</section>
+
+<section class="lh-section">
+  <h2>What Should You Back Up?</h2>
+  <p>Prioritize files that would be difficult or impossible to recreate.</p>
+  <ul>
+    <li>Personal documents and certificates.</li>
+    <li>Photos and videos.</li>
+    <li>School or work projects.</li>
+    <li>Important spreadsheets and records.</li>
+    <li>Creative work and source files.</li>
+    <li>Other data that is important to you.</li>
+  </ul>
+  <p>Operating-system files and applications can often be reinstalled, while personal data may be irreplaceable.</p>
+</section>
+
+<section class="lh-section">
+  <h2>How to Make a Simple Local Backup</h2>
+  <ol>
+    <li>Connect a trusted external drive with enough free space.</li>
     <li>Open <strong>File Explorer</strong> with <strong>Windows + E</strong>.</li>
-    <li>Look under <strong>This PC</strong> for the new drive.</li>
-    <li>Open it and confirm that the expected folders or files are visible.</li>
+    <li>Find the important folders you want to protect.</li>
+    <li>Copy those folders to a clearly named backup folder on the external drive.</li>
+    <li>Wait for the copy operation to finish.</li>
+    <li>Open a few copied files from the backup and confirm they work.</li>
+    <li>Safely eject the external drive when finished.</li>
   </ol>
-  <p>The drive may appear with a letter such as <strong>D:</strong>, <strong>E:</strong>, or another available drive letter. The exact letter can vary between computers.</p>
+  <div class="lh-callout"><strong>Verification matters:</strong> A backup is useful only if the data can actually be recovered.</div>
 </section>
 
-<section class="lh-lesson-section">
-  <h2>Copying Files to External Storage</h2>
-  <ol>
-    <li>Open the source folder in File Explorer.</li>
-    <li>Select the files or folders you want to copy.</li>
-    <li>Press <strong>Ctrl + C</strong>.</li>
-    <li>Open the external drive.</li>
-    <li>Open or create the destination folder.</li>
-    <li>Press <strong>Ctrl + V</strong>.</li>
-    <li>Wait until the copy operation finishes before disconnecting the drive.</li>
-  </ol>
-  <p>For important data, check that the copied files actually open from the external drive before assuming the backup or transfer worked.</p>
+<section class="lh-section">
+  <h2>Automatic Backups</h2>
+  <p>Automatic backup tools can reduce the chance of forgetting to make backups. Depending on the Windows setup, you may use features such as <strong>File History</strong>, Windows backup features, or a trusted backup application.</p>
+  <p>Automatic backup does not mean you should ignore the backup destination. Periodically check that backups are completing and that important files are included.</p>
 </section>
 
-<section class="lh-lesson-section">
-  <h2>Copy vs Move</h2>
+<section class="lh-section">
+  <h2>Backup Frequency</h2>
+  <p>The right schedule depends on how often your data changes and how much work you could afford to lose.</p>
   <table class="table table-bordered">
-    <thead><tr><th>Action</th><th>What happens?</th><th>Typical use</th></tr></thead>
+    <thead><tr><th>Data</th><th>Example approach</th></tr></thead>
     <tbody>
-      <tr><td>Copy</td><td>Creates another copy while the original remains.</td><td>Backup or transfer</td></tr>
-      <tr><td>Move</td><td>Places the item in a new location and removes it from the old location.</td><td>Reorganizing storage</td></tr>
-    </tbody>
-  </table>
-  <div class="lh-callout"><strong>For backup work, prefer copying.</strong> Moving your only copy to an external drive does not protect you if that drive fails.</div>
-</section>
-
-<section class="lh-lesson-section">
-  <h2>Safely Disconnecting the Drive</h2>
-  <p>Before unplugging an external drive, make sure file transfers have finished and close files that are being used from the drive.</p>
-  <ol>
-    <li>Finish all copy or move operations.</li>
-    <li>Close File Explorer windows or applications using files on the drive.</li>
-    <li>Use Windows' <strong>Safely Remove Hardware</strong> or the drive's eject option when available.</li>
-    <li>Wait for Windows to indicate that the device can be removed.</li>
-    <li>Disconnect the cable or device.</li>
-  </ol>
-  <p>This reduces the chance of interrupted writes and file-system problems.</p>
-</section>
-
-<section class="lh-lesson-section">
-  <h2>External Storage and Backups</h2>
-  <p>A good backup plan should protect you from more than one type of failure. For important files, consider keeping multiple copies in different locations or on different types of storage.</p>
-  <div class="lh-callout"><strong>3-2-1 concept:</strong> Keep 3 copies of important data, on 2 different types of storage, with 1 copy kept somewhere separate. This is a useful backup strategy, not a requirement for every small file.</div>
-  <p>Cloud storage can provide an off-device copy, while an external drive can provide a local copy that may be useful when internet access is unavailable.</p>
-</section>
-
-<section class="lh-lesson-section">
-  <h2>When an External Drive Is Not Detected</h2>
-  <ol>
-    <li>Unplug and reconnect the drive.</li>
-    <li>Try a different USB port.</li>
-    <li>If possible, try another compatible cable.</li>
-    <li>Check <strong>File Explorer → This PC</strong>.</li>
-    <li>Open <strong>Disk Management</strong> and see whether Windows detects the drive.</li>
-    <li>Try the drive on another computer if practical.</li>
-  </ol>
-  <div class="lh-callout"><strong>Do not immediately format a drive containing important data.</strong> Formatting can erase the information you are trying to recover.</div>
-</section>
-
-<section class="lh-lesson-section">
-  <h2>Common External-Storage Problems</h2>
-  <table class="table table-bordered">
-    <thead><tr><th>Problem</th><th>Possible reason</th><th>First step</th></tr></thead>
-    <tbody>
-      <tr><td>Drive not visible</td><td>Port, cable, power, or detection issue</td><td>Reconnect and try another port</td></tr>
-      <tr><td>Very slow transfer</td><td>Large files, slower hardware, or connection limitations</td><td>Check the connection and allow the transfer to finish</td></tr>
-      <tr><td>Copy fails</td><td>Not enough space, permissions, or file-system issue</td><td>Check free space and the error message</td></tr>
-      <tr><td>Drive disconnects</td><td>Cable, port, power, or hardware problem</td><td>Try another cable/port and avoid moving the drive during transfers</td></tr>
+      <tr><td>Frequently changing work</td><td>Frequent or automatic backups</td></tr>
+      <tr><td>Photos and personal documents</td><td>Regular backups whenever new important files are added</td></tr>
+      <tr><td>Rarely changing archives</td><td>Back up when the archive changes, then verify it</td></tr>
     </tbody>
   </table>
 </section>
 
-<section class="lh-lesson-section">
-  <h2>Security Tips</h2>
+<section class="lh-section">
+  <h2>Backup Security</h2>
   <ul>
-    <li>Do not plug an unknown USB device into your computer just because you found it.</li>
-    <li>Scan unfamiliar files with your security software before opening them.</li>
-    <li>Keep sensitive files protected and do not leave an external drive unattended.</li>
-    <li>If an external drive contains your only backup, consider creating another backup.</li>
-    <li>Do not remove a drive while important data is actively being written.</li>
+    <li>Protect sensitive backups from unauthorized access.</li>
+    <li>Use strong account security and multi-factor authentication for cloud accounts.</li>
+    <li>Do not leave an external backup drive permanently connected if it does not need to be.</li>
+    <li>Keep at least one backup separate from the computer so a single incident cannot affect every copy.</li>
+    <li>Be careful with ransomware: a constantly connected writable backup can also be affected by malicious software.</li>
   </ul>
 </section>
 
-<section class="lh-lesson-section">
+<section class="lh-section">
+  <h2>How to Test a Backup</h2>
+  <ol>
+    <li>Choose a non-critical file from the backup.</li>
+    <li>Open it directly from the backup location.</li>
+    <li>Check that the file is readable and appears complete.</li>
+    <li>For a larger backup system, periodically perform a controlled restore test.</li>
+  </ol>
+  <p><strong>Remember:</strong> “Backup completed” and “I can restore my data” are related but not identical checks.</p>
+</section>
+
+<section class="lh-section">
+  <h2>If You Accidentally Delete a File</h2>
+  <ol>
+    <li>Stop making unnecessary changes to the affected storage when possible.</li>
+    <li>Check the <strong>Recycle Bin</strong>.</li>
+    <li>Check your backup or cloud version history if available.</li>
+    <li>Use the recovery options provided by your backup system.</li>
+    <li>If the data is extremely important and no backup exists, avoid random recovery software or repeated writes and consider professional recovery advice.</li>
+  </ol>
+</section>
+
+<section class="lh-section">
   <h2>Practical Activity</h2>
   <ol>
-    <li>Connect a trusted USB flash drive or external drive.</li>
-    <li>Open <strong>File Explorer → This PC</strong> and identify the external drive.</li>
+    <li>Choose a few non-sensitive practice files.</li>
     <li>Create a folder named <strong>Computer Basics Backup Practice</strong>.</li>
-    <li>Copy a few non-sensitive practice files into that folder.</li>
-    <li>Open one copied file directly from the external drive.</li>
-    <li>Safely eject the drive.</li>
-    <li>Reconnect it and confirm that the copied files are still present.</li>
+    <li>Copy the files to a trusted external drive or suitable cloud location.</li>
+    <li>Open one copied file to verify the backup.</li>
+    <li>Write down where the backup is stored and when it was created.</li>
+    <li>Safely disconnect the external drive if you used one.</li>
   </ol>
-  <p><strong>Goal:</strong> Learn the complete cycle: connect → identify → copy → verify → safely eject → reconnect.</p>
+  <p><strong>Goal:</strong> Practice the complete backup cycle: select → copy → verify → record → protect.</p>
 </section>
 
-<section class="lh-lesson-section">
+<section class="lh-section">
   <h2>Common Mistakes</h2>
   <ul>
-    <li>Assuming an external drive is a backup without checking for another copy.</li>
-    <li>Unplugging the drive while files are still transferring.</li>
-    <li>Moving files when the goal is to create a backup.</li>
-    <li>Formatting a drive before checking whether it contains important data.</li>
-    <li>Using unknown USB devices without considering security risks.</li>
+    <li>Keeping the only copy of important data on one device.</li>
+    <li>Assuming cloud synchronization is automatically a complete backup.</li>
+    <li>Never testing whether a backup can be opened or restored.</li>
+    <li>Keeping every backup connected to the same computer all the time.</li>
+    <li>Backing up only after a data-loss event.</li>
+    <li>Forgetting where a backup was stored or which files it contains.</li>
   </ul>
 </section>
 
-<section class="lh-lesson-section">
+<section class="lh-section">
   <h2>Quick Self-Check</h2>
   <ol>
-    <li>What is the difference between an external HDD and an external SSD?</li>
-    <li>Why is copying safer than moving when creating a backup?</li>
-    <li>Why should you safely eject an external drive?</li>
-    <li>What should you avoid doing if an important drive is not detected?</li>
-    <li>What does the 3-2-1 backup concept mean?</li>
+    <li>What is a backup?</li>
+    <li>What does the 3-2-1 rule mean?</li>
+    <li>Why is sync not always the same as backup?</li>
+    <li>Why should you test backups?</li>
+    <li>Why is a separate backup location useful?</li>
   </ol>
   <details class="mt-3">
-    <summary><strong>Show answers</strong></summary>
+    <summary><strong>Show Answers</strong></summary>
     <div class="lh-callout mt-3">
-      <p><strong>1.</strong> An HDD uses spinning magnetic disks; an SSD uses flash memory and has no moving parts.</p>
-      <p><strong>2.</strong> Copying leaves the original intact, so you have another copy rather than moving your only copy.</p>
-      <p><strong>3.</strong> It helps avoid interrupting active writes and reduces the chance of file-system or data problems.</p>
-      <p><strong>4.</strong> Do not format it immediately. First check connections, Disk Management, and other safe troubleshooting options.</p>
-      <p><strong>5.</strong> Three copies of important data, on two different storage types, with one copy kept separately.</p>
+      <p><strong>1.</strong> A separate copy of important data kept for recovery if the original is lost or unavailable.</p>
+      <p><strong>2.</strong> Three copies, on two different storage types, with one copy kept separately.</p>
+      <p><strong>3.</strong> Synchronization can also synchronize changes or deletions, so it does not necessarily provide an independent recovery copy.</p>
+      <p><strong>4.</strong> To confirm that the data is actually readable and recoverable.</p>
+      <p><strong>5.</strong> It reduces the chance that one event, such as device failure or theft, destroys every copy.</p>
     </div>
   </details>
 </section>
 
-<section class="lh-lesson-section">
+<section class="lh-section">
   <h2>Key Takeaway</h2>
-  <div class="lh-callout"><strong>External storage is useful for extra space, file transfers, and backups—but a backup only helps when there is a separate copy that you can actually recover.</strong></div>
+  <div class="lh-callout"><strong>Backups protect your data from unexpected loss. Keep more than one copy, separate important copies when possible, and verify that you can actually recover the files.</strong></div>
 </section>
 HTML;
 }

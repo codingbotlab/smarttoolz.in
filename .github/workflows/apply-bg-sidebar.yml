@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'smart-toolz/tool-sidebar.php'
+      - 'smart-toolz/tools/image-background-remover.php'
       - '.github/workflows/apply-bg-sidebar.yml'
 
 permissions:
@@ -23,9 +24,9 @@ jobs:
           $path = 'smart-toolz/tools/image-background-remover.php'
           $marker = "<?php require_once __DIR__.'/../tool-sidebar.php'; ?>"
           $text = Get-Content -Raw -LiteralPath $path
-          if ($text -notlike "*$marker*") {
+          if ($text -notmatch [regex]::Escape($marker)) {
             $needle = '<main class="wrap">'
-            if ($text -notlike "*$needle*") { throw 'Background remover main wrapper not found.' }
+            if ($text -notmatch [regex]::Escape($needle)) { throw 'Background remover main wrapper not found.' }
             $replacement = $needle + "`r`n" + $marker
             $text = $text.Replace($needle, $replacement)
             [System.IO.File]::WriteAllText((Resolve-Path $path), $text, (New-Object System.Text.UTF8Encoding($false)))

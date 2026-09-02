@@ -17,6 +17,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/analytics/tracker.php';
 <body>
 <?php require_once __DIR__.'/../header.php'; ?>
 <main class="wrap">
+<?php require_once __DIR__.'/../tool-sidebar.php'; ?>
 <section class="hero">
 <div class="brand-pill"><span class="spark">✦</span> SMARTTOOLZ VISION STUDIO</div>
 <h1>Make every image <span>look smarter.</span></h1>

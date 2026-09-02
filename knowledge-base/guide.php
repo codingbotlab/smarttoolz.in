@@ -1,0 +1,158 @@
+<?php
+declare(strict_types=1);
+
+define('SMARTTOOLZ_HOME_REGISTRY', true);
+require_once __DIR__ . '/../smart-toolz/tool.php';
+
+$slug = trim((string)($_GET['tool'] ?? ''));
+$tool = null;
+foreach ($tools as $item) {
+    $path = trim((string)parse_url($item['url'], PHP_URL_PATH), '/');
+    if ($slug !== '' && $slug === basename($path, '.php')) {
+        $tool = $item;
+        break;
+    }
+}
+if (!$tool) {
+    http_response_code(404);
+    exit('Guide not found.');
+}
+
+$name = (string)$tool['name'];
+$category = (string)$tool['category'];
+$description = (string)$tool['description'];
+$url = (string)$tool['url'];
+$icon = (string)($tool['icon'] ?? '');
+
+$h = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
+$iconMap = [
+    'content_cut'=>'fa-scissors','compress'=>'fa-compress','photo_size_select_large'=>'fa-up-right-and-down-left-from-center',
+    'swap_horiz'=>'fa-right-left','article'=>'fa-file-lines','text_fields'=>'fa-font','qr_code_2'=>'fa-qrcode',
+    'lock'=>'fa-lock','data_object'=>'fa-code','link'=>'fa-link','picture_as_pdf'=>'fa-file-pdf','content_copy'=>'fa-copy',
+    'crop'=>'fa-crop-simple','rotate_right'=>'fa-rotate-right','flip'=>'fa-arrows-left-right','image'=>'fa-image',
+    'gif'=>'fa-file-image','gif_box'=>'fa-images','sentiment_very_satisfied'=>'fa-face-laugh-beam','palette'=>'fa-palette',
+    'gradient'=>'fa-paint-roller','lock_open'=>'fa-lock-open','link_off'=>'fa-link-slash','code'=>'fa-code',
+    'description'=>'fa-file-lines','space_bar'=>'fa-arrows-left-right','sort'=>'fa-arrow-down-a-z','sync'=>'fa-arrows-rotate',
+    'merge_type'=>'fa-code-merge','call_split'=>'fa-code-branch','qr_code_scanner'=>'fa-qrcode','casino'=>'fa-dice',
+    'fingerprint'=>'fa-fingerprint','schedule'=>'fa-clock','timer'=>'fa-stopwatch','cake'=>'fa-cake-candles',
+    'percent'=>'fa-percent','monitor_heart'=>'fa-heart-pulse','straighten'=>'fa-ruler-combined'
+];
+$fa = static fn(string $value): string => $iconMap[$value] ?? 'fa-circle-question';
+
+$profiles = [
+    'Image Tools' => [
+        'intro' => 'Work with images directly in your browser. The guide below focuses on the practical workflow: prepare the source, choose the right options, process it, and check the final file.',
+        'input' => 'Upload the image you want to process. Use a common image format supported by the tool and keep the original if you may need to retry.',
+        'steps' => ['Upload or select your image.', 'Choose the required size, format, quality, crop, rotation, or other available options.', 'Start the main image operation.', 'Preview or inspect the result for quality, dimensions, and visual correctness.', 'Download the finished image or continue with another operation.'],
+        'tips' => ['Use the original file when quality matters.', 'Preview the output before replacing your source file.', 'For compression or resizing, compare quality and file size rather than choosing the smallest file blindly.']
+    ],
+    'PDF Tools' => [
+        'intro' => 'Handle common PDF tasks through a simple browser workflow. Start with the correct PDF, configure the operation, then verify the generated document before sharing it.',
+        'input' => 'Select the PDF file or files required by the tool. If the tool accepts multiple files, check their order before processing.',
+        'steps' => ['Open the PDF tool and select your document.', 'Choose the pages, output format, or other available options.', 'Run the PDF operation.', 'Open or preview the result and check pages, orientation, text, and file size.', 'Download the final PDF or converted file.'],
+        'tips' => ['Keep a copy of important source PDFs.', 'Check page order after merge, split, or conversion operations.', 'For documents containing sensitive information, use only files you are comfortable processing in the current environment.']
+    ],
+    'Text Tools' => [
+        'intro' => 'Transform or analyze text quickly. These guides emphasize clean input, the exact transformation you need, and checking the result before copying it elsewhere.',
+        'input' => 'Paste or type the text you want to process. Remove accidental extra content if the tool expects a specific format.',
+        'steps' => ['Paste or enter your text.', 'Select the transformation, case, counting, sorting, or formatting options available.', 'Run the operation.', 'Review the output for missing characters, spacing, or unexpected changes.', 'Copy the final text or use the available export action.'],
+        'tips' => ['Keep the original text until you confirm the output.', 'For long text, verify the beginning, middle, and end of the result.', 'If the result looks wrong, undo the last change and retry with cleaner input.']
+    ],
+    'Developer Tools' => [
+        'intro' => 'Developer utilities are designed for quick formatting, encoding, validation, conversion, and data tasks. Always verify that the output matches the syntax or format your next system expects.',
+        'input' => 'Paste the code, JSON, URL, data, or other value requested by the tool. Do not paste passwords, API keys, private tokens, or other secrets unless the specific tool explicitly requires them and you understand the risk.',
+        'steps' => ['Enter the code, data, URL, or value.', 'Select the desired format or processing options.', 'Run the formatter, converter, validator, or generator.', 'Inspect the output and any validation messages.', 'Copy or download the final result and test it in its destination environment.'],
+        'tips' => ['Validate generated data before putting it into production.', 'Keep secrets out of public or shared text fields.', 'Use a small sample first when testing an unfamiliar transformation.']
+    ],
+    'Calculators' => [
+        'intro' => 'Calculator tools turn a few inputs into a clear result. Enter values carefully, confirm units, and review the calculation before using it for a decision.',
+        'input' => 'Enter every requested value using the units or format shown by the calculator.',
+        'steps' => ['Enter the first required value.', 'Fill in the remaining fields and confirm units.', 'Run the calculation.', 'Review the result and the values used to produce it.', 'Copy, record, or reuse the result as needed.'],
+        'tips' => ['Double-check decimal separators and units.', 'For important decisions, independently verify the result.', 'Do not assume a calculator result is a professional or legal determination.']
+    ],
+    'Generators' => [
+        'intro' => 'Generators create a new result from your input and selected options. The best workflow is to define what you need first, generate a result, then inspect it before saving or sharing.',
+        'input' => 'Enter the content, values, or options requested by the generator.',
+        'steps' => ['Enter the information you want to generate from.', 'Choose available settings such as format, length, style, or quantity.', 'Generate the result.', 'Review the generated output for correctness.', 'Copy, download, or use the result in your next step.'],
+        'tips' => ['Use clear input values for predictable results.', 'Generate again if you need a different result.', 'Check generated output before publishing or sending it to others.']
+    ],
+    'Security' => [
+        'intro' => 'Security-focused utilities help with tasks such as generating or checking values. Treat anything you enter as potentially sensitive and avoid exposing real credentials or secrets unnecessarily.',
+        'input' => 'Enter only the value or options needed for the operation. Never share passwords, private keys, recovery codes, or API secrets with anyone.',
+        'steps' => ['Open the security utility.', 'Enter the required non-sensitive input or select the required options.', 'Run the operation.', 'Review the result and understand what it represents.', 'Copy or save the result only in an appropriate secure location.'],
+        'tips' => ['Never publish passwords, private keys, or access tokens.', 'Use strong, unique values when a generator offers security-related output.', 'For real security incidents, consult the appropriate security professional or service provider.']
+    ],
+    'Design Tools' => [
+        'intro' => 'Design utilities make visual values easier to inspect, compare, or reuse. Use the tool to identify the exact value you need and then copy it into your design workflow.',
+        'input' => 'Enter or select the color, value, or design input requested by the tool.',
+        'steps' => ['Enter or select your design value.', 'Adjust the available controls.', 'Run or inspect the result.', 'Compare the displayed value with your intended design.', 'Copy the final value or use the available export action.'],
+        'tips' => ['Keep the exact output value when moving between design tools.', 'Check contrast and readability where relevant.', 'Remember that screens and printed output can render colors differently.']
+    ],
+    'Utilities' => [
+        'intro' => 'Utility tools handle focused everyday tasks. The workflow is intentionally simple: provide the requested value, run the operation, and verify the result.',
+        'input' => 'Set the requested value, duration, date, option, or other input shown by the tool.',
+        'steps' => ['Open the utility and identify the required input.', 'Enter the value or choose the requested options.', 'Start the operation.', 'Review the result or status.', 'Copy, download, or act on the result if an action is provided.'],
+        'tips' => ['Read the field labels and units before submitting.', 'Use reset or retry when experimenting with different values.', 'For important outcomes, verify the result independently.']
+    ]
+];
+$profile = $profiles[$category] ?? [
+    'intro' => 'This guide explains the practical workflow for using this SmartToolz utility from input through final result.',
+    'input' => 'Enter, upload, or select the information requested by the tool.',
+    'steps' => ['Open the tool.', 'Enter or select the required input.', 'Choose the available options.', 'Run the main action and review the result.', 'Download, copy, or use the finished result.'],
+    'tips' => ['Keep the original input until you have checked the output.', 'Read the labels and options before processing.', 'Review the final result before sharing it.']
+];
+
+$steps = [];
+foreach ($profile['steps'] as $i => $body) {
+    $steps[] = ['title' => 'Step ' . ($i + 1), 'body' => $body];
+}
+$related = array_values(array_filter($tools, static fn(array $t): bool => (string)$t['category'] === $category && (string)$t['name'] !== $name));
+
+$canonical = 'https://smarttoolz.in/knowledge-base/' . rawurlencode($slug) . '/article/';
+$pageTitle = 'How to Use ' . $name . ' — SmartToolz Knowledge Base';
+$pageDescription = 'Learn how to use ' . $name . ' on SmartToolz with a practical step-by-step guide, tips, common mistakes, and related tools.';
+
+$schemaSteps = [];
+foreach ($steps as $step) {
+    $schemaSteps[] = ['@type' => 'HowToStep', 'name' => $step['title'], 'text' => $step['body']];
+}
+$schema = [
+    ['@context'=>'https://schema.org','@type'=>'HowTo','name'=>'How to Use '.$name,'description'=>$pageDescription,'step'=>$schemaSteps],
+    ['@context'=>'https://schema.org','@type'=>'BreadcrumbList','itemListElement'=>[
+        ['@type'=>'ListItem','position'=>1,'name'=>'Knowledge Base','item'=>'https://smarttoolz.in/knowledge-base/'],
+        ['@type'=>'ListItem','position'=>2,'name'=>$category,'item'=>'https://smarttoolz.in/knowledge-base/'],
+        ['@type'=>'ListItem','position'=>3,'name'=>$name,'item'=>$canonical]
+    ]]
+];
+?><!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title><?=$h($pageTitle)?></title>
+<meta name="description" content="<?=$h($pageDescription)?>">
+<link rel="canonical" href="<?=$h($canonical)?>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<script type="application/ld+json"><?=json_encode($schema, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f8fc;color:#172033;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.fa-solid{display:inline-block;width:1em;text-align:center}.kb-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border-bottom:1px solid #e3e7ef}.kb-nav{width:min(1420px,calc(100% - 28px));min-height:70px;margin:auto;display:flex;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#172033;font-weight:900;font-size:19px;white-space:nowrap}.brand-mark{width:41px;height:41px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#635bff,#9275ff);color:#fff;box-shadow:0 9px 22px rgba(99,91,255,.2)}.navlinks{margin-left:auto;display:flex;gap:5px}.navlinks a{display:flex;align-items:center;gap:6px;padding:9px 11px;border-radius:10px;color:#5d687b;text-decoration:none;font-size:12px;font-weight:800}.navlinks a:hover{background:#eeedff;color:#635bff}.menu{display:none;margin-left:auto;border:1px solid #dfe4ed;background:#fff;color:#635bff;border-radius:10px;width:42px;height:42px}.layout{width:min(1420px,calc(100% - 28px));margin:22px auto;display:grid;grid-template-columns:265px minmax(0,1fr);gap:20px}.side{position:sticky;top:92px;max-height:calc(100vh - 112px);overflow:auto;background:#fff;border:1px solid #e2e7ef;border-radius:18px;padding:14px}.side-title{display:flex;align-items:center;gap:7px;margin:3px 6px 12px;font-size:13px;font-weight:900}.side-search{width:100%;padding:9px 10px;border:1px solid #e1e5ed;border-radius:10px;outline:none;font:inherit;font-size:11px}.side-search:focus{border-color:#bdb7ff;box-shadow:0 0 0 3px #eeedff}.cat{margin-top:14px}.cat-title{padding:7px;font-size:10px;color:#858e9d;font-weight:900;text-transform:uppercase;letter-spacing:.5px}.tool-link{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:9px;text-decoration:none;color:#596477;font-size:11px}.tool-link:hover,.tool-link.current{background:#eeedff;color:#635bff}.tool-link i{width:16px}.main{min-width:0}.crumb{font-size:12px;color:#7a8494;margin:0 0 14px}.crumb a{color:#635bff;text-decoration:none}.hero{position:relative;overflow:hidden;background:#fff;border:1px solid #e1e6ef;border-radius:22px;padding:32px;margin-bottom:18px;box-shadow:0 12px 40px rgba(25,35,70,.045)}.hero:after{content:"";position:absolute;right:-90px;top:-100px;width:260px;height:260px;border-radius:50%;background:#eeedff;opacity:.65}.tag{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;color:#635bff;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}.hero h1{position:relative;z-index:1;max-width:850px;margin:10px 0 8px;font-size:clamp(31px,5vw,52px);line-height:1.08;letter-spacing:-1.7px}.hero p{position:relative;z-index:1;max-width:820px;margin:0;color:#697487;font-size:14px;line-height:1.75}.hero-actions{position:relative;z-index:1;display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.cta,.secondary{display:inline-flex;align-items:center;gap:7px;border-radius:11px;padding:11px 15px;text-decoration:none;font-size:12px;font-weight:900}.cta{background:#635bff;color:#fff;box-shadow:0 8px 18px rgba(99,91,255,.2)}.secondary{background:#f3f2ff;color:#635bff;border:1px solid #e0dcff}.stats{position:relative;z-index:1;display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.stat{display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #e6e9ef;border-radius:999px;background:#fafbfe;color:#687386;font-size:10px;font-weight:800}.stat i{color:#635bff}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:#fff;border:1px solid #e1e6ef;border-radius:18px;padding:21px}.card h2{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:19px}.card h2 i{color:#635bff}.card p,.card li{color:#5f6b7d;font-size:13px;line-height:1.75}.card p{margin:0}.input-box{margin-top:12px;padding:13px 14px;border-radius:12px;background:#f6f7fb;border:1px dashed #d8dde7;color:#596477;font-size:12px;line-height:1.65}.input-box strong{display:block;color:#172033;margin-bottom:4px}.steps{margin-top:14px}.step{display:grid;grid-template-columns:38px 1fr;gap:12px;background:#fff;border:1px solid #e1e6ef;border-radius:16px;padding:17px;margin:10px 0}.step-no{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#eeedff;color:#635bff;font-weight:950}.step h3{margin:0 0 5px;font-size:14px}.step p{margin:0;color:#5f6b7d;font-size:12.5px;line-height:1.7}.tips{margin-top:14px;background:#f0f5ff;border:1px solid #dce7ff;border-radius:16px;padding:18px}.tips h2{margin:0 0 8px;font-size:17px;display:flex;align-items:center;gap:7px}.tips h2 i{color:#635bff}.tips ul{margin:0;padding-left:20px}.mistakes{margin-top:14px}.mistake{display:flex;gap:9px;padding:11px 0;border-bottom:1px solid #edf0f4;color:#5f6b7d;font-size:12px;line-height:1.6}.mistake:last-child{border-bottom:0}.mistake i{color:#d65b61;margin-top:3px}.faq{margin-top:14px}.faq-item{padding:13px 0;border-bottom:1px solid #edf0f4}.faq-item:last-child{border-bottom:0}.faq-item h3{margin:0 0 5px;font-size:13px}.faq-item p{margin:0;color:#687386;font-size:12px;line-height:1.65}.related{margin-top:16px}.related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.related a{display:flex;align-items:center;gap:8px;padding:12px;background:#fff;border:1px solid #e1e6ef;border-radius:12px;color:#596477;text-decoration:none;font-size:11px;font-weight:750}.related a:hover{color:#635bff;border-color:#d8d3ff;background:#fbfaff}.footer{margin-top:42px;background:#172033;color:#aeb7c8}.footer-inner{width:min(1420px,calc(100% - 28px));margin:auto;padding:34px 0 22px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:25px}.footer-brand{display:flex;align-items:center;gap:7px;color:#fff;font-weight:900}.footer h4{margin:0 0 9px;color:#fff;font-size:12px}.footer a{display:flex;align-items:center;gap:6px;margin:7px 0;color:#aeb7c8;text-decoration:none;font-size:11px}.footer a:hover{color:#fff}.bottom{width:min(1420px,calc(100% - 28px));margin:auto;padding:14px 0;border-top:1px solid #30394c;display:flex;justify-content:space-between;font-size:10px}@media(max-width:980px){.layout{display:block}.side{position:fixed;z-index:1200;left:12px;top:76px;width:min(320px,calc(100% - 24px));height:calc(100vh - 88px);max-height:none;transform:translateX(-120%);transition:.22s;box-shadow:0 20px 55px rgba(20,30,70,.2)}.side.open{transform:translateX(0)}.menu{display:grid;place-items:center}.navlinks{display:none;position:absolute;top:64px;left:14px;right:14px;padding:9px;background:#fff;border:1px solid #e1e6ef;border-radius:14px;box-shadow:0 18px 45px rgba(20,30,70,.15);flex-direction:column}.navlinks.open{display:flex}.navlinks a{width:100%}.browse{display:inline-flex!important}.grid2{grid-template-columns:1fr}.related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.footer-inner{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.layout{width:calc(100% - 20px)}.hero{padding:23px 19px}.hero h1{font-size:34px}.card{padding:17px}.related-grid{grid-template-columns:1fr}.footer-inner{grid-template-columns:1fr}.bottom{flex-direction:column;gap:5px}}
+</style>
+</head>
+<body>
+<header class="kb-header"><nav class="kb-nav"><a class="brand" href="/knowledge-base/"><span class="brand-mark"><i class="fa-solid <?=$fa($icon)?>" aria-hidden="true"></i></span><span>SmartToolz Knowledge</span></a><button class="menu" id="menu" type="button" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button><div class="navlinks" id="navlinks"><a href="/knowledge-base/"><i class="fa-solid fa-house"></i> Knowledge Base</a><a href="/smart-toolz/tool.php"><i class="fa-solid fa-table-cells-large"></i> All Tools</a><a href="/smart-toolz/"><i class="fa-solid fa-screwdriver-wrench"></i> SmartToolz</a></div></nav></header>
+<div class="layout">
+<aside class="side" id="side"><div class="side-title"><i class="fa-solid fa-book-open"></i> Browse all guides</div><input class="side-search" id="sideSearch" type="search" placeholder="Search this category…" aria-label="Search guides"><?php foreach ($tools as $t): if ((string)$t['category'] !== $category) continue; $p=trim((string)parse_url($t['url'],PHP_URL_PATH),'/'); $tslug=basename($p,'.php'); ?><a class="tool-link <?=$t['name']===$name?'current':''?>" data-tool-name="<?=$h(strtolower((string)$t['name']))?>" href="/knowledge-base/<?=rawurlencode($tslug)?>/article/"><i class="fa-solid <?=$fa((string)($t['icon']??''))?>"></i><span><?=$h((string)$t['name'])?></span></a><?php endforeach; ?></aside>
+<div class="overlay" id="overlay"></div>
+<main class="main">
+<div class="crumb"><a href="/knowledge-base/"><i class="fa-solid fa-arrow-left"></i> Knowledge Base</a> <span>/</span> <?=$h($category)?> <span>/</span> <?=$h($name)?></div>
+<section class="hero"><div class="tag"><i class="fa-solid <?=$fa($icon)?>"></i><?=$h($category)?></div><h1>How to Use <?=$h($name)?></h1><p><?=$h($description)?> <?=$h($profile['intro'])?></p><div class="hero-actions"><a class="cta" href="<?=$h($url)?>"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open <?=$h($name)?></a><button class="secondary browse" id="browse" type="button" style="display:none"><i class="fa-solid fa-bars"></i> Browse Guides</button></div><div class="stats"><span class="stat"><i class="fa-solid fa-circle-check"></i> Step-by-step</span><span class="stat"><i class="fa-solid fa-lightbulb"></i> Practical tips</span><span class="stat"><i class="fa-solid fa-mobile-screen"></i> Responsive</span></div></section>
+<div class="grid2"><section class="card"><h2><i class="fa-solid fa-circle-info"></i> What this tool does</h2><p><?=$h($description)?> This guide explains the workflow from input to finished result so you can use the tool confidently.</p></section><section class="card"><h2><i class="fa-solid fa-upload"></i> What you need</h2><div class="input-box"><strong>Before you start</strong><?=$h($profile['input'])?></div></section></div>
+<section class="steps"><div class="card" style="margin-top:14px"><h2><i class="fa-solid fa-list-check"></i> Step-by-step guide</h2><?php foreach($steps as $i=>$step): ?><div class="step"><span class="step-no"><?=$i+1?></span><div><h3><?=$h($step['title'])?></h3><p><?=$h($step['body'])?></p></div></div><?php endforeach; ?></div></section>
+<section class="tips"><h2><i class="fa-solid fa-lightbulb"></i> Practical tips</h2><ul><?php foreach($profile['tips'] as $tip): ?><li><?=$h($tip)?></li><?php endforeach; ?></ul></section>
+<section class="card mistakes"><h2><i class="fa-solid fa-triangle-exclamation"></i> Common mistakes to avoid</h2><div class="mistake"><i class="fa-solid fa-xmark"></i><span>Using the wrong input type, file, unit, or format for the tool.</span></div><div class="mistake"><i class="fa-solid fa-xmark"></i><span>Skipping the result check before downloading, publishing, or sharing.</span></div><div class="mistake"><i class="fa-solid fa-xmark"></i><span>Overwriting the original input before confirming that the output is correct.</span></div></section>
+<section class="card faq"><h2><i class="fa-solid fa-circle-question"></i> Frequently asked questions</h2><div class="faq-item"><h3>Is <?=$h($name)?> free to use?</h3><p>It is part of the SmartToolz online tool collection. Availability and usage limits can depend on the current SmartToolz settings.</p></div><div class="faq-item"><h3>Do I need to install anything?</h3><p>No separate desktop installation is normally required. Open the tool in a modern browser and follow its input instructions.</p></div><div class="faq-item"><h3>What should I do if the result looks wrong?</h3><p>Check the input, units, file type, and selected options, then run the tool again. For important results, verify them independently.</p></div><div class="faq-item"><h3>Where can I use the result?</h3><p>That depends on the tool. You can generally download, copy, export, or continue with the result action provided by the tool.</p></div></section>
+<?php if ($related): ?><section class="related"><div class="card"><h2><i class="fa-solid fa-layer-group"></i> Related <?=$h($category)?> tools</h2><div class="related-grid"><?php foreach(array_slice($related,0,9) as $t): $p=trim((string)parse_url($t['url'],PHP_URL_PATH),'/'); $tslug=basename($p,'.php'); ?><a href="/knowledge-base/<?=rawurlencode($tslug)?>/article/"><i class="fa-solid <?=$fa((string)($t['icon']??''))?>"></i><span><?=$h((string)$t['name'])?></span></a><?php endforeach; ?></div></div></section><?php endif; ?>
+</main></div>
+<footer class="footer"><div class="footer-inner"><div><div class="footer-brand"><i class="fa-solid fa-book-open"></i> SmartToolz Knowledge</div><p style="font-size:11px;line-height:1.7">Practical guides for the SmartToolz tool collection.</p></div><div><h4>Knowledge Base</h4><a href="/knowledge-base/"><i class="fa-solid fa-book"></i> All Guides</a><a href="/knowledge-base/"><i class="fa-solid fa-magnifying-glass"></i> Browse</a></div><div><h4>SmartToolz</h4><a href="/smart-toolz/"><i class="fa-solid fa-house"></i> Home</a><a href="/smart-toolz/tool.php"><i class="fa-solid fa-table-cells-large"></i> All Tools</a></div><div><h4>Explore</h4><a href="/learning-hub/"><i class="fa-solid fa-graduation-cap"></i> Learning Hub</a><a href="<?=$h($url)?>"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open this tool</a></div></div><div class="bottom"><span>© <?=date('Y')?> SmartToolz.in</span><span>Built for fast, simple tool guidance.</span></div></footer>
+<script>(function(){const nav=document.getElementById('navlinks'),menu=document.getElementById('menu'),side=document.getElementById('side'),overlay=document.getElementById('overlay'),browse=document.getElementById('browse'),search=document.getElementById('sideSearch');menu?.addEventListener('click',()=>nav.classList.toggle('open'));browse?.addEventListener('click',()=>{side.classList.add('open');overlay.classList.add('open')});overlay?.addEventListener('click',()=>{side.classList.remove('open');overlay.classList.remove('open')});side?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{side.classList.remove('open');overlay.classList.remove('open')}));search?.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();side.querySelectorAll('.tool-link').forEach(a=>{a.style.display=a.dataset.toolName.includes(q)?'flex':'none'})});})();</script>
+</body></html>

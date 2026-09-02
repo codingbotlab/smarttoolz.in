@@ -5,6 +5,7 @@ on:
     paths:
       - 'smart-toolz/tool-sidebar.php'
       - 'smart-toolz/tools/image-background-remover.php'
+      - 'smart-toolz/tools/png-to-jpg.php'
       - '.github/workflows/apply-bg-sidebar.yml'
 
 permissions:
@@ -16,6 +17,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Fix tool bootstrap duplicates
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'smart-toolz/tools/png-to-jpg.php'
+          $text = Get-Content -Raw -LiteralPath $path
+          $old = "<?php require_once dirname(__DIR__) . '/header.php'; ?>`r`n<?php`r`n$header=dirname(__DIR__).'/header.php';`r`nif (is_file($header)) { require $header; }`r`n?>"
+          $new = "<?php require_once dirname(__DIR__) . '/header.php'; ?>"
+          if ($text.Contains($old)) {
+            $text = $text.Replace($old, $new)
+          } elseif ($text.Contains("<?php require_once dirname(__DIR__) . '/header.php'; ?>`n<?php`n$header=dirname(__DIR__).'/header.php';`nif (is_file($header)) { require $header; }`n?>")) {
+            $oldLf = "<?php require_once dirname(__DIR__) . '/header.php'; ?>`n<?php`n$header=dirname(__DIR__).'/header.php';`nif (is_file($header)) { require $header; }`n?>"
+            $text = $text.Replace($oldLf, $new)
+          }
+          $oldSidebar = "<?php $sidebar=__DIR__.'/tool-sidebar.php';if(is_file($sidebar)){require $sidebar;} ?>"
+          $newSidebar = "<?php $sidebar=dirname(__DIR__).'/tool-sidebar.php';if(is_file($sidebar)){require $sidebar;} ?>"
+          if ($text.Contains($oldSidebar)) { $text = $text.Replace($oldSidebar, $newSidebar) }
+          [System.IO.File]::WriteAllText((Resolve-Path $path), $text, (New-Object System.Text.UTF8Encoding($false)))
+          git config user.name 'SmartToolz Runner'
+          git config user.email 'actions@smarttoolz.in'
+          git add $path
+          if (git diff --cached --quiet) {
+            Write-Host 'PNG to JPG already clean; nothing to commit.'
+            exit 0
+          }
+          git commit -m 'Remove duplicate PNG to JPG bootstrap code'
+          git push origin main
 
       - name: Add sidebar include
         shell: pwsh

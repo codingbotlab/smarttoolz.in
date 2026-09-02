@@ -36,11 +36,14 @@ for scene in SCRIPT["scenes"]:
     files.append(wav)
     print(f"Generated {scene['id']}: {len(audio) / 24000:.2f}s")
 
-# ffmpeg handles the final mix/resample and pads the track to the 5-minute
-# composition duration expected by Remotion.
+# ffmpeg handles the final mix/resample. The narration is intentionally kept at
+# its natural length; the final pipeline enforces a hard maximum of 60 seconds.
 concat = OUT / "concat.txt"
 concat.write_text(
-    "\n".join(f"file '{str(f).replace(chr(39), chr(39)+chr(92)+chr(39)+chr(39))}'" for f in files) + "\n",
+    "\n".join(
+        f"file '{str(f).replace(chr(92), '/')}'".replace("'", "'\\''")
+        for f in files
+    ) + "\n",
     encoding="utf-8",
 )
 print(f"Kokoro scenes generated in {OUT}")

@@ -1,0 +1,38 @@
+name: Apply Background Remover Sidebar
+
+on:
+  push:
+    paths:
+      - 'smart-toolz/tool-sidebar.php'
+      - '.github/workflows/apply-bg-sidebar.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: [self-hosted, windows]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add sidebar include
+        shell: pwsh
+        run: |
+          $path = 'smart-toolz/tools/image-background-remover.php'
+          $marker = "<?php require_once __DIR__.'/../tool-sidebar.php'; ?>"
+          $text = Get-Content -Raw -LiteralPath $path
+          if ($text -notlike "*$marker*") {
+            $needle = '<main class="wrap">'
+            if ($text -notlike "*$needle*") { throw 'Background remover main wrapper not found.' }
+            $replacement = $needle + "`r`n" + $marker
+            $text = $text.Replace($needle, $replacement)
+            Set-Content -LiteralPath $path -Value $text -Encoding utf8 -NoNewline
+            git config user.name 'SmartToolz Runner'
+            git config user.email 'actions@smarttoolz.in'
+            git add $path
+            git commit -m 'Add All Tools sidebar to background remover'
+            git push origin main
+          } else {
+            Write-Host 'Sidebar include already present; nothing to do.'
+          }

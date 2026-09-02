@@ -36,7 +36,7 @@ jobs:
         shell: powershell
         run: |
           $python = Get-Command python -ErrorAction SilentlyContinue
-          if (-not $python) { throw 'Python 3.11 is required on the self-hosted Windows runner. Install Python 3.11 and restart the runner service.' }
+          if (-not $python) { throw 'Python 3.11 is required on the self-hosted Windows runner. Install Python.Python.3.11 and restart the runner service.' }
           $version = (& python --version 2>&1).ToString()
           Write-Host "Python detected: $version"
           if ($version -notmatch '^Python 3\.11\.') { throw "Python 3.11 is required. Detected: $version" }
@@ -153,5 +153,5 @@ jobs:
 # This workflow intentionally targets the user's self-hosted Windows PC so the private-repo
 # video pipeline does not consume GitHub-hosted Actions minutes. Python is preinstalled on the
 # Windows runner instead of using actions/setup-python, avoiding the host's PowerShell policy.
-# Windows PowerShell is used because PowerShell 7 (pwsh) is not installed on the runner.
 # Upload happens only after the real browser recording, natural narration, and final MP4 pass <=60s checks.
+# Trigger verification: keep this workflow push-sensitive so the corrected shell is exercised.

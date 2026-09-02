@@ -47,7 +47,7 @@ if (PHP_SAPI !== 'cli') {
 <style>
 /* Global KB width override: keep the existing components/design, remove the centered max-width shell. */
 html,body{width:100%!important;max-width:none!important}
-.kb-nav,.kb-layout,.kb-main,.kb-footer,.footer-inner,.footer-bottom,.layout,.main,.footer,.bottom{width:100%!important;max-width:none!important}
+.kb-nav,.kb-main,.kb-footer,.footer-inner,.footer-bottom,.layout,.main,.footer,.bottom{width:100%!important;max-width:none!important}
 .kb-nav{margin-left:0!important;margin-right:0!important}
 .kb-layout,.layout{margin-left:0!important;margin-right:0!important}
 .layout{display:grid!important;grid-template-columns:minmax(245px,265px) minmax(0,1fr)!important;align-items:start!important;padding-left:28px!important;padding-right:28px!important;gap:20px!important}

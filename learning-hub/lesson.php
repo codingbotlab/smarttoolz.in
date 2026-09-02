@@ -35,6 +35,7 @@ require_once __DIR__.'/includes/course16_lesson26_computer_basics.php';
 require_once __DIR__.'/includes/course16_lesson27_computer_basics.php';
 require_once __DIR__.'/includes/course16_lesson28_computer_basics.php';
 require_once __DIR__.'/includes/course16_lesson29_computer_basics.php';
+require_once __DIR__.'/includes/course16_lesson30_computer_basics.php';
 
 $slug=trim((string)($_GET['slug']??''));$lesson=null;$course=null;$lessons=[];$previous=null;$next=null;
 try{$q=$db->prepare("SELECT l.* FROM learning_lessons l WHERE l.slug=? AND l.enabled=1 LIMIT 1");$q->execute([$slug]);$lesson=$q->fetch(PDO::FETCH_ASSOC)?:null;}catch(Throwable){}
@@ -76,6 +77,7 @@ if ($slug === 'course-16-lesson-26') {$override=lh_course16_lesson26_computer_ba
 if ($slug === 'course-16-lesson-27') {$override=lh_course16_lesson27_computer_basics_override($lesson,$position);}
 if ($slug === 'course-16-lesson-28') {$override=lh_course16_lesson28_computer_basics_override($lesson,$position);}
 if ($slug === 'course-16-lesson-29') {$override=lh_course16_lesson29_computer_basics_override($lesson,$position);}
+if ($slug === 'course-16-lesson-30') {$override=lh_course16_lesson30_computer_basics_override($lesson,$position);}
 if (($slug === 'course-16-lesson-10' || $position === 10) && $override===null) {$override=lh_course16_lesson10_override($lesson,$position);}
 if (($slug === 'course-16-lesson-9' || $position === 9) && $override===null) {$override=lh_course16_lesson9_override($lesson,$position);}
 if($override===null){$override=lh_course16_override($lesson,$position);}

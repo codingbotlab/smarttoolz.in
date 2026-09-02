@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   add-kb-links:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:

@@ -1,21 +1,20 @@
 <?php
 declare(strict_types=1);
 
-require_once dirname(__DIR__) . '/lib/trials.php';
+require_once dirname(__DIR__, 2) . '/creator-ai/auth/config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
-$userId = smarttoolz_current_user_id();
-if (!$userId) {
+$userId = (int)($_SESSION['user_id'] ?? 0);
+if ($userId <= 0) {
     http_response_code(401);
     echo json_encode(['ok' => false, 'reason' => 'login_required']);
     exit;
 }
 
 try {
-    smarttoolz_trial_install();
-    $db = smarttoolz_trial_db();
+    $db = db();
     $action = (string)($_REQUEST['action'] ?? 'list');
 
     if ($action === 'read') {
@@ -29,10 +28,17 @@ try {
         $q->execute([$userId]);
     }
 
+    $q = $db->prepare('SELECT COUNT(*) FROM smarttoolz_notifications WHERE user_id=? AND read_at IS NULL');
+    $q->execute([$userId]);
+    $unread = (int)$q->fetchColumn();
+
+    $q = $db->prepare('SELECT id,type,title,message,read_at,created_at FROM smarttoolz_notifications WHERE user_id=? ORDER BY id DESC LIMIT 25');
+    $q->execute([$userId]);
+
     echo json_encode([
         'ok' => true,
-        'unread' => smarttoolz_notification_unread_count($userId),
-        'notifications' => smarttoolz_notification_list($userId, 25),
+        'unread' => $unread,
+        'notifications' => $q->fetchAll(PDO::FETCH_ASSOC),
     ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     error_log('SmartToolz notifications API: ' . $e->getMessage());

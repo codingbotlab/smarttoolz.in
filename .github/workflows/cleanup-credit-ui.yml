@@ -1,0 +1,78 @@
+name: Cleanup leftover credit UI
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove credit-system UI references
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          header = root / 'smart-toolz/header.php'
+          text = header.read_text(encoding='utf-8')
+
+          text = text.replace("$headerCredits = null;\n", "")
+          text = text.replace("SELECT credits, role, email FROM creator_users", "SELECT role, email FROM creator_users")
+          text = re.sub(r"\n\s*\$headerCredits = \(int\)\(\$hr\['credits'\] \?\? 0\);", "", text)
+          text = re.sub(r"\n<span class=\"credit-pill\">.*?</span>", "", text, flags=re.S)
+          text = text.replace("Login to continue with credits, or try another tool.", "Login to continue, or try another tool.")
+          text = text.replace("Guest trials are currently disabled. Login to continue using credits.", "Guest trials are currently disabled. Login to continue using SmartToolz.")
+          text = re.sub(r"\n?<?\?php elseif\(\$isToolPage && \$isLoggedIn\): \?><div class=\"trial-note\"><span class=\"material-symbols-rounded\">bolt</span> Logged in: <b>credits apply</b> according to current site settings\.?</div>", "", text)
+          text = text.replace(".credit-pill{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid #ddd9ff;border-radius:999px;background:#f5f3ff;color:#635bff;font-size:11px;font-weight:800;white-space:nowrap}.credit-pill .material-symbols-rounded{font-size:17px}", "")
+          text = text.replace(".credit-pill{padding:7px 9px}", "")
+          text = text.replace(".nav-links>a,.credit-pill,.notify-btn", ".nav-links>a,.notify-btn")
+          text = text.replace(".credit-pill{justify-content:flex-start;border-radius:11px}", "")
+          header.write_text(text, encoding='utf-8')
+
+          account = root / 'smart-toolz/account.php'
+          text = account.read_text(encoding='utf-8')
+          text = text.replace('No usage credits required.', 'No usage limits.')
+          text = text.replace('SmartToolz tools themselves do not consume credits.', 'SmartToolz tools are available without usage limits.')
+          text = text.replace('Choose a plan for account benefits such as an ad-free experience. SmartToolz tools themselves do not consume credits.', 'Choose a plan for account benefits such as an ad-free experience.')
+          account.write_text(text, encoding='utf-8')
+
+          # Fail loudly if any credit-system wording remains in source files.
+          matches = []
+          for p in root.rglob('*'):
+              if not p.is_file() or p.name == 'cleanup-credit-ui.yml':
+                  continue
+              if p.suffix.lower() not in {'.php', '.js', '.html', '.css'}:
+                  continue
+              try:
+                  s = p.read_text(encoding='utf-8')
+              except Exception:
+                  continue
+              for i, line in enumerate(s.splitlines(), 1):
+                  if re.search(r'credit', line, re.I):
+                      matches.append(f'{p}:{i}:{line.strip()}')
+          if matches:
+              print('Remaining credit references:')
+              print('\n'.join(matches[:100]))
+              raise SystemExit(1)
+          print('No credit references remain in PHP/JS/HTML/CSS.')
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "smarttoolz-cleanup"
+          git config user.email "actions@users.noreply.github.com"
+          git add smart-toolz/header.php smart-toolz/account.php
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git commit -m "fix: remove remaining credit UI"
+          git push

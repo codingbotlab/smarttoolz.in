@@ -1,94 +1,14 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/registered-users.php';
-
-const KEDDY_MANUAL_COMMENT_COOLDOWN = 300;
-
-function commentDbInit():void{
-    db()->exec("CREATE TABLE IF NOT EXISTS viewer_comment_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        viewer_channel_id TEXT NOT NULL,
-        viewer_name TEXT NOT NULL,
-        video_id TEXT NOT NULL,
-        video_title TEXT NOT NULL,
-        video_url TEXT NOT NULL,
-        comment_text TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'posted',
-        error_text TEXT NOT NULL DEFAULT '',
-        created_at INTEGER NOT NULL
-    )");
-    db()->exec('CREATE INDEX IF NOT EXISTS idx_viewer_comment_created ON viewer_comment_history(created_at DESC)');
-    db()->exec('CREATE INDEX IF NOT EXISTS idx_viewer_comment_user_video ON viewer_comment_history(viewer_channel_id,video_id)');
-}
-function commentHistory(int $limit=50):array{
-    commentDbInit();$q=db()->prepare('SELECT * FROM viewer_comment_history ORDER BY created_at DESC,id DESC LIMIT ?');
-    $q->bindValue(1,max(1,min($limit,200)),PDO::PARAM_INT);$q->execute();return $q->fetchAll(PDO::FETCH_ASSOC)?:[];
-}
-function commentStats():array{
-    commentDbInit();$today=strtotime('today');
-    $q=db()->prepare("SELECT COUNT(*) FROM viewer_comment_history WHERE created_at>=? AND status='posted'");$q->execute([$today]);$posted=(int)$q->fetchColumn();
-    $total=(int)db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='posted'")->fetchColumn();
-    $failed=(int)db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='failed'")->fetchColumn();
-    $q=db()->query("SELECT created_at FROM viewer_comment_history WHERE status='posted' ORDER BY created_at DESC LIMIT 1");$last=$q?$q->fetchColumn():false;
-    return ['today'=>$posted,'total'=>$total,'failed'=>$failed,'last'=>$last?((int)$last):0];
-}
-function commentWasPosted(string $viewerId,string $videoId):bool{
-    commentDbInit();$q=db()->prepare("SELECT 1 FROM viewer_comment_history WHERE viewer_channel_id=? AND video_id=? AND status='posted' LIMIT 1");$q->execute([$viewerId,$videoId]);return(bool)$q->fetchColumn();
-}
-function logViewerComment(string $viewerId,string $viewerName,string $videoId,string $title,string $url,string $text,string $status='posted',string $error=''):void{
-    commentDbInit();$q=db()->prepare('INSERT INTO viewer_comment_history(viewer_channel_id,viewer_name,video_id,video_title,video_url,comment_text,status,error_text,created_at) VALUES(?,?,?,?,?,?,?,?,?)');$q->execute([$viewerId,$viewerName,$videoId,$title,$url,$text,$status,$error,time()]);
-}
-function composeViewerComment(string $title,string $description=''):string{
-    $s=mb_strtolower($title.' '.$description,'UTF-8');
-    if(preg_match('/dance|dancecover|choreo|kpop|performance/ui',$s))return 'Okay, this energy is seriously good 🔥 The performance feels so alive — loved the vibe!';
-    if(preg_match('/travel|trip|vlog|korea|seoul|tour|journey/ui',$s))return 'This looks like such a fun journey 😄 Loved the atmosphere and the little details in this vlog!';
-    if(preg_match('/food|recipe|cooking|cook|bake|baking|street food/ui',$s))return 'Now you have officially made me hungry 😂 This looks so good — the whole video has a great vibe!';
-    if(preg_match('/gaming|gameplay|minecraft|valorant|pubg|free fire|fortnite/ui',$s))return 'That was a fun watch 🎮 The video has great energy and the gameplay moments were seriously entertaining!';
-    if(preg_match('/music|song|singing|cover song|vocal|guitar|piano/ui',$s))return 'This has such a nice vibe 🎶 Loved the feel of the video — keep making more like this!';
-    if(preg_match('/art|drawing|sketch|painting|craft|design/ui',$s))return 'The creativity here is so good 👏 Really enjoyed seeing the idea come together!';
-    return 'This was genuinely a nice watch 😄 Loved the vibe and the effort you put into it. Keep going!';
-}
-function viewerCommentEligibleVideo(string $videoId,string $title,string $privacy,string $channelId):bool{
-    if($videoId===''||$title===''||$channelId==='')return false;if(strtolower($privacy)!=='public')return false;return !commentWasPosted($channelId,$videoId);
-}
-function pickRegisteredUserOffset(array $users):array{
-    $n=count($users);if($n===0)return [];$cursor=(int)gv('viewer_comments_user_cursor','-1');$start=0;
-    foreach($users as $i=>$u)if((int)($u['id']??-2)>$cursor){$start=$i;break;}if($cursor>=(int)($users[$n-1]['id']??-2))$start=0;
-    return array_merge(array_slice($users,$start),array_slice($users,0,$start));
-}
-function viewerCommentCooldown(bool $manual=false):int{
-    $key=$manual?'viewer_comments_manual_last':'viewer_comments_last_run';
-    $seconds=$manual?KEDDY_MANUAL_COMMENT_COOLDOWN:3600;
-    return max(0,$seconds-(time()-(int)gv($key,'0')));
-}
-function runViewerVideoCommentTick(bool $force=false):array{
-    commentDbInit();keddyUsersInit();
-    $manual=$force;$remaining=viewerCommentCooldown($manual);
-    if($remaining>0)return['ran'=>false,'reason'=>$manual?'manual_cooldown':'cooldown','remaining'=>$remaining];
-    $key=$manual?'viewer_comments_manual_last':'viewer_comments_last_run';sv($key,(string)time());
-    $users=registeredKeddyUsers(true);
-    if(!$users)return['ran'=>true,'posted'=>0,'reason'=>'no_registered_keddy_users','mode'=>$manual?'manual':'hourly'];
-    try{
-        botChannel();
-        foreach(pickRegisteredUserOffset($users) as $u){
-            $channelId=(string)$u['channel_id'];$viewerName=(string)($u['channel_title']?:'Keddy user');
-            try{
-                $vc=ytBot('channels?part=contentDetails,snippet&id='.rawurlencode($channelId));$vch=$vc['items'][0]??null;if(!$vch)continue;
-                $uploads=(string)($vch['contentDetails']['relatedPlaylists']['uploads']??'');if($uploads==='')continue;
-                $pi=ytBot('playlistItems?part=snippet&playlistId='.rawurlencode($uploads).'&maxResults=5');
-                foreach($pi['items']??[] as $item){
-                    $video=$item['snippet']??[];$videoId=(string)($video['resourceId']['videoId']??'');$title=(string)($video['title']??'');if($videoId===''||$title==='')continue;
-                    $info=ytBot('videos?part=snippet,status&id='.rawurlencode($videoId));$sn=$info['items'][0]??[];$privacy=(string)($sn['status']['privacyStatus']??'public');$channel=(string)($sn['snippet']['channelId']??$channelId);
-                    if(!viewerCommentEligibleVideo($videoId,$title,$privacy,$channelId)||$channel!==$channelId)continue;
-                    $description=(string)($sn['snippet']['description']??'');$comment=composeViewerComment($title,$description);$url='https://www.youtube.com/watch?v='.rawurlencode($videoId);
-                    try{
-                        $posted=ytBot('commentThreads?part=snippet','POST',['snippet'=>['channelId'=>$channelId,'videoId'=>$videoId,'topLevelComment'=>['snippet'=>['textOriginal'=>$comment]]]]);
-                        if(!empty($posted['id'])){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'posted');sv('viewer_comments_user_cursor',(string)($u['id']??-1));return['ran'=>true,'posted'=>1,'user'=>$viewerName,'video'=>$title,'mode'=>$manual?'manual':'hourly'];}
-                        logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed','YouTube did not return a comment id.');
-                    }catch(Throwable $e){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed',$e->getMessage());}
-                }
-            }catch(Throwable $e){sv('viewer_comments_last_error',$e->getMessage());}
-        }
-        return['ran'=>true,'posted'=>0,'reason'=>'no_eligible_new_video','mode'=>$manual?'manual':'hourly'];
-    }catch(Throwable $e){sv('viewer_comments_last_error',$e->getMessage());return['ran'=>true,'posted'=>0,'error'=>$e->getMessage()];}
-}
+const KEDDY_MANUAL_COMMENT_COOLDOWN=300;
+function commentDbInit():void{db()->exec("CREATE TABLE IF NOT EXISTS viewer_comment_history(id INTEGER PRIMARY KEY AUTOINCREMENT,viewer_channel_id TEXT NOT NULL,viewer_name TEXT NOT NULL,video_id TEXT NOT NULL,video_title TEXT NOT NULL,video_url TEXT NOT NULL,comment_text TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'posted',error_text TEXT NOT NULL DEFAULT '',created_at INTEGER NOT NULL)");db()->exec('CREATE INDEX IF NOT EXISTS idx_viewer_comment_created ON viewer_comment_history(created_at DESC)');db()->exec('CREATE INDEX IF NOT EXISTS idx_viewer_comment_user_video ON viewer_comment_history(viewer_channel_id,video_id)');}
+function commentHistory(int$limit=50):array{commentDbInit();$q=db()->prepare('SELECT * FROM viewer_comment_history ORDER BY created_at DESC,id DESC LIMIT ?');$q->bindValue(1,max(1,min($limit,200)),PDO::PARAM_INT);$q->execute();return$q->fetchAll(PDO::FETCH_ASSOC)?:[];}
+function commentStats():array{commentDbInit();$today=strtotime('today');$q=db()->prepare("SELECT COUNT(*) FROM viewer_comment_history WHERE created_at>=? AND status='posted'");$q->execute([$today]);$posted=(int)$q->fetchColumn();$total=(int)db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='posted'")->fetchColumn();$failed=(int)db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='failed'")->fetchColumn();$q=db()->query("SELECT created_at FROM viewer_comment_history WHERE status='posted' ORDER BY created_at DESC LIMIT 1");$last=$q?$q->fetchColumn():false;return['today'=>$posted,'total'=>$total,'failed'=>$failed,'last'=>$last?(int)$last:0];}
+function commentWasPosted(string$viewerId,string$videoId):bool{commentDbInit();$q=db()->prepare("SELECT 1 FROM viewer_comment_history WHERE viewer_channel_id=? AND video_id=? AND status='posted' LIMIT 1");$q->execute([$viewerId,$videoId]);return(bool)$q->fetchColumn();}
+function logViewerComment(string$viewerId,string$viewerName,string$videoId,string$title,string$url,string$text,string$status='posted',string$error=''):void{commentDbInit();db()->prepare('INSERT INTO viewer_comment_history(viewer_channel_id,viewer_name,video_id,video_title,video_url,comment_text,status,error_text,created_at) VALUES(?,?,?,?,?,?,?,?,?)')->execute([$viewerId,$viewerName,$videoId,$title,$url,$text,$status,$error,time()]);}
+function composeViewerComment(string$title,string$description=''):string{$s=mb_strtolower($title.' '.$description,'UTF-8');if(preg_match('/dance|dancecover|choreo|kpop|performance/ui',$s))return'Okay, this energy is seriously good 🔥 The performance feels so alive — loved the vibe!';if(preg_match('/travel|trip|vlog|korea|seoul|tour|journey/ui',$s))return'This looks like such a fun journey 😄 Loved the atmosphere and the little details in this vlog!';if(preg_match('/food|recipe|cooking|cook|bake|baking|street food/ui',$s))return'Now you have officially made me hungry 😂 This looks so good — the whole video has a great vibe!';if(preg_match('/gaming|gameplay|minecraft|valorant|pubg|free fire|fortnite/ui',$s))return'That was a fun watch 🎮 The video has great energy and the gameplay moments were seriously entertaining!';if(preg_match('/music|song|singing|cover song|vocal|guitar|piano/ui',$s))return'This has such a nice vibe 🎶 Loved the feel of the video — keep making more like this!';if(preg_match('/art|drawing|sketch|painting|craft|design/ui',$s))return'The creativity here is so good 👏 Really enjoyed seeing the idea come together!';return'This was genuinely a nice watch 😄 Loved the vibe and the effort you put into it. Keep going!';}
+function viewerCommentEligibleVideo(string$videoId,string$title,string$privacy,string$channelId):bool{if($videoId===''||$title===''||$channelId==='')return false;if(strtolower($privacy)!=='public')return false;return!commentWasPosted($channelId,$videoId);}
+function pickRegisteredUserOffset(array$users):array{$n=count($users);if($n===0)return[];$cursor=(int)gv('viewer_comments_user_cursor','-1');$start=0;foreach($users as$i=>$u)if((int)($u['id']??-2)>$cursor){$start=$i;break;}if($cursor>=(int)($users[$n-1]['id']??-2))$start=0;return array_merge(array_slice($users,$start),array_slice($users,0,$start));}
+function viewerCommentCooldown(bool$manual=false):int{$key=$manual?'viewer_comments_manual_last':'viewer_comments_last_run';$seconds=$manual?KEDDY_MANUAL_COMMENT_COOLDOWN:3600;return max(0,$seconds-(time()-(int)gv($key,'0')));}
+function runViewerVideoCommentTick(bool$force=false):array{commentDbInit();keddyUsersInit();$manual=$force;$remaining=viewerCommentCooldown($manual);if($remaining>0)return['ran'=>false,'reason'=>$manual?'manual_cooldown':'cooldown','remaining'=>$remaining];$key=$manual?'viewer_comments_manual_last':'viewer_comments_last_run';sv($key,(string)time());$users=registeredKeddyUsers(true);if(!$users)return['ran'=>true,'posted'=>0,'reason'=>'no_registered_keddy_users','mode'=>$manual?'manual':'hourly'];try{botChannel();foreach(pickRegisteredUserOffset($users)as$u){$channelId=(string)$u['channel_id'];$viewerName=(string)($u['channel_title']?:'Keddy user');try{keddyDataCaptureChannelById($channelId,'comment_target',true,false,null);$vc=ytBot('channels?part=contentDetails,snippet&id='.rawurlencode($channelId));$vch=$vc['items'][0]??null;if(!$vch)continue;$uploads=(string)($vch['contentDetails']['relatedPlaylists']['uploads']??'');if($uploads==='')continue;$pi=ytBot('playlistItems?part=snippet&playlistId='.rawurlencode($uploads).'&maxResults=5');foreach($pi['items']??[]as$item){$video=$item['snippet']??[];$videoId=(string)($video['resourceId']['videoId']??'');$title=(string)($video['title']??'');if($videoId===''||$title==='')continue;$info=ytBot('videos?part=snippet,status,contentDetails,statistics&id='.rawurlencode($videoId));$sn=$info['items'][0]??[];$privacy=(string)($sn['status']['privacyStatus']??'public');$channel=(string)($sn['snippet']['channelId']??$channelId);if(!viewerCommentEligibleVideo($videoId,$title,$privacy,$channelId)||$channel!==$channelId)continue;try{keddyDataCaptureVideo($sn);}catch(Throwable$e){}$description=(string)($sn['snippet']['description']??'');$comment=composeViewerComment($title,$description);$url='https://www.youtube.com/watch?v='.rawurlencode($videoId);try{$posted=ytBot('commentThreads?part=snippet','POST',['snippet'=>['channelId'=>$channelId,'videoId'=>$videoId,'topLevelComment'=>['snippet'=>['textOriginal'=>$comment]]]]);if(!empty($posted['id'])){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'posted');sv('viewer_comments_user_cursor',(string)($u['id']??-1));return['ran'=>true,'posted'=>1,'user'=>$viewerName,'video'=>$title,'mode'=>$manual?'manual':'hourly'];}logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed','YouTube did not return a comment id.');}catch(Throwable$e){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed',$e->getMessage());}}}catch(Throwable$e){sv('viewer_comments_last_error',$e->getMessage());}}return['ran'=>true,'posted'=>0,'reason'=>'no_eligible_new_video','mode'=>$manual?'manual':'hourly'];}catch(Throwable$e){sv('viewer_comments_last_error',$e->getMessage());return['ran'=>true,'posted'=>0,'error'=>$e->getMessage()];}}

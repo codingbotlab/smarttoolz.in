@@ -18,37 +18,24 @@ function commentDbInit():void{
     db()->exec('CREATE INDEX IF NOT EXISTS idx_viewer_comment_created ON viewer_comment_history(created_at DESC)');
     db()->exec('CREATE INDEX IF NOT EXISTS idx_viewer_comment_user_video ON viewer_comment_history(viewer_channel_id,video_id)');
 }
-
 function commentHistory(int $limit=50):array{
-    commentDbInit();
-    $q=db()->prepare('SELECT * FROM viewer_comment_history ORDER BY created_at DESC,id DESC LIMIT ?');
-    $q->bindValue(1,max(1,min($limit,200)),PDO::PARAM_INT);$q->execute();
-    return $q->fetchAll(PDO::FETCH_ASSOC)?:[];
+    commentDbInit();$q=db()->prepare('SELECT * FROM viewer_comment_history ORDER BY created_at DESC,id DESC LIMIT ?');
+    $q->bindValue(1,max(1,min($limit,200)),PDO::PARAM_INT);$q->execute();return $q->fetchAll(PDO::FETCH_ASSOC)?:[];
 }
-
 function commentStats():array{
-    commentDbInit();
-    $today=strtotime('today');
-    $q=db()->prepare("SELECT COUNT(*) FROM viewer_comment_history WHERE created_at>=? AND status='posted'");$q->execute([$today]);
-    $posted=(int)$q->fetchColumn();
-    $q=db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='posted'");$total=(int)$q->fetchColumn();
-    $q=db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='failed'");$failed=(int)$q->fetchColumn();
+    commentDbInit();$today=strtotime('today');
+    $q=db()->prepare("SELECT COUNT(*) FROM viewer_comment_history WHERE created_at>=? AND status='posted'");$q->execute([$today]);$posted=(int)$q->fetchColumn();
+    $total=(int)db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='posted'")->fetchColumn();
+    $failed=(int)db()->query("SELECT COUNT(*) FROM viewer_comment_history WHERE status='failed'")->fetchColumn();
     $q=db()->query("SELECT created_at FROM viewer_comment_history WHERE status='posted' ORDER BY created_at DESC LIMIT 1");$last=$q?$q->fetchColumn():false;
     return ['today'=>$posted,'total'=>$total,'failed'=>$failed,'last'=>$last?((int)$last):0];
 }
-
 function commentWasPosted(string $viewerId,string $videoId):bool{
-    commentDbInit();
-    $q=db()->prepare("SELECT 1 FROM viewer_comment_history WHERE viewer_channel_id=? AND video_id=? AND status='posted' LIMIT 1");
-    $q->execute([$viewerId,$videoId]);return(bool)$q->fetchColumn();
+    commentDbInit();$q=db()->prepare("SELECT 1 FROM viewer_comment_history WHERE viewer_channel_id=? AND video_id=? AND status='posted' LIMIT 1");$q->execute([$viewerId,$videoId]);return(bool)$q->fetchColumn();
 }
-
 function logViewerComment(string $viewerId,string $viewerName,string $videoId,string $title,string $url,string $text,string $status='posted',string $error=''):void{
-    commentDbInit();
-    $q=db()->prepare('INSERT INTO viewer_comment_history(viewer_channel_id,viewer_name,video_id,video_title,video_url,comment_text,status,error_text,created_at) VALUES(?,?,?,?,?,?,?,?,?)');
-    $q->execute([$viewerId,$viewerName,$videoId,$title,$url,$text,$status,$error,time()]);
+    commentDbInit();$q=db()->prepare('INSERT INTO viewer_comment_history(viewer_channel_id,viewer_name,video_id,video_title,video_url,comment_text,status,error_text,created_at) VALUES(?,?,?,?,?,?,?,?,?)');$q->execute([$viewerId,$viewerName,$videoId,$title,$url,$text,$status,$error,time()]);
 }
-
 function composeViewerComment(string $title,string $description=''):string{
     $s=mb_strtolower($title.' '.$description,'UTF-8');
     if(preg_match('/dance|dancecover|choreo|kpop|performance/ui',$s))return 'Okay, this energy is seriously good 🔥 The performance feels so alive — loved the vibe!';
@@ -59,79 +46,45 @@ function composeViewerComment(string $title,string $description=''):string{
     if(preg_match('/art|drawing|sketch|painting|craft|design/ui',$s))return 'The creativity here is so good 👏 Really enjoyed seeing the idea come together!';
     return 'This was genuinely a nice watch 😄 Loved the vibe and the effort you put into it. Keep going!';
 }
-
 function viewerCommentEligibleVideo(string $videoId,string $title,string $privacy,string $channelId):bool{
-    if($videoId===''||$title===''||$channelId==='')return false;
-    if(strtolower($privacy)!=='public')return false;
-    return !commentWasPosted($channelId,$videoId);
+    if($videoId===''||$title===''||$channelId==='')return false;if(strtolower($privacy)!=='public')return false;return !commentWasPosted($channelId,$videoId);
 }
-
 function pickRegisteredUserOffset(array $users):array{
-    $n=count($users);if($n===0)return [];
-    $cursor=(int)gv('viewer_comments_user_cursor','-1');
-    $start=0;
-    foreach($users as $i=>$u)if((int)($u['id']??-2)>$cursor){$start=$i;break;}
-    if($cursor>=(int)($users[$n-1]['id']??-2))$start=0;
+    $n=count($users);if($n===0)return [];$cursor=(int)gv('viewer_comments_user_cursor','-1');$start=0;
+    foreach($users as $i=>$u)if((int)($u['id']??-2)>$cursor){$start=$i;break;}if($cursor>=(int)($users[$n-1]['id']??-2))$start=0;
     return array_merge(array_slice($users,$start),array_slice($users,0,$start));
 }
-
 function runViewerVideoCommentTick(bool $force=false):array{
-    commentDbInit();keddyUsersInit();
-    $last=(int)gv('viewer_comments_last_run','0');
+    commentDbInit();keddyUsersInit();$last=(int)gv('viewer_comments_last_run','0');
     if(!$force&&time()-$last<3600)return ['ran'=>false,'reason'=>'cooldown'];
 
+    // Mark the hourly attempt immediately so a missing/expired bot OAuth token
+    // cannot cause the website heartbeat to retry the external work every few seconds.
+    sv('viewer_comments_last_run',(string)time());
     $users=registeredKeddyUsers(true);
     if(!$users)return ['ran'=>true,'posted'=>0,'reason'=>'no_registered_keddy_users'];
-    
     try{
-        // This feature deliberately uses only the dedicated Keddy Bot identity.
+        // Only the dedicated Keddy Bot identity is allowed to publish these comments.
         botChannel();
-        $ordered=pickRegisteredUserOffset($users);
-        foreach($ordered as $u){
-            $channelId=(string)$u['channel_id'];
-            $viewerName=(string)($u['channel_title']?:'Keddy user');
+        foreach(pickRegisteredUserOffset($users) as $u){
+            $channelId=(string)$u['channel_id'];$viewerName=(string)($u['channel_title']?:'Keddy user');
             try{
-                $vc=ytBot('channels?part=contentDetails,snippet&id='.rawurlencode($channelId));
-                $vch=$vc['items'][0]??null;
-                if(!$vch)continue;
-                $uploads=(string)($vch['contentDetails']['relatedPlaylists']['uploads']??'');
-                if($uploads==='')continue;
+                $vc=ytBot('channels?part=contentDetails,snippet&id='.rawurlencode($channelId));$vch=$vc['items'][0]??null;if(!$vch)continue;
+                $uploads=(string)($vch['contentDetails']['relatedPlaylists']['uploads']??'');if($uploads==='')continue;
                 $pi=ytBot('playlistItems?part=snippet&playlistId='.rawurlencode($uploads).'&maxResults=5');
                 foreach($pi['items']??[] as $item){
-                    $video=$item['snippet']??[];
-                    $videoId=(string)($video['resourceId']['videoId']??'');
-                    $title=(string)($video['title']??'');
-                    if($videoId===''||$title==='')continue;
-                    $info=ytBot('videos?part=snippet,status&id='.rawurlencode($videoId));
-                    $sn=$info['items'][0]??[];
-                    $privacy=(string)($sn['status']['privacyStatus']??'public');
-                    $channel=(string)($sn['snippet']['channelId']??$channelId);
-                    if(!viewerCommentEligibleVideo($videoId,$title,$privacy,$channelId))continue;
-                    if($channel!==$channelId)continue;
-                    $description=(string)($sn['snippet']['description']??'');
-                    $comment=composeViewerComment($title,$description);
-                    $url='https://www.youtube.com/watch?v='.rawurlencode($videoId);
+                    $video=$item['snippet']??[];$videoId=(string)($video['resourceId']['videoId']??'');$title=(string)($video['title']??'');if($videoId===''||$title==='')continue;
+                    $info=ytBot('videos?part=snippet,status&id='.rawurlencode($videoId));$sn=$info['items'][0]??[];$privacy=(string)($sn['status']['privacyStatus']??'public');$channel=(string)($sn['snippet']['channelId']??$channelId);
+                    if(!viewerCommentEligibleVideo($videoId,$title,$privacy,$channelId)||$channel!==$channelId)continue;
+                    $description=(string)($sn['snippet']['description']??'');$comment=composeViewerComment($title,$description);$url='https://www.youtube.com/watch?v='.rawurlencode($videoId);
                     try{
                         $posted=ytBot('commentThreads?part=snippet','POST',['snippet'=>['channelId'=>$channelId,'videoId'=>$videoId,'topLevelComment'=>['snippet'=>['textOriginal'=>$comment]]]]);
-                        if(!empty($posted['id'])){
-                            logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'posted');
-                            sv('viewer_comments_last_run',(string)time());
-                            sv('viewer_comments_user_cursor',(string)($u['id']??-1));
-                            return ['ran'=>true,'posted'=>1,'user'=>$viewerName,'video'=>$title];
-                        }
+                        if(!empty($posted['id'])){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'posted');sv('viewer_comments_user_cursor',(string)($u['id']??-1));return['ran'=>true,'posted'=>1,'user'=>$viewerName,'video'=>$title];}
                         logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed','YouTube did not return a comment id.');
-                    }catch(Throwable $e){
-                        logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed',$e->getMessage());
-                    }
+                    }catch(Throwable $e){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed',$e->getMessage());}
                 }
-            }catch(Throwable $e){
-                sv('viewer_comments_last_error',$e->getMessage());
-            }
+            }catch(Throwable $e){sv('viewer_comments_last_error',$e->getMessage());}
         }
-        sv('viewer_comments_last_run',(string)time());
         return ['ran'=>true,'posted'=>0,'reason'=>'no_eligible_new_video'];
-    }catch(Throwable $e){
-        sv('viewer_comments_last_error',$e->getMessage());
-        return ['ran'=>true,'posted'=>0,'error'=>$e->getMessage()];
-    }
+    }catch(Throwable $e){sv('viewer_comments_last_error',$e->getMessage());return['ran'=>true,'posted'=>0,'error'=>$e->getMessage()];}
 }

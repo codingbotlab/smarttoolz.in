@@ -2,6 +2,8 @@
 declare(strict_types=1);
 require_once __DIR__.'/registered-users.php';
 
+const KEDDY_MANUAL_COMMENT_COOLDOWN = 300;
+
 function commentDbInit():void{
     db()->exec("CREATE TABLE IF NOT EXISTS viewer_comment_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,17 +56,19 @@ function pickRegisteredUserOffset(array $users):array{
     foreach($users as $i=>$u)if((int)($u['id']??-2)>$cursor){$start=$i;break;}if($cursor>=(int)($users[$n-1]['id']??-2))$start=0;
     return array_merge(array_slice($users,$start),array_slice($users,0,$start));
 }
+function viewerCommentCooldown(bool $manual=false):int{
+    $key=$manual?'viewer_comments_manual_last':'viewer_comments_last_run';
+    $seconds=$manual?KEDDY_MANUAL_COMMENT_COOLDOWN:3600;
+    return max(0,$seconds-(time()-(int)gv($key,'0')));
+}
 function runViewerVideoCommentTick(bool $force=false):array{
-    commentDbInit();keddyUsersInit();$last=(int)gv('viewer_comments_last_run','0');
-    if(!$force&&time()-$last<3600)return ['ran'=>false,'reason'=>'cooldown'];
-
-    // Mark the hourly attempt immediately so a missing/expired bot OAuth token
-    // cannot cause the website heartbeat to retry the external work every few seconds.
-    sv('viewer_comments_last_run',(string)time());
+    commentDbInit();keddyUsersInit();
+    $manual=$force;$remaining=viewerCommentCooldown($manual);
+    if($remaining>0)return['ran'=>false,'reason'=>$manual?'manual_cooldown':'cooldown','remaining'=>$remaining];
+    $key=$manual?'viewer_comments_manual_last':'viewer_comments_last_run';sv($key,(string)time());
     $users=registeredKeddyUsers(true);
-    if(!$users)return ['ran'=>true,'posted'=>0,'reason'=>'no_registered_keddy_users'];
+    if(!$users)return['ran'=>true,'posted'=>0,'reason'=>'no_registered_keddy_users','mode'=>$manual?'manual':'hourly'];
     try{
-        // Only the dedicated Keddy Bot identity is allowed to publish these comments.
         botChannel();
         foreach(pickRegisteredUserOffset($users) as $u){
             $channelId=(string)$u['channel_id'];$viewerName=(string)($u['channel_title']?:'Keddy user');
@@ -79,12 +83,12 @@ function runViewerVideoCommentTick(bool $force=false):array{
                     $description=(string)($sn['snippet']['description']??'');$comment=composeViewerComment($title,$description);$url='https://www.youtube.com/watch?v='.rawurlencode($videoId);
                     try{
                         $posted=ytBot('commentThreads?part=snippet','POST',['snippet'=>['channelId'=>$channelId,'videoId'=>$videoId,'topLevelComment'=>['snippet'=>['textOriginal'=>$comment]]]]);
-                        if(!empty($posted['id'])){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'posted');sv('viewer_comments_user_cursor',(string)($u['id']??-1));return['ran'=>true,'posted'=>1,'user'=>$viewerName,'video'=>$title];}
+                        if(!empty($posted['id'])){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'posted');sv('viewer_comments_user_cursor',(string)($u['id']??-1));return['ran'=>true,'posted'=>1,'user'=>$viewerName,'video'=>$title,'mode'=>$manual?'manual':'hourly'];}
                         logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed','YouTube did not return a comment id.');
                     }catch(Throwable $e){logViewerComment($channelId,$viewerName,$videoId,$title,$url,$comment,'failed',$e->getMessage());}
                 }
             }catch(Throwable $e){sv('viewer_comments_last_error',$e->getMessage());}
         }
-        return ['ran'=>true,'posted'=>0,'reason'=>'no_eligible_new_video'];
+        return['ran'=>true,'posted'=>0,'reason'=>'no_eligible_new_video','mode'=>$manual?'manual':'hourly'];
     }catch(Throwable $e){sv('viewer_comments_last_error',$e->getMessage());return['ran'=>true,'posted'=>0,'error'=>$e->getMessage()];}
 }

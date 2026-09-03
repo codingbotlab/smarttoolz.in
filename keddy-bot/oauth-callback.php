@@ -31,17 +31,15 @@ try {
         throw new RuntimeException('Google did not return an access token.');
     }
 
-    // Always store the token set returned by this fresh OAuth authorization.
-    // Do not reuse a refresh token belonging to an older/revoked client session.
     $j['expires_at'] = time() + (int)($j['expires_in'] ?? 3600);
     sj('oauth', $j);
     unset($_SESSION['keddy_oauth_state']);
 
-    header('Location: index.php?connected=1');
+    header('Location: /keddy-bot/index.php?connected=1');
     exit;
 } catch (Throwable $e) {
     http_response_code(400);
     echo '<!doctype html><meta charset="utf-8"><title>Keddy OAuth Error</title>';
     echo '<h1>Keddy OAuth Error</h1><p>'.htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8').'</p>';
-    echo '<p><a href="index.php">Back to Keddy</a></p>';
+    echo '<p><a href="/keddy-bot/index.php">Back to Keddy</a></p>';
 }

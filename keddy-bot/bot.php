@@ -6,7 +6,7 @@ const KEDDY_REDIRECT_URI='https://smarttoolz.in/keddy-bot/oauth-callback.php';
 const KEDDY_BOT_REDIRECT_URI='https://smarttoolz.in/keddy-bot/bot-oauth-callback.php';
 const KEDDY_BOT_CHANNEL_NAME='Keddy Bot BTS';
 const KEDDY_TASKS_ENABLED=false;
-const KEDDY_AUTO_WELCOME=true;
+const KEDDY_AUTO_WELCOME=false;
 const KEDDY_SOCIAL_TIMER_ENABLED=true;
 const KEDDY_SOCIAL_INTERVAL=120;
 const KEDDY_USER_WELCOME_COOLDOWN=600;
@@ -18,9 +18,9 @@ function cfg():array{
     $base=[
         'app_secret'=>getenv('KEDDY_APP_SECRET')?:'CHANGE-ME',
         'redirect_uri'=>KEDDY_REDIRECT_URI,
-        'ai_url'=>getenv('KEDDY_AI_URL')?:'',
+        'ai_url'=>getenv('KEDDY_AI_URL')?:'http://127.0.0.1:11434/api/chat',
         'ai_key'=>getenv('KEDDY_AI_KEY')?:'',
-        'ai_model'=>getenv('KEDDY_AI_MODEL')?:'gpt-4o-mini',
+        'ai_model'=>getenv('KEDDY_AI_MODEL')?:'qwen3:4b',
         'database'=>__DIR__.'/data/keddy.sqlite'
     ];
     $runtime=__DIR__.'/data/credentials.php';
@@ -107,7 +107,7 @@ function sendMsg(string$m):array{$id=gv('chat_id');if(!$id)throw new RuntimeExce
 function sendBotMsg(string$m):array{$id=gv('chat_id');if(!$id)throw new RuntimeException('No live chat found.');return ytBot('liveChat/messages?part=snippet','POST',['snippet'=>['liveChatId'=>$id,'type'=>'textMessageEvent','textMessageDetails'=>['messageText'=>trim($m)]]]);}
 function welcomeBotToLive():bool{$l=findLive();if(!$l)return false;sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')===$l['id'])return true;sendBotMsg('🤖 Hello! I am Keddy Bot BTS 👋 Brain online. Chat samjho, baat karo, mazaak bhi karo 😎');sv('bot_welcome_live_id',$l['id']);sv('social_timer_last',(string)time());return true;}
 function socialMessage():string{$msgs=['❤️ Like kar do dosto! Keddy ne attendance le li 😎','🔗 Share kar do dosto — ek friend ko bulao, Keddy uski entry bhi note karega 😂','🔥 Like + Share kar do! Chat ki energy low hui to Keddy motivational lecture dega 😭','🙌 Support dikhao — Like aur Share dono. Keddy ka social radar dekh raha hai 👀'];return$msgs[array_rand($msgs)];}
-function welcomeUser(string$name):string{$name=trim($name)?:'dost';$templates=['👋 Welcome %s! Keddy Brain ne tumhari entry notice kar li 😎','🤖 Hi %s! Keddy yahin hai — bolo kya scene hai?','✨ Welcome %s! Chat mein aao, baat shuru karo ❤️'];return sprintf($templates[array_rand($templates)],$name);}
+function welcomeUser(string$name):string{$name=trim($name)?:'dost';$templates=['👋 Welcome %s! Keddy yahin hai 😎','🤖 Hi %s! Bolo kya scene hai?','✨ Welcome %s! Chat shuru karo ❤️'];return sprintf($templates[array_rand($templates)],$name);}
 function maybeWelcomeUser(array$x):bool{if(!KEDDY_AUTO_WELCOME)return false;$authorId=(string)($x['authorDetails']['channelId']??'');$name=(string)($x['authorDetails']['displayName']??'');if($authorId==='')return false;$key='welcome_user_'.hash('sha256',$authorId);$last=(int)gv($key,'0');if(time()-$last<KEDDY_USER_WELCOME_COOLDOWN)return false;sendBotMsg(welcomeUser($name));sv($key,(string)time());return true;}
 function maybeSocialTimer():void{if(!KEDDY_SOCIAL_TIMER_ENABLED)return;$last=(int)gv('social_timer_last','0');if(time()-$last<KEDDY_SOCIAL_INTERVAL)return;sendBotMsg(socialMessage());sv('social_timer_last',(string)time());}
 function tasks():array{return gj('tasks',['2 minutes: comfortably baithi raho aur chat ke messages ka reply karo. 👀','2 minutes: seated Q&A round — chat se ek interesting question ka answer do. 💬','2 minutes: camera ki taraf smile karke viewers ko welcome karo. 😊','2 minutes: apni current live feeling chat ke saath share karo. ❤️','2 minutes: seated rapid-fire — chat ke 3 short questions ka answer do. ⚡','2 minutes: seated break — paani piyo aur relax karo. 🧘','2 minutes: viewers se ek fun topic choose karne ko bolo. 🎯','2 minutes: active viewers ko thank you bolo. 🙌']);}
@@ -116,10 +116,9 @@ function saveS(array$s):void{sj('session',$s);}
 function startS():array{$l=findLive();if(!$l)throw new RuntimeException('No active YouTube live found. Start the live first.');sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')!==$l['id']){sendBotMsg('🤖 Keddy Brain online! Main chat samajhne aur replies dene ke liye ready hoon 😎');sv('bot_welcome_live_id',$l['id']);}sv('social_timer_last',(string)time());$s=session();$s['active']=true;$s['started']=time();$s['index']=0;$s['last']=time();saveS($s);return$s;}
 function stopS():void{$s=session();$s['active']=false;saveS($s);}
 function nextS(bool$send=true):array{$a=tasks();$s=session();$i=(int)$s['index']%count($a);if($send&&KEDDY_TASKS_ENABLED)sendBotMsg('🎯 Keddy Instructor — Task '.($i+1).': '.$a[$i]);$s['index']=$i+1;$s['last']=time();saveS($s);return['task'=>$a[$i],'index'=>$i+1];}
-function statusText():string{$last=(int)gv('social_timer_last','0');$left=max(0,KEDDY_SOCIAL_INTERVAL-(time()-$last));return'🤖 Keddy Brain: local NLP + context memory active. Next social reminder in '.ceil($left/60).' min. Tasks are OFF.';}
+function statusText():string{$last=(int)gv('social_timer_last','0');$left=max(0,KEDDY_SOCIAL_INTERVAL-(time()-$last));return'🤖 Keddy Brain: Ollama open-weight LLM + local NLP fallback. Model: '.(string)(cfg()['ai_model']??'qwen3:4b').'. Next social reminder in '.ceil($left/60).' min. Tasks are OFF.';}
 function handleCmd(string$text):?string{
-    $text=trim($text);
-    if($text==='')return null;
+    $text=trim($text);if($text==='')return null;
     $cmd=strtolower((string)(preg_split('/\s+/',$text)[0]??''));
     return match($cmd){
         '!hello'=>'👋 Hello! Keddy Brain online 🤖',
@@ -127,21 +126,18 @@ function handleCmd(string$text):?string{
         '!share'=>'🔗 Share kar do dosto! Ek aur insaan ko chat mein le aao 😎',
         '!timer'=>statusText(),
         '!status'=>statusText(),
-        '!help'=>'🤖 Normal language mein bhi baat karo. Commands: !hello • !like • !share • !timer • !status • !help',
-        '!commands'=>'🤖 Normal language mein bhi baat karo. Commands: !hello • !like • !share • !timer • !status • !help',
+        '!help'=>'🤖 Normal language mein baat karo — Hindi, Hinglish ya English. Keddy chat samajhne ke liye local open-weight brain use karta hai.',
+        '!commands'=>'🤖 Normal language mein baat karo — Hindi, Hinglish ya English. Keddy chat samajhne ke liye local open-weight brain use karta hai.',
         '!task'=>KEDDY_TASKS_ENABLED?'🎯 Tasks are enabled.':'🤖 Tasks are currently OFF.',
         default=>null
     };
 }
 function markMessageSeen(string $messageId):bool{
     if($messageId==='')return true;
-    $seen=gj('processed_chat_messages',[]);
-    if(!is_array($seen))$seen=[];
+    $seen=gj('processed_chat_messages',[]);if(!is_array($seen))$seen=[];
     if(in_array($messageId,$seen,true))return false;
-    $seen[]=$messageId;
-    if(count($seen)>KEDDY_SEEN_MESSAGE_LIMIT)$seen=array_slice($seen,-KEDDY_SEEN_MESSAGE_LIMIT);
-    sj('processed_chat_messages',$seen);
-    return true;
+    $seen[]=$messageId;if(count($seen)>KEDDY_SEEN_MESSAGE_LIMIT)$seen=array_slice($seen,-KEDDY_SEEN_MESSAGE_LIMIT);
+    sj('processed_chat_messages',$seen);return true;
 }
 function poll():void{
     $id=gv('chat_id');if(!$id)return;
@@ -151,15 +147,12 @@ function poll():void{
     if(!empty($j['nextPageToken']))sv('chat_token',$j['nextPageToken']);
     $botId=gv('bot_channel_id');
     foreach($j['items']??[] as $x){
-        $messageId=(string)($x['id']??'');
-        if(!markMessageSeen($messageId))continue;
+        $messageId=(string)($x['id']??'');if(!markMessageSeen($messageId))continue;
         $author=(string)($x['authorDetails']['channelId']??'');if($botId&&$author===$botId)continue;
         $text=(string)($x['snippet']['displayMessage']??'');if(trim($text)==='')continue;
-        $welcomed=false;
-        try{$welcomed=maybeWelcomeUser($x);}catch(Throwable$e){}
         $cmd=handleCmd($text);
         if($cmd!==null){try{sendBotMsg($cmd);}catch(Throwable$e){}}
-        elseif(!$welcomed){try{sendBotMsg(brainReply($x));}catch(Throwable$e){}}
+        else {try{sendBotMsg(brainReply($x));}catch(Throwable$e){}}
     }
 }
 function tick():array{

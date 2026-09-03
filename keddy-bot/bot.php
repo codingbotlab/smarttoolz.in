@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-const KEDDY_GOOGLE_CLIENT_ID='523738407628-o1c4t43j4vjriajnvojpt4cio4mktr01.apps.googleusercontent.com';
+const KEDDY_GOOGLE_CLIENT_ID='523738407628-svvuj66f6836mvbb6438sgl1gpu1pntc.apps.googleusercontent.com';
 const KEDDY_REDIRECT_URI='https://smarttoolz.in/keddy-bot/oauth-callback.php';
 function cfg():array{
     $p=__DIR__.'/config.php';

@@ -1,0 +1,12 @@
+services:
+  keddy-ollama:
+    image: ollama/ollama:latest
+    container_name: keddy-ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - keddy_ollama_models:/root/.ollama
+
+volumes:
+  keddy_ollama_models:

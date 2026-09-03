@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 const KEDDY_GOOGLE_CLIENT_ID='523738407628-svvuj66f6836mvbb6438sgl1gpu1pntc.apps.googleusercontent.com';
 const KEDDY_REDIRECT_URI='https://smarttoolz.in/keddy-bot/oauth-callback.php';
 const KEDDY_BOT_REDIRECT_URI='https://smarttoolz.in/keddy-bot/bot-oauth-callback.php';
@@ -9,39 +10,155 @@ const KEDDY_AUTO_WELCOME=true;
 const KEDDY_SOCIAL_TIMER_ENABLED=true;
 const KEDDY_SOCIAL_INTERVAL=120;
 const KEDDY_USER_WELCOME_COOLDOWN=600;
-function cfg():array{$base=['app_secret'=>getenv('KEDDY_APP_SECRET')?:'CHANGE-ME','redirect_uri'=>KEDDY_REDIRECT_URI,'ai_url'=>getenv('KEDDY_AI_URL')?:'','ai_key'=>getenv('KEDDY_AI_KEY')?:'','ai_model'=>getenv('KEDDY_AI_MODEL')?:'gpt-4o-mini','database'=>__DIR__.'/data/keddy.sqlite'];$runtime=__DIR__.'/data/credentials.php';if(is_file($runtime)){$c=require $runtime;if(is_array($c))return array_merge($base,$c,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'redirect_uri'=>KEDDY_REDIRECT_URI,'bot_redirect_uri'=>KEDDY_BOT_REDIRECT_URI]);}$p=__DIR__.'/config.php';if(is_file($p)){$c=require $p;if(is_array($c))return array_merge($base,$c,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'redirect_uri'=>KEDDY_REDIRECT_URI,'bot_redirect_uri'=>KEDDY_BOT_REDIRECT_URI]);}return array_merge($base,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'google_client_secret'=>getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:'','bot_redirect_uri'=>KEDDY_BOT_REDIRECT_URI]);}
-function db():PDO{static $p;if($p)return$p;$c=cfg();$d=dirname($c['database']);if(!is_dir($d))mkdir($d,0755,true);$p=new PDO('sqlite:'.$c['database']);$p->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);$p->exec('CREATE TABLE IF NOT EXISTS state(k TEXT PRIMARY KEY,v TEXT NOT NULL)');return$p;}
+
+require_once __DIR__.'/brain.php';
+
+function cfg():array{
+    $base=[
+        'app_secret'=>getenv('KEDDY_APP_SECRET')?:'CHANGE-ME',
+        'redirect_uri'=>KEDDY_REDIRECT_URI,
+        'ai_url'=>getenv('KEDDY_AI_URL')?:'',
+        'ai_key'=>getenv('KEDDY_AI_KEY')?:'',
+        'ai_model'=>getenv('KEDDY_AI_MODEL')?:'gpt-4o-mini',
+        'database'=>__DIR__.'/data/keddy.sqlite'
+    ];
+    $runtime=__DIR__.'/data/credentials.php';
+    if(is_file($runtime)){
+        $c=require $runtime;
+        if(is_array($c)) return array_merge($base,$c,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'redirect_uri'=>KEDDY_REDIRECT_URI,'bot_redirect_uri'=>KEDDY_BOT_REDIRECT_URI]);
+    }
+    $p=__DIR__.'/config.php';
+    if(is_file($p)){
+        $c=require $p;
+        if(is_array($c)) return array_merge($base,$c,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'redirect_uri'=>KEDDY_REDIRECT_URI,'bot_redirect_uri'=>KEDDY_BOT_REDIRECT_URI]);
+    }
+    return array_merge($base,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'google_client_secret'=>getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:'','bot_redirect_uri'=>KEDDY_BOT_REDIRECT_URI]);
+}
+
+function db():PDO{
+    static $p;
+    if($p)return $p;
+    $c=cfg();
+    $d=dirname($c['database']);
+    if(!is_dir($d))mkdir($d,0755,true);
+    $p=new PDO('sqlite:'.$c['database']);
+    $p->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+    $p->exec('CREATE TABLE IF NOT EXISTS state(k TEXT PRIMARY KEY,v TEXT NOT NULL)');
+    return $p;
+}
 function gv(string$k,?string$d=null):?string{$q=db()->prepare('SELECT v FROM state WHERE k=?');$q->execute([$k]);$v=$q->fetchColumn();return$v===false?$d:(string)$v;}
 function sv(string$k,string$v):void{$q=db()->prepare('INSERT INTO state(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v');$q->execute([$k,$v]);}
 function gj(string$k,$d=null){$v=gv($k);if($v===null||$v==='')return$d;$x=json_decode($v,true);return$x===null?$d:$x;}
 function sj(string$k,$v):void{sv($k,json_encode($v,JSON_UNESCAPED_UNICODE));}
-function req(string$u,string$m='GET',array$h=[],?string$b=null):array{$c=curl_init($u);curl_setopt_array($c,[CURLOPT_RETURNTRANSFER=>1,CURLOPT_CUSTOMREQUEST=>$m,CURLOPT_HTTPHEADER=>$h,CURLOPT_TIMEOUT=>25]);if($b!==null)curl_setopt($c,CURLOPT_POSTFIELDS,$b);$r=curl_exec($c);$code=(int)curl_getinfo($c,CURLINFO_HTTP_CODE);$e=curl_error($c);curl_close($c);if($r===false)throw new RuntimeException($e?:'HTTP error');$j=json_decode($r,true)?:[];if($code>=400)throw new RuntimeException('HTTP '.$code.': '.($j['error_description']??$j['error']['message']??$r));return$j;}
-function googleCredentials():array{$c=cfg();$secret=trim((string)($c['google_client_secret']??''));if($secret==='')throw new RuntimeException('Keddy Google OAuth credentials are not configured.');return['id'=>KEDDY_GOOGLE_CLIENT_ID,'secret'=>$secret,'redirect'=>KEDDY_REDIRECT_URI,'bot_redirect'=>KEDDY_BOT_REDIRECT_URI];}
-function refreshStoredToken(string$key):string{$t=gj($key);if(!$t||empty($t['access_token']))throw new RuntimeException('YouTube account is not connected.');if(!empty($t['expires_at'])&&time()<(int)$t['expires_at']-60)return(string)$t['access_token'];$c=googleCredentials();$r=(string)($t['refresh_token']??'');if($r==='')throw new RuntimeException('Refresh token missing. Reconnect the account.');$j=req('https://oauth2.googleapis.com/token','POST',['Content-Type: application/x-www-form-urlencoded'],http_build_query(['client_id'=>$c['id'],'client_secret'=>$c['secret'],'refresh_token'=>$r,'grant_type'=>'refresh_token']));$t['access_token']=$j['access_token'];$t['expires_at']=time()+(int)($j['expires_in']??3600);if(isset($j['refresh_token']))$t['refresh_token']=$j['refresh_token'];sj($key,$t);return(string)$t['access_token'];}
+function req(string$u,string$m='GET',array$h=[],?string$b=null):array{
+    $c=curl_init($u);
+    curl_setopt_array($c,[CURLOPT_RETURNTRANSFER=>1,CURLOPT_CUSTOMREQUEST=>$m,CURLOPT_HTTPHEADER=>$h,CURLOPT_TIMEOUT=>25]);
+    if($b!==null)curl_setopt($c,CURLOPT_POSTFIELDS,$b);
+    $r=curl_exec($c);$code=(int)curl_getinfo($c,CURLINFO_HTTP_CODE);$e=curl_error($c);curl_close($c);
+    if($r===false)throw new RuntimeException($e?:'HTTP error');
+    $j=json_decode($r,true)?:[];
+    if($code>=400)throw new RuntimeException('HTTP '.$code.': '.($j['error_description']??$j['error']['message']??$r));
+    return $j;
+}
+function googleCredentials():array{
+    $c=cfg();$secret=trim((string)($c['google_client_secret']??''));
+    if($secret==='')throw new RuntimeException('Keddy Google OAuth credentials are not configured.');
+    return ['id'=>KEDDY_GOOGLE_CLIENT_ID,'secret'=>$secret,'redirect'=>KEDDY_REDIRECT_URI,'bot_redirect'=>KEDDY_BOT_REDIRECT_URI];
+}
+function refreshStoredToken(string$key):string{
+    $t=gj($key);if(!$t||empty($t['access_token']))throw new RuntimeException('YouTube account is not connected.');
+    if(!empty($t['expires_at'])&&time()<(int)$t['expires_at']-60)return(string)$t['access_token'];
+    $c=googleCredentials();$r=(string)($t['refresh_token']??'');if($r==='')throw new RuntimeException('Refresh token missing. Reconnect the account.');
+    $j=req('https://oauth2.googleapis.com/token','POST',['Content-Type: application/x-www-form-urlencoded'],http_build_query(['client_id'=>$c['id'],'client_secret'=>$c['secret'],'refresh_token'=>$r,'grant_type'=>'refresh_token']));
+    $t['access_token']=$j['access_token'];$t['expires_at']=time()+(int)($j['expires_in']??3600);if(isset($j['refresh_token']))$t['refresh_token']=$j['refresh_token'];sj($key,$t);return(string)$t['access_token'];
+}
 function token():string{return refreshStoredToken('oauth');}
 function botToken():string{return refreshStoredToken('bot_oauth');}
 function yt(string$p,string$m='GET',?array$d=null):array{return ytWithToken($p,$m,$d,token());}
 function ytBot(string$p,string$m='GET',?array$d=null):array{return ytWithToken($p,$m,$d,botToken());}
-function ytWithToken(string$p,string$m='GET',?array$d=null,?string$a=null):array{$h=['Authorization: Bearer '.($a?:token()),'Accept: application/json'];$b=null;if($d!==null){$h[]='Content-Type: application/json';$b=json_encode($d,JSON_UNESCAPED_UNICODE);}return req('https://www.googleapis.com/youtube/v3/'.ltrim($p,'/'),$m,$h,$b);}
-function channelForToken(string$a):?array{$j=ytWithToken('channels?part=id,snippet&mine=true&maxResults=10','GET',null,$a);$x=$j['items'][0]??null;if(!$x||empty($x['id']))return null;return['id'=>$x['id'],'title'=>(string)($x['snippet']['title']??''),'handle'=>(string)($x['snippet']['customUrl']??'')];}
+function ytWithToken(string$p,string$m='GET',?array$d=null,?string$a=null):array{
+    $h=['Authorization: Bearer '.($a?:token()),'Accept: application/json'];$b=null;
+    if($d!==null){$h[]='Content-Type: application/json';$b=json_encode($d,JSON_UNESCAPED_UNICODE);}
+    return req('https://www.googleapis.com/youtube/v3/'.ltrim($p,'/'),$m,$h,$b);
+}
+function channelForToken(string$a):?array{
+    $j=ytWithToken('channels?part=id,snippet&mine=true&maxResults=10','GET',null,$a);$x=$j['items'][0]??null;
+    if(!$x||empty($x['id']))return null;
+    return ['id'=>$x['id'],'title'=>(string)($x['snippet']['title']??''),'handle'=>(string)($x['snippet']['customUrl']??'')];
+}
 function connectedChannel():?array{return channelForToken(token());}
-function botChannel():array{$c=channelForToken(botToken());if(!$c)throw new RuntimeException('Keddy Bot BTS is not connected. Open bot-oauth.php once with the Keddy Bot BTS YouTube account.');if(strcasecmp($c['title'],KEDDY_BOT_CHANNEL_NAME)!==0)throw new RuntimeException('The bot OAuth account is not Keddy Bot BTS.');sv('bot_channel_id',(string)$c['id']);sv('bot_channel_title',(string)$c['title']);return$c;}
-function findLive():?array{$j=yt('liveBroadcasts?part=id,snippet,status&broadcastStatus=active&broadcastType=all&maxResults=5');foreach($j['items']??[]as$x){if(!empty($x['snippet']['liveChatId']))return['id'=>$x['id'],'chat'=>$x['snippet']['liveChatId'],'title'=>$x['snippet']['title']??'Live'];}return null;}
-function ensureBotModerator(string$chatId):bool{try{$c=botChannel();yt('liveChat/moderators?part=snippet','POST',['snippet'=>['liveChatId'=>$chatId,'moderatorDetails'=>['channelId'=>$c['id']]]]);return true;}catch(Throwable$e){$m=$e->getMessage();return str_contains($m,'HTTP 409')||str_contains(strtolower($m),'already');}}
+function botChannel():array{
+    $c=channelForToken(botToken());
+    if(!$c)throw new RuntimeException('Keddy Bot BTS is not connected. Open bot-oauth.php once with the Keddy Bot BTS YouTube account.');
+    if(strcasecmp($c['title'],KEDDY_BOT_CHANNEL_NAME)!==0)throw new RuntimeException('The bot OAuth account is not Keddy Bot BTS.');
+    sv('bot_channel_id',(string)$c['id']);sv('bot_channel_title',(string)$c['title']);return$c;
+}
+function findLive():?array{
+    $j=yt('liveBroadcasts?part=id,snippet,status&broadcastStatus=active&broadcastType=all&maxResults=5');
+    foreach($j['items']??[] as $x)if(!empty($x['snippet']['liveChatId']))return ['id'=>$x['id'],'chat'=>$x['snippet']['liveChatId'],'title'=>$x['snippet']['title']??'Live'];
+    return null;
+}
+function ensureBotModerator(string$chatId):bool{
+    try{$c=botChannel();yt('liveChat/moderators?part=snippet','POST',['snippet'=>['liveChatId'=>$chatId,'moderatorDetails'=>['channelId'=>$c['id']]]]);return true;}
+    catch(Throwable$e){$m=$e->getMessage();return str_contains($m,'HTTP 409')||str_contains(strtolower($m),'already');}
+}
 function sendMsg(string$m):array{$id=gv('chat_id');if(!$id)throw new RuntimeException('No live chat found.');return yt('liveChat/messages?part=snippet','POST',['snippet'=>['liveChatId'=>$id,'type'=>'textMessageEvent','textMessageDetails'=>['messageText'=>trim($m)]]]);}
 function sendBotMsg(string$m):array{$id=gv('chat_id');if(!$id)throw new RuntimeException('No live chat found.');return ytBot('liveChat/messages?part=snippet','POST',['snippet'=>['liveChatId'=>$id,'type'=>'textMessageEvent','textMessageDetails'=>['messageText'=>trim($m)]]]);}
-function welcomeBotToLive():bool{$l=findLive();if(!$l)return false;sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')===$l['id'])return true;sendBotMsg('🤖 Hello! I am Keddy Bot BTS 👋 I am connected and ready to help in this live!');sv('bot_welcome_live_id',$l['id']);sv('social_timer_last',(string)time());return true;}
-function socialMessage():string{$msgs=['❤️ Like kar do dosto! Aur live pasand aa rahi ho to Share bhi kar dena 🔗🙏','💜 Ek Like Keddy ke liye! Aur kisi dost ko ye live Share kar do 🔗😊','🔥 Like + Share kar do dosto, support se stream aur bhi awesome banegi! ❤️','🙌 Support dikhao — Like kar do aur live ko apne friends ke saath Share kar do! 🔗'];return$msgs[array_rand($msgs)];}
-function welcomeUser(string$name):string{$name=trim($name);if($name==='')$name='dost';$templates=['👋 Welcome %s! Keddy Bot BTS ki taraf se big hello! ❤️','🤖 Hi %s! Welcome to the live! Keddy Bot BTS yahin hai. 💜','✨ Welcome %s! Hope you enjoy the live. 👋'];return sprintf($templates[array_rand($templates)],$name);}
+function welcomeBotToLive():bool{$l=findLive();if(!$l)return false;sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')===$l['id'])return true;sendBotMsg('🤖 Hello! I am Keddy Bot BTS 👋 Brain online. Chat samjho, baat karo, mazaak bhi karo 😎');sv('bot_welcome_live_id',$l['id']);sv('social_timer_last',(string)time());return true;}
+function socialMessage():string{$msgs=['❤️ Like kar do dosto! Keddy ne attendance le li 😎','🔗 Share kar do dosto — ek friend ko bulao, Keddy uski entry bhi note karega 😂','🔥 Like + Share kar do! Chat ki energy low hui to Keddy motivational lecture dega 😭','🙌 Support dikhao — Like aur Share dono. Keddy ka social radar dekh raha hai 👀'];return$msgs[array_rand($msgs)];}
+function welcomeUser(string$name):string{$name=trim($name)?:'dost';$templates=['👋 Welcome %s! Keddy Brain ne tumhari entry notice kar li 😎','🤖 Hi %s! Keddy yahin hai — bolo kya scene hai?','✨ Welcome %s! Chat mein aao, baat shuru karo ❤️'];return sprintf($templates[array_rand($templates)],$name);}
 function maybeWelcomeUser(array$x):void{if(!KEDDY_AUTO_WELCOME)return;$authorId=(string)($x['authorDetails']['channelId']??'');$name=(string)($x['authorDetails']['displayName']??'');if($authorId==='')return;$key='welcome_user_'.hash('sha256',$authorId);$last=(int)gv($key,'0');if(time()-$last<KEDDY_USER_WELCOME_COOLDOWN)return;sendBotMsg(welcomeUser($name));sv($key,(string)time());}
 function maybeSocialTimer():void{if(!KEDDY_SOCIAL_TIMER_ENABLED)return;$last=(int)gv('social_timer_last','0');if(time()-$last<KEDDY_SOCIAL_INTERVAL)return;sendBotMsg(socialMessage());sv('social_timer_last',(string)time());}
 function tasks():array{return gj('tasks',['2 minutes: comfortably baithi raho aur chat ke messages ka reply karo. 👀','2 minutes: seated Q&A round — chat se ek interesting question ka answer do. 💬','2 minutes: camera ki taraf smile karke viewers ko welcome karo. 😊','2 minutes: apni current live feeling chat ke saath share karo. ❤️','2 minutes: seated rapid-fire — chat ke 3 short questions ka answer do. ⚡','2 minutes: seated break — paani piyo aur relax karo. 🧘','2 minutes: viewers se ek fun topic choose karne ko bolo. 🎯','2 minutes: active viewers ko thank you bolo. 🙌']);}
 function session():array{return gj('session',['active'=>false,'started'=>0,'index'=>0,'last'=>0,'duration'=>60,'interval'=>2]);}
 function saveS(array$s):void{sj('session',$s);}
-function startS():array{$l=findLive();if(!$l)throw new RuntimeException('No active YouTube live found. Start the live first.');sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')!==$l['id']){sendBotMsg('🤖 Hello! I am Keddy Bot BTS 👋 I am connected and ready to help in this live!');sv('bot_welcome_live_id',$l['id']);}sv('social_timer_last',(string)time());$s=session();$s['active']=true;$s['started']=time();$s['index']=0;$s['last']=time();saveS($s);return$s;}
+function startS():array{$l=findLive();if(!$l)throw new RuntimeException('No active YouTube live found. Start the live first.');sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')!==$l['id']){sendBotMsg('🤖 Keddy Brain online! Main chat samajhne aur replies dene ke liye ready hoon 😎');sv('bot_welcome_live_id',$l['id']);}sv('social_timer_last',(string)time());$s=session();$s['active']=true;$s['started']=time();$s['index']=0;$s['last']=time();saveS($s);return$s;}
 function stopS():void{$s=session();$s['active']=false;saveS($s);}
 function nextS(bool$send=true):array{$a=tasks();$s=session();$i=(int)$s['index']%count($a);if($send&&KEDDY_TASKS_ENABLED)sendBotMsg('🎯 Keddy Instructor — Task '.($i+1).': '.$a[$i]);$s['index']=$i+1;$s['last']=time();saveS($s);return['task'=>$a[$i],'index'=>$i+1];}
-function statusText():string{$last=(int)gv('social_timer_last','0');$left=max(0,KEDDY_SOCIAL_INTERVAL-(time()-$last));return'🤖 Keddy: welcome-on-comment + Like/Share timer active. Next reminder in '.ceil($left/60).' min. Tasks are OFF.';}
-function handleCmd(string$text):?string{$cmd=strtolower((string)(preg_split('/\s+/',trim($text))[0]??''));return match($cmd){ '!hello'=>'👋 Hello! I am Keddy Bot BTS 🤖💜', '!like'=>'❤️ Like kar do dosto! Support ke liye thanks! 🙌', '!share'=>'🔗 Live ko Share kar do dosto! ❤️', '!timer'=>statusText(), '!status'=>statusText(), '!help'=>'🤖 Commands: !hello • !like • !share • !timer • !status • !help', '!commands'=>'🤖 Commands: !hello • !like • !share • !timer • !status • !help', '!task'=>KEDDY_TASKS_ENABLED?'🎯 Tasks are enabled.':'🤖 Tasks are currently OFF.',default=>null};}
-function poll():void{$id=gv('chat_id');if(!$id)return;$u='liveChat/messages?liveChatId='.rawurlencode($id).'&part=id,snippet,authorDetails&maxResults=200';$p=gv('chat_token');if($p)$u.='&pageToken='.rawurlencode($p);try{$j=yt($u);}catch(Throwable$e){return;}if(!empty($j['nextPageToken']))sv('chat_token',$j['nextPageToken']);$botId=gv('bot_channel_id');foreach($j['items']??[]as$x){$author=(string)($x['authorDetails']['channelId']??'');if($botId&&$author===$botId)continue;maybeWelcomeUser($x);$r=handleCmd((string)($x['snippet']['displayMessage']??''));if($r!==null)try{sendBotMsg($r);}catch(Throwable$e){}}}
-function tick():array{$lockFile=__DIR__.'/data/keddy.tick.lock';$fh=@fopen($lockFile,'c');if($fh&&!@flock($fh,LOCK_EX|LOCK_NB))return['live'=>null,'session'=>session()];try{$l=null;try{$l=findLive();}catch(Throwable$e){}$s=session();if($l){if(gv('chat_id')!==$l['chat']){sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');sv('bot_welcome_live_id','');sv('social_timer_last',(string)time());}if($s['active']){try{maybeSocialTimer();}catch(Throwable$e){}}poll();}elseif($s['active'])stopS();return['live'=>$l,'session'=>session()];}finally{if($fh){@flock($fh,LOCK_UN);@fclose($fh);}}}
+function statusText():string{$last=(int)gv('social_timer_last','0');$left=max(0,KEDDY_SOCIAL_INTERVAL-(time()-$last));return'🤖 Keddy Brain: local NLP + context memory active. Next social reminder in '.ceil($left/60).' min. Tasks are OFF.';}
+function handleCmd(string$text):?string{
+    $text=trim($text);
+    if($text==='')return null;
+    $cmd=strtolower((string)(preg_split('/\s+/',$text)[0]??''));
+    return match($cmd){
+        '!hello'=>'👋 Hello! Keddy Brain online 🤖',
+        '!like'=>'❤️ Like kar do dosto! Keddy ne request officially register kar li 😂',
+        '!share'=>'🔗 Share kar do dosto! Ek aur insaan ko chat mein le aao 😎',
+        '!timer'=>statusText(),
+        '!status'=>statusText(),
+        '!help'=>'🤖 Normal language mein bhi baat karo. Commands: !hello • !like • !share • !timer • !status • !help',
+        '!commands'=>'🤖 Normal language mein bhi baat karo. Commands: !hello • !like • !share • !timer • !status • !help',
+        '!task'=>KEDDY_TASKS_ENABLED?'🎯 Tasks are enabled.':'🤖 Tasks are currently OFF.',
+        default=>null
+    };
+}
+function poll():void{
+    $id=gv('chat_id');if(!$id)return;
+    $u='liveChat/messages?liveChatId='.rawurlencode($id).'&part=id,snippet,authorDetails&maxResults=200';
+    $p=gv('chat_token');if($p)$u.='&pageToken='.rawurlencode($p);
+    try{$j=yt($u);}catch(Throwable$e){return;}
+    if(!empty($j['nextPageToken']))sv('chat_token',$j['nextPageToken']);
+    $botId=gv('bot_channel_id');
+    foreach($j['items']??[] as $x){
+        $author=(string)($x['authorDetails']['channelId']??'');if($botId&&$author===$botId)continue;
+        $text=(string)($x['snippet']['displayMessage']??'');if(trim($text)==='')continue;
+        maybeWelcomeUser($x);
+        $cmd=handleCmd($text);
+        if($cmd!==null){try{sendBotMsg($cmd);}catch(Throwable$e){}}
+        else {try{sendBotMsg(brainReply($x));}catch(Throwable$e){}}
+    }
+}
+function tick():array{
+    $lockFile=__DIR__.'/data/keddy.tick.lock';$fh=@fopen($lockFile,'c');
+    if($fh&&!@flock($fh,LOCK_EX|LOCK_NB))return['live'=>null,'session'=>session()];
+    try{
+        $l=null;try{$l=findLive();}catch(Throwable$e){}
+        $s=session();
+        if($l){
+            if(gv('chat_id')!==$l['chat']){sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');sv('bot_welcome_live_id','');sv('social_timer_last',(string)time());}
+            if($s['active']){try{maybeSocialTimer();}catch(Throwable$e){}}
+            poll();
+        } elseif($s['active']) stopS();
+        return['live'=>$l,'session'=>session()];
+    } finally {if($fh){@flock($fh,LOCK_UN);@fclose($fh);}}
+}

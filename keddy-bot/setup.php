@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 session_start();
-const CLIENT_ID='523738407628-o1c4t43j4vjriajnvojpt4cio4mktr01.apps.googleusercontent.com';
-const REDIRECT_URI='https://smarttoolz.in/keddy-bot/oauth-callback.php';
+const CLIENT_ID='52634723911-fe1ha1bs7p8nloc5phn0eimrg4qgism3.apps.googleusercontent.com';
+const REDIRECT_URI='https://smarttoolz.in/reddott-films-youtube-oauth.php';
 const SETUP_KEY='keddy-setup-2026';
 $ok=$err='';
 if($_SERVER['REQUEST_METHOD']==='POST'){

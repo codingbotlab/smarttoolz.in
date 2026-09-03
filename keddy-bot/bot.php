@@ -1,6 +1,15 @@
 <?php
 declare(strict_types=1);
-function cfg():array{$p=__DIR__.'/config.php';return is_file($p)?require $p:require __DIR__.'/config.php.example';}
+function cfg():array{
+    $p=__DIR__.'/config.php';
+    if(is_file($p)) return require $p;
+    $runtime=__DIR__.'/data/credentials.php';
+    if(is_file($runtime)){
+        $c=require $runtime;
+        if(is_array($c)) return array_merge(['app_secret'=>getenv('KEDDY_APP_SECRET')?:'CHANGE-ME','redirect_uri'=>'https://smarttoolz.in/keddy-bot/oauth-callback.php','ai_url'=>getenv('KEDDY_AI_URL')?:'','ai_key'=>getenv('KEDDY_AI_KEY')?:'','ai_model'=>getenv('KEDDY_AI_MODEL')?:'gpt-4o-mini','database'=>__DIR__.'/data/keddy.sqlite'],$c);
+    }
+    return require __DIR__.'/config.php.example';
+}
 function db():PDO{static $p;if($p)return$p;$c=cfg();$d=dirname($c['database']);if(!is_dir($d))mkdir($d,0755,true);$p=new PDO('sqlite:'.$c['database']);$p->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);$p->exec('CREATE TABLE IF NOT EXISTS state(k TEXT PRIMARY KEY,v TEXT NOT NULL)');return$p;}
 function gv(string$k,?string$d=null):?string{$q=db()->prepare('SELECT v FROM state WHERE k=?');$q->execute([$k]);$v=$q->fetchColumn();return$v===false?$d:(string)$v;}
 function sv(string$k,string$v):void{$q=db()->prepare('INSERT INTO state(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v');$q->execute([$k,$v]);}

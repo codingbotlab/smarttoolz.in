@@ -4,7 +4,7 @@ return [
     'google_client_id' => getenv('KEDDY_GOOGLE_CLIENT_ID') ?: '',
     'google_client_secret' => getenv('KEDDY_GOOGLE_CLIENT_SECRET') ?: '',
     'app_secret' => getenv('KEDDY_APP_SECRET') ?: 'CHANGE-ME',
-    'redirect_uri' => getenv('KEDDY_REDIRECT_URI') ?: 'https://YOUR-DOMAIN/keddy-bot/oauth-callback.php',
+    'redirect_uri' => getenv('KEDDY_REDIRECT_URI') ?: 'https://smarttoolz.in/keddy-bot/oauth-callback.php',
     'ai_url' => getenv('KEDDY_AI_URL') ?: '',
     'ai_key' => getenv('KEDDY_AI_KEY') ?: '',
     'ai_model' => getenv('KEDDY_AI_MODEL') ?: 'gpt-4o-mini',

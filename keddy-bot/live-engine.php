@@ -6,6 +6,27 @@ require __DIR__.'/bot.php';
 if(empty($_SESSION['keddy_engine_token']))$_SESSION['keddy_engine_token']=bin2hex(random_bytes(24));
 $engineToken=$_SESSION['keddy_engine_token'];
 
+function engineModeratorStatus(string $chatId):array{
+    try{
+        $bot=botChannel();
+        $botId=(string)($bot['id']??'');
+        if($botId==='')return ['ok'=>false,'confirmed'=>false,'reason'=>'Bot channel ID unavailable'];
+        $j=yt('liveChat/moderators?part=snippet&liveChatId='.rawurlencode($chatId).'&maxResults=50');
+        foreach($j['items']??[] as $row){
+            $id=(string)($row['snippet']['moderatorDetails']['channelId']??'');
+            if($id!==$botId)continue;
+            try{
+                $ownerId=(string)gv('oauth_channel_id','');
+                if($ownerId!=='')keddyDataMarkModeratedChannel($ownerId,(string)gv('live_id',''),$chatId,'moderator_verified',['bot_channel_id'=>$botId,'verification'=>'liveChatModerators.list']);
+            }catch(Throwable $e){}
+            return ['ok'=>true,'confirmed'=>true,'reason'=>'Keddy Bot BTS is listed as a YouTube live-chat moderator'];
+        }
+        return ['ok'=>true,'confirmed'=>false,'reason'=>'Keddy Bot BTS is not listed as a moderator on this live chat'];
+    }catch(Throwable $e){
+        return ['ok'=>false,'confirmed'=>false,'reason'=>$e->getMessage()?:'Moderator verification failed'];
+    }
+}
+
 if(isset($_GET['pulse'])){
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -15,11 +36,14 @@ if(isset($_GET['pulse'])){
         $r=tick();
         $live=$r['live']??null;
         $moderator=false;
+        $moderatorReason='No active live';
         if(is_array($live)&&!empty($live['chat'])){
-            try{$moderator=ensureBotModerator((string)$live['chat']);}catch(Throwable $e){$moderator=false;}
+            $check=engineModeratorStatus((string)$live['chat']);
+            $moderator=(bool)$check['confirmed'];
+            $moderatorReason=(string)$check['reason'];
             try{maybeSocialTimer();}catch(Throwable $e){}
         }
-        echo json_encode(['ok'=>true,'live'=>!empty($live),'live_id'=>(string)($live['id']??''),'chat_id'=>(string)($live['chat']??''),'title'=>(string)($live['title']??''),'moderator'=>$moderator,'session'=>$r['session']??session(),'server_time'=>time()],JSON_UNESCAPED_UNICODE);
+        echo json_encode(['ok'=>true,'live'=>!empty($live),'live_id'=>(string)($live['id']??''),'chat_id'=>(string)($live['chat']??''),'title'=>(string)($live['title']??''),'moderator'=>$moderator,'moderator_reason'=>$moderatorReason,'session'=>$r['session']??session(),'server_time'=>time()],JSON_UNESCAPED_UNICODE);
     }catch(Throwable $e){http_response_code(500);echo json_encode(['ok'=>false,'error'=>$e->getMessage()],JSON_UNESCAPED_UNICODE);}exit;
 }
 function engH($v):string{return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}
@@ -33,7 +57,7 @@ function engH($v):string{return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');
 <section class="card" style="margin-top:16px"><h2>Engine Log</h2><div class="log" id="log"></div><div class="footer">Keep this tab open during the live. Closing the tab stops the browser-side engine; the saved DB data remains safe.</div></section>
 </main><script>
 const token=<?=json_encode($engineToken)?>;let running=true,checks=0,failures=0,timer=null;const $=id=>document.getElementById(id);function addLog(text,cls=''){const d=document.createElement('div');d.className='line '+cls;d.textContent=new Date().toLocaleTimeString()+'  '+text;$('log').prepend(d);while($('log').children.length>80)$('log').lastChild.remove();}function setState(kind,title,detail){$('status').textContent=title;$('detail').textContent=detail;$('dot').className='dot '+kind;}
-async function pulse(){if(!running)return;try{const r=await fetch('live-engine.php?pulse=1&token='+encodeURIComponent(token)+'&_='+Date.now(),{cache:'no-store',credentials:'same-origin'});const j=await r.json();checks++;$('checks').textContent=checks;if(!j.ok)throw new Error(j.error||'Engine error');$('last').textContent=new Date().toLocaleTimeString();$('live').textContent=j.live?(j.title||'LIVE'):'Idle';$('mod').textContent=j.live?(j.moderator?'MOD ON':'Checking…'):'—';$('chat').textContent=j.chat_id||'—';$('liveId').textContent=j.live_id||'—';if(j.live){failures=0;setState('live','Keddy is LIVE-ready',j.title||'Active YouTube live detected');addLog('Live detected • chat polling + moderation cycle executed','ok');if(j.moderator)addLog('Keddy Bot BTS moderator status confirmed','ok');else addLog('Moderator verification did not confirm on this check','warn');}else{setState('','Waiting for live…','Engine is running and will auto-detect the next live.');addLog('No active live • engine remains ready');}}
+async function pulse(){if(!running)return;try{const r=await fetch('live-engine.php?pulse=1&token='+encodeURIComponent(token)+'&_='+Date.now(),{cache:'no-store',credentials:'same-origin'});const j=await r.json();checks++;$('checks').textContent=checks;if(!j.ok)throw new Error(j.error||'Engine error');$('last').textContent=new Date().toLocaleTimeString();$('live').textContent=j.live?(j.title||'LIVE'):'Idle';$('mod').textContent=j.live?(j.moderator?'MOD ON':'NOT VERIFIED'):'—';$('chat').textContent=j.chat_id||'—';$('liveId').textContent=j.live_id||'—';if(j.live){failures=0;if(j.moderator){setState('live','Keddy is LIVE + MOD ON',j.moderator_reason);addLog('Live detected • chat polling + moderation cycle executed','ok');addLog(j.moderator_reason,'ok');}else{setState('warn','Keddy is LIVE',j.moderator_reason||'Moderator not verified');addLog('Live detected • chat polling + moderation cycle executed','ok');addLog(j.moderator_reason||'Moderator verification did not confirm on this check','warn');}}else{setState('','Waiting for live…','Engine is running and will auto-detect the next live.');addLog('No active live • engine remains ready');}}
 catch(e){failures++;setState('warn','Engine reconnecting…',e.message);addLog('Check failed: '+e.message,'bad');}}
 function schedule(){clearInterval(timer);timer=setInterval(pulse,5000);} $('toggle').onclick=()=>{running=!running;$('toggle').textContent=running?'Pause Engine':'Resume Engine';if(running){setState('','Resuming…','Running check now.');pulse();schedule();}else{setState('warn','Engine paused','Resume when the live begins.');clearInterval(timer);}};$('pulse').onclick=()=>{if(!running){running=true;$('toggle').textContent='Pause Engine';schedule();}pulse();};addLog('Browser live engine started','ok');pulse();schedule();window.addEventListener('beforeunload',()=>clearInterval(timer));
 </script></body></html>

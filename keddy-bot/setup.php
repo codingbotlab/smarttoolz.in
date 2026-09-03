@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 session_start();
-const CLIENT_ID='523738407628-o1c4t43j4vjriajnvojpt4cio4mktr01.apps.googleusercontent.com';
+const CLIENT_ID='523738407628-svvuj66f6836mvbb6438sgl1gpu1pntc.apps.googleusercontent.com';
 const REDIRECT_URI='https://smarttoolz.in/keddy-bot/oauth-callback.php';
 const SETUP_KEY='keddy-setup-2026';
 $ok=$err='';
@@ -12,8 +12,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   $secret=trim((string)($_POST['client_secret']??''));
   if($secret==='') throw new RuntimeException('Client Secret required.');
   $dir=__DIR__.'/data';
-  if(!is_dir($dir) && !@mkdir($dir,0700,true) && !is_dir($dir)) throw new RuntimeException('Cannot create data directory. Server permission denied: '.htmlspecialchars($dir));
-  if(!is_writable($dir)) throw new RuntimeException('Keddy data directory is not writable: '.htmlspecialchars($dir));
+  if(!is_dir($dir) && !@mkdir($dir,0700,true) && !is_dir($dir)) throw new RuntimeException('Cannot create data directory. Server permission denied.');
+  if(!is_writable($dir)) throw new RuntimeException('Keddy data directory is not writable.');
   $file=$dir.'/credentials.php';
   $tmp=$file.'.tmp-'.bin2hex(random_bytes(6));
   $content="<?php\ndeclare(strict_types=1);\nreturn ".var_export(['google_client_id'=>CLIENT_ID,'google_client_secret'=>$secret,'redirect_uri'=>REDIRECT_URI],true).";\n";

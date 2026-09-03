@@ -53,8 +53,9 @@ function brainSentiment(string $text): array {
     $pos = ['love','lovely','awesome','great','good','nice','amazing','best','happy','khushi','accha','achha','sundar','pyara','mast','shukriya','thanks','thank','❤️','😍','😊','🔥'];
     $neg = ['sad','bad','hate','angry','bura','dukhi','udaas','pareshan','nahi','nahin','bekar','boring','gussa','ro','rona','😢','😭','💔'];
     $p = 0; $n = 0;
-    foreach ($pos as $w) if (mb_strpos(mb_strtolower($text, 'UTF-8'), mb_strtolower($w, 'UTF-8')) !== false) $p++;
-    foreach ($neg as $w) if (mb_strpos(mb_strtolower($text, 'UTF-8'), mb_strtolower($w, 'UTF-8')) !== false) $n++;
+    $lower = mb_strtolower($text, 'UTF-8');
+    foreach ($pos as $w) if (mb_strpos($lower, mb_strtolower($w, 'UTF-8')) !== false) $p++;
+    foreach ($neg as $w) if (mb_strpos($lower, mb_strtolower($w, 'UTF-8')) !== false) $n++;
     $score = $p - $n;
     return ['label' => $score > 0 ? 'positive' : ($score < 0 ? 'negative' : 'neutral'), 'score' => $score];
 }
@@ -84,7 +85,8 @@ function brainIntent(string $text): string {
         'mood' => ['kaise ho','how are you','kya haal','mood'],
         'compliment' => ['nice','awesome','amazing','accha bot','good bot','smart bot'],
         'confusion' => ['samajh nahi','samajh nhi','confused','what do you mean','matlab'],
-        'question' => ['?','kya ','kyu ','kyun ','why ','how ','kaise ','what ','who ','kab '],
+        'repeat' => ['repeat','repeating','same thing','same baat','why are you repeating','phir se wahi','baar baar','bar bar','copy what i said'],
+        'question' => ['?','kya ','kyu ','kyun ','why ','how ','what ','who ','kab '],
     ];
     $lower = mb_strtolower($text, 'UTF-8');
     $best = 'chat'; $bestScore = 0.0;
@@ -131,7 +133,6 @@ function brainReply(array $x): string {
     $intent = brainIntent($text);
     $memory = brainRemember($authorId, $name, $text);
 
-    $prefix = $lang === 'english' ? "{$name}, " : "{$name}, ";
     $responses = [
         'greeting' => [
             "👋 {$name}! Keddy ka neural processor online hai 😎 Batao, aaj chat ka mood kya hai?",
@@ -147,6 +148,7 @@ function brainReply(array $x): string {
         'mood' => ["😄 Main theek hoon {$name}! Mere circuits ko coffee nahi milti, bas chat milti hai — aur honestly wahi zyada dangerous hai 😂"],
         'compliment' => ["😎 Compliment detected. Keddy ego safely increased by 7%. {$name}, aise hi chalte raho 😂❤️"],
         'confusion' => ["🧠 Ruko {$name}, Keddy brain rewind kar raha hai... Seedha bolo kis line ka matlab clear nahi hua?"],
+        'repeat' => ["😅 Fair point, {$name}! Main tumhari line ko bas copy karke reply nahi karunga. Ab seedha us baat ka jawab dunga jo tum poochte ho. 🧠"],
     ];
     if (isset($responses[$intent])) return $responses[$intent][array_rand($responses[$intent])];
 
@@ -156,14 +158,14 @@ function brainReply(array $x): string {
     if ($emotion === 'love') return "❤️ {$name}, pyaar wali frequency pakdi gayi... Keddy ne antenna seedha kar liya 😂";
     if ($intent === 'question') {
         return $lang === 'english'
-            ? "🧠 {$name}, question received: ‘" . brainExtractTopic($text) . "’. Keddy is thinking... give me a sec 😄"
-            : "🧠 {$name}, sawaal capture ho gaya: ‘" . brainExtractTopic($text) . "’. Keddy soch raha hai... thoda processor garam hone do 😄";
+            ? "🧠 {$name}, question samajh gaya. Keddy context check kar raha hai — thoda aur detail doge to seedha answer dunga 😄"
+            : "🧠 {$name}, sawaal samajh gaya. Keddy context check kar raha hai — thoda aur detail doge to seedha jawab dunga 😄";
     }
 
     $fallback = [
-        "👀 {$name}, Keddy ne message read kiya: ‘{$text}’. Isme vibe {$emotion} wali lag rahi hai 😄 Bolo aur.",
-        "🧠 {$name}, context save kar liya. Tumne bola ‘{$text}’ — ab Keddy ka turn: aur detail do 😏",
-        "😂 {$name}, ye message unexpected tha. Keddy ke NLP neurons ne collectively bola: ‘interesting!’",
+        "👀 {$name}, message samajh gaya. Bolo, is par kya jaan-na ya kehna hai? 😄",
+        "🧠 {$name}, context update ho gaya. Ab next part bolo — Keddy sun raha hai 😏",
+        "😂 {$name}, interesting message. Thoda aur context do, Keddy proper jawab dega!",
     ];
     return $fallback[array_rand($fallback)];
 }

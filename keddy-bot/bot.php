@@ -3,15 +3,12 @@ declare(strict_types=1);
 const KEDDY_GOOGLE_CLIENT_ID='523738407628-svvuj66f6836mvbb6438sgl1gpu1pntc.apps.googleusercontent.com';
 const KEDDY_REDIRECT_URI='https://smarttoolz.in/keddy-bot/oauth-callback.php';
 function cfg():array{
-    $p=__DIR__.'/config.php';
-    if(is_file($p)) {$c=require $p; if(is_array($c)) return array_merge($c,['google_client_id'=>getenv('KEDDY_GOOGLE_CLIENT_ID')?:($c['google_client_id']??KEDDY_GOOGLE_CLIENT_ID),'google_client_secret'=>getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:($c['google_client_secret']??''),'redirect_uri'=>getenv('KEDDY_REDIRECT_URI')?:($c['redirect_uri']??KEDDY_REDIRECT_URI)]);}
+    $base=['app_secret'=>getenv('KEDDY_APP_SECRET')?:'CHANGE-ME','redirect_uri'=>KEDDY_REDIRECT_URI,'ai_url'=>getenv('KEDDY_AI_URL')?:'','ai_key'=>getenv('KEDDY_AI_KEY')?:'','ai_model'=>getenv('KEDDY_AI_MODEL')?:'gpt-4o-mini','database'=>__DIR__.'/data/keddy.sqlite'];
     $runtime=__DIR__.'/data/credentials.php';
-    if(is_file($runtime)){
-        $c=require $runtime;
-        if(is_array($c)) return array_merge(['app_secret'=>getenv('KEDDY_APP_SECRET')?:'CHANGE-ME','redirect_uri'=>KEDDY_REDIRECT_URI,'ai_url'=>getenv('KEDDY_AI_URL')?:'','ai_key'=>getenv('KEDDY_AI_KEY')?:'','ai_model'=>getenv('KEDDY_AI_MODEL')?:'gpt-4o-mini','database'=>__DIR__.'/data/keddy.sqlite'],['google_client_id'=>getenv('KEDDY_GOOGLE_CLIENT_ID')?:KEDDY_GOOGLE_CLIENT_ID,'google_client_secret'=>getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:($c['google_client_secret']??'')],$c,['google_client_id'=>getenv('KEDDY_GOOGLE_CLIENT_ID')?:($c['google_client_id']??KEDDY_GOOGLE_CLIENT_ID),'redirect_uri'=>getenv('KEDDY_REDIRECT_URI')?:KEDDY_REDIRECT_URI]);
-    }
-    $c=require __DIR__.'/config.php.example';
-    return array_merge($c,['google_client_id'=>getenv('KEDDY_GOOGLE_CLIENT_ID')?:KEDDY_GOOGLE_CLIENT_ID,'google_client_secret'=>getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:($c['google_client_secret']??''),'redirect_uri'=>getenv('KEDDY_REDIRECT_URI')?:KEDDY_REDIRECT_URI]);
+    if(is_file($runtime)){$c=require $runtime;if(is_array($c))return array_merge($base,$c,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'redirect_uri'=>KEDDY_REDIRECT_URI]);}
+    $p=__DIR__.'/config.php';
+    if(is_file($p)){$c=require $p;if(is_array($c))return array_merge($base,$c,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'redirect_uri'=>KEDDY_REDIRECT_URI]);}
+    return array_merge($base,['google_client_id'=>KEDDY_GOOGLE_CLIENT_ID,'google_client_secret'=>getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:'']);
 }
 function db():PDO{static $p;if($p)return$p;$c=cfg();$d=dirname($c['database']);if(!is_dir($d))mkdir($d,0755,true);$p=new PDO('sqlite:'.$c['database']);$p->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);$p->exec('CREATE TABLE IF NOT EXISTS state(k TEXT PRIMARY KEY,v TEXT NOT NULL)');return$p;}
 function gv(string$k,?string$d=null):?string{$q=db()->prepare('SELECT v FROM state WHERE k=?');$q->execute([$k]);$v=$q->fetchColumn();return$v===false?$d:(string)$v;}
@@ -19,7 +16,7 @@ function sv(string$k,string$v):void{$q=db()->prepare('INSERT INTO state(k,v) VAL
 function gj(string$k,$d=null){$v=gv($k);if($v===null)return$d;$x=json_decode($v,true);return$x===null?$d:$x;}
 function sj(string$k,$v):void{sv($k,json_encode($v,JSON_UNESCAPED_UNICODE));}
 function req(string$u,string$m='GET',array$h=[],?string$b=null):array{$c=curl_init($u);curl_setopt_array($c,[CURLOPT_RETURNTRANSFER=>1,CURLOPT_CUSTOMREQUEST=>$m,CURLOPT_HTTPHEADER=>$h,CURLOPT_TIMEOUT=>25]);if($b!==null)curl_setopt($c,CURLOPT_POSTFIELDS,$b);$r=curl_exec($c);$code=(int)curl_getinfo($c,CURLINFO_HTTP_CODE);$e=curl_error($c);curl_close($c);if($r===false)throw new RuntimeException($e?:'HTTP error');$j=json_decode($r,true)?:[];if($code>=400)throw new RuntimeException('HTTP '.$code.': '.($j['error_description']??$j['error']['message']??$r));return$j;}
-function googleCredentials():array{$c=cfg();$id=trim(KEDDY_GOOGLE_CLIENT_ID);$secret=trim((string)(getenv('KEDDY_GOOGLE_CLIENT_SECRET')?:($c['google_client_secret']??'')));$redirect=trim(KEDDY_REDIRECT_URI);if($id===''||$secret==='')throw new RuntimeException('Keddy Google OAuth credentials are not configured. Open setup.php and save the Client Secret for the configured client.');return['id'=>$id,'secret'=>$secret,'redirect'=>$redirect];}
+function googleCredentials():array{$c=cfg();$secret=trim((string)($c['google_client_secret']??''));if($secret==='')throw new RuntimeException('Keddy Google OAuth credentials are not configured. Open setup.php and save the Web Client secret.');return['id'=>KEDDY_GOOGLE_CLIENT_ID,'secret'=>$secret,'redirect'=>KEDDY_REDIRECT_URI];}
 function token():string{$t=gj('oauth');if(!$t||empty($t['access_token']))throw new RuntimeException('YouTube is not connected.');if(!empty($t['expires_at'])&&time()<(int)$t['expires_at']-60)return$t['access_token'];$c=googleCredentials();$j=req('https://oauth2.googleapis.com/token','POST',['Content-Type: application/x-www-form-urlencoded'],http_build_query(['client_id'=>$c['id'],'client_secret'=>$c['secret'],'refresh_token'=>$t['refresh_token']??'','grant_type'=>'refresh_token']));$t['access_token']=$j['access_token'];$t['expires_at']=time()+(int)($j['expires_in']??3600);sj('oauth',$t);return$t['access_token'];}
 function yt(string$p,string$m='GET',?array$data=null):array{$h=['Authorization: Bearer '.token(),'Accept: application/json'];$b=null;if($data!==null){$h[]='Content-Type: application/json';$b=json_encode($data,JSON_UNESCAPED_UNICODE);}return req('https://www.googleapis.com/youtube/v3/'.ltrim($p,'/'),$m,$h,$b);}
 function findLive():?array{$j=yt('liveBroadcasts?part=id,snippet,status&broadcastStatus=active&broadcastType=all&maxResults=5');foreach($j['items']??[]as$x){if(!empty($x['snippet']['liveChatId']))return['id'=>$x['id'],'chat'=>$x['snippet']['liveChatId'],'title'=>$x['snippet']['title']??'Live'];}return null;}

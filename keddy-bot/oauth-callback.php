@@ -35,18 +35,26 @@ try {
     sj('oauth', $j);
     unset($_SESSION['keddy_oauth_state']);
 
-    // After Keddy Bot BTS connects, greet the current live chat once.
-    // The existing chat_id belongs to the live that was already running.
+    $channel = connectedChannel();
+    if (!$channel) {
+        throw new RuntimeException('Connected Google account has no YouTube channel.');
+    }
+    sv('oauth_channel_id', (string)$channel['id']);
+    sv('oauth_channel_title', (string)$channel['title']);
+
+    // Keep the already-running stream chat ID when switching the bot identity.
+    // The bot only needs the target live-chat ID to post as Keddy Bot BTS.
     $chatId = gv('chat_id');
-    if ($chatId) {
+    if ($chatId && strcasecmp((string)$channel['title'], KEDDY_BOT_CHANNEL_NAME) === 0) {
         try {
             sendMsg('🤖 Hello! I am Keddy Bot BTS 👋 I am connected and ready to help in this live!');
         } catch (Throwable $e) {
-            // OAuth connection succeeded even if the greeting cannot be posted.
+            // Connection itself succeeded; greeting can be retried from the bot page.
         }
     }
 
-    header('Location: /keddy-bot/index.php?connected=1');
+    $wrong = strcasecmp((string)$channel['title'], KEDDY_BOT_CHANNEL_NAME) !== 0 ? '&wrong_channel=1' : '';
+    header('Location: /keddy-bot/index.php?connected=1'.$wrong);
     exit;
 } catch (Throwable $e) {
     http_response_code(400);

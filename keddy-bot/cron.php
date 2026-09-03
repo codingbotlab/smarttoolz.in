@@ -16,6 +16,11 @@ if (isset($_GET['heartbeat'])) {
 
 try{
     $r=tick();
+    if(!empty($r['live']['chat'])){
+        try{
+            ensureBotModerator((string)$r['live']['chat']);
+        }catch(Throwable $e){}
+    }
     $commentRun=null;
     if(isset($_GET['comments'])&&$_GET['comments']==='1'){
         $commentRun=runViewerVideoCommentTick(true);

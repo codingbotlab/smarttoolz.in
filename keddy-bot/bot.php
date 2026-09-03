@@ -10,6 +10,7 @@ const KEDDY_AUTO_WELCOME=true;
 const KEDDY_SOCIAL_TIMER_ENABLED=true;
 const KEDDY_SOCIAL_INTERVAL=120;
 const KEDDY_USER_WELCOME_COOLDOWN=600;
+const KEDDY_SEEN_MESSAGE_LIMIT=120;
 
 require_once __DIR__.'/brain.php';
 
@@ -107,7 +108,7 @@ function sendBotMsg(string$m):array{$id=gv('chat_id');if(!$id)throw new RuntimeE
 function welcomeBotToLive():bool{$l=findLive();if(!$l)return false;sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');ensureBotModerator($l['chat']);if(gv('bot_welcome_live_id')===$l['id'])return true;sendBotMsg('🤖 Hello! I am Keddy Bot BTS 👋 Brain online. Chat samjho, baat karo, mazaak bhi karo 😎');sv('bot_welcome_live_id',$l['id']);sv('social_timer_last',(string)time());return true;}
 function socialMessage():string{$msgs=['❤️ Like kar do dosto! Keddy ne attendance le li 😎','🔗 Share kar do dosto — ek friend ko bulao, Keddy uski entry bhi note karega 😂','🔥 Like + Share kar do! Chat ki energy low hui to Keddy motivational lecture dega 😭','🙌 Support dikhao — Like aur Share dono. Keddy ka social radar dekh raha hai 👀'];return$msgs[array_rand($msgs)];}
 function welcomeUser(string$name):string{$name=trim($name)?:'dost';$templates=['👋 Welcome %s! Keddy Brain ne tumhari entry notice kar li 😎','🤖 Hi %s! Keddy yahin hai — bolo kya scene hai?','✨ Welcome %s! Chat mein aao, baat shuru karo ❤️'];return sprintf($templates[array_rand($templates)],$name);}
-function maybeWelcomeUser(array$x):void{if(!KEDDY_AUTO_WELCOME)return;$authorId=(string)($x['authorDetails']['channelId']??'');$name=(string)($x['authorDetails']['displayName']??'');if($authorId==='')return;$key='welcome_user_'.hash('sha256',$authorId);$last=(int)gv($key,'0');if(time()-$last<KEDDY_USER_WELCOME_COOLDOWN)return;sendBotMsg(welcomeUser($name));sv($key,(string)time());}
+function maybeWelcomeUser(array$x):bool{if(!KEDDY_AUTO_WELCOME)return false;$authorId=(string)($x['authorDetails']['channelId']??'');$name=(string)($x['authorDetails']['displayName']??'');if($authorId==='')return false;$key='welcome_user_'.hash('sha256',$authorId);$last=(int)gv($key,'0');if(time()-$last<KEDDY_USER_WELCOME_COOLDOWN)return false;sendBotMsg(welcomeUser($name));sv($key,(string)time());return true;}
 function maybeSocialTimer():void{if(!KEDDY_SOCIAL_TIMER_ENABLED)return;$last=(int)gv('social_timer_last','0');if(time()-$last<KEDDY_SOCIAL_INTERVAL)return;sendBotMsg(socialMessage());sv('social_timer_last',(string)time());}
 function tasks():array{return gj('tasks',['2 minutes: comfortably baithi raho aur chat ke messages ka reply karo. 👀','2 minutes: seated Q&A round — chat se ek interesting question ka answer do. 💬','2 minutes: camera ki taraf smile karke viewers ko welcome karo. 😊','2 minutes: apni current live feeling chat ke saath share karo. ❤️','2 minutes: seated rapid-fire — chat ke 3 short questions ka answer do. ⚡','2 minutes: seated break — paani piyo aur relax karo. 🧘','2 minutes: viewers se ek fun topic choose karne ko bolo. 🎯','2 minutes: active viewers ko thank you bolo. 🙌']);}
 function session():array{return gj('session',['active'=>false,'started'=>0,'index'=>0,'last'=>0,'duration'=>60,'interval'=>2]);}
@@ -132,6 +133,16 @@ function handleCmd(string$text):?string{
         default=>null
     };
 }
+function markMessageSeen(string $messageId):bool{
+    if($messageId==='')return true;
+    $seen=gj('processed_chat_messages',[]);
+    if(!is_array($seen))$seen=[];
+    if(in_array($messageId,$seen,true))return false;
+    $seen[]=$messageId;
+    if(count($seen)>KEDDY_SEEN_MESSAGE_LIMIT)$seen=array_slice($seen,-KEDDY_SEEN_MESSAGE_LIMIT);
+    sj('processed_chat_messages',$seen);
+    return true;
+}
 function poll():void{
     $id=gv('chat_id');if(!$id)return;
     $u='liveChat/messages?liveChatId='.rawurlencode($id).'&part=id,snippet,authorDetails&maxResults=200';
@@ -140,12 +151,15 @@ function poll():void{
     if(!empty($j['nextPageToken']))sv('chat_token',$j['nextPageToken']);
     $botId=gv('bot_channel_id');
     foreach($j['items']??[] as $x){
+        $messageId=(string)($x['id']??'');
+        if(!markMessageSeen($messageId))continue;
         $author=(string)($x['authorDetails']['channelId']??'');if($botId&&$author===$botId)continue;
         $text=(string)($x['snippet']['displayMessage']??'');if(trim($text)==='')continue;
-        maybeWelcomeUser($x);
+        $welcomed=false;
+        try{$welcomed=maybeWelcomeUser($x);}catch(Throwable$e){}
         $cmd=handleCmd($text);
         if($cmd!==null){try{sendBotMsg($cmd);}catch(Throwable$e){}}
-        else {try{sendBotMsg(brainReply($x));}catch(Throwable$e){}}
+        elseif(!$welcomed){try{sendBotMsg(brainReply($x));}catch(Throwable$e){}}
     }
 }
 function tick():array{
@@ -155,7 +169,7 @@ function tick():array{
         $l=null;try{$l=findLive();}catch(Throwable$e){}
         $s=session();
         if($l){
-            if(gv('chat_id')!==$l['chat']){sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');sv('bot_welcome_live_id','');sv('social_timer_last',(string)time());}
+            if(gv('chat_id')!==$l['chat']){sv('chat_id',$l['chat']);sv('live_id',$l['id']);sv('chat_token','');sv('bot_welcome_live_id','');sv('social_timer_last',(string)time());sv('processed_chat_messages','[]');}
             if($s['active']){try{maybeSocialTimer();}catch(Throwable$e){}}
             poll();
         } elseif($s['active']) stopS();

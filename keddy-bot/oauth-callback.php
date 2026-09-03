@@ -35,6 +35,17 @@ try {
     sj('oauth', $j);
     unset($_SESSION['keddy_oauth_state']);
 
+    // After Keddy Bot BTS connects, greet the current live chat once.
+    // The existing chat_id belongs to the live that was already running.
+    $chatId = gv('chat_id');
+    if ($chatId) {
+        try {
+            sendMsg('🤖 Hello! I am Keddy Bot BTS 👋 I am connected and ready to help in this live!');
+        } catch (Throwable $e) {
+            // OAuth connection succeeded even if the greeting cannot be posted.
+        }
+    }
+
     header('Location: /keddy-bot/index.php?connected=1');
     exit;
 } catch (Throwable $e) {

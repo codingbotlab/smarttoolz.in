@@ -2,6 +2,7 @@
 declare(strict_types=1);
 session_start();
 require __DIR__.'/bot.php';
+require_once __DIR__.'/comments-engine.php';
 
 if (isset($_GET['heartbeat'])) {
     $expected = $_SESSION['keddy_heartbeat_token'] ?? '';
@@ -15,7 +16,13 @@ if (isset($_GET['heartbeat'])) {
 
 try{
     $r=tick();
-    echo json_encode(['ok'=>true,'live'=>!empty($r['live']),'session'=>$r['session']],JSON_UNESCAPED_UNICODE).PHP_EOL;
+    $commentRun=null;
+    if(isset($_GET['comments'])&&$_GET['comments']==='1'){
+        $commentRun=runViewerVideoCommentTick(true);
+    }else{
+        $commentRun=runViewerVideoCommentTick(false);
+    }
+    echo json_encode(['ok'=>true,'live'=>!empty($r['live']),'session'=>$r['session'],'viewer_comments'=>$commentRun],JSON_UNESCAPED_UNICODE).PHP_EOL;
 }catch(Throwable$e){
     http_response_code(500);
     echo json_encode(['ok'=>false,'error'=>$e->getMessage()],JSON_UNESCAPED_UNICODE).PHP_EOL;

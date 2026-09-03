@@ -2,6 +2,8 @@
 declare(strict_types=1);
 session_start();
 require __DIR__.'/bot.php';
+require_once __DIR__.'/registered-users.php';
+
 try{
     if(!hash_equals($_SESSION['keddy_oauth_state']??'',(string)($_GET['state']??'')))throw new RuntimeException('Invalid OAuth state. Please start Connect YouTube again.');
     $code=(string)($_GET['code']??'');
@@ -14,8 +16,17 @@ try{
     $j['expires_at']=time()+(int)($j['expires_in']??3600);
     sj('oauth',$j);
     unset($_SESSION['keddy_oauth_state']);
+
+    // Every successful Keddy connection registers this YouTube channel as a
+    // Keddy user. Comment automation uses this registry only; it never derives
+    // targets from random public commenters.
     $channel=connectedChannel();
-    if($channel){sv('oauth_channel_id',(string)$channel['id']);sv('oauth_channel_title',(string)$channel['title']);}
+    if($channel){
+        sv('oauth_channel_id',(string)$channel['id']);
+        sv('oauth_channel_title',(string)$channel['title']);
+        registerKeddyUser($channel);
+    }
+
     $welcomed=false;
     if(gv('bot_oauth')){try{$welcomed=welcomeBotToLive();}catch(Throwable $e){}}
     header('Location: /keddy-bot/index.php?connected=1&welcomed='.(int)$welcomed);

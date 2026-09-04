@@ -1,0 +1,45 @@
+name: Add global fonts to favicon tools
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-global-fonts-to-favicons.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link global font list in both favicon tools
+        shell: pwsh
+        run: |
+          $files = @(
+            'smart-toolz/tools/favicon-generator.php',
+            'smart-toolz/tools/favicon-ico-generator.php'
+          )
+          $tag = '<script src="/smart-toolz/assets/global-fonts.js" defer></script>'
+          foreach ($file in $files) {
+            if (-not (Test-Path $file)) { throw "Missing $file" }
+            $s = Get-Content $file -Raw -Encoding UTF8
+            if ($s -notlike "*$tag*") {
+              $s = $s -replace '(<meta name="robots"[^>]*>)', '$1`n<script src="/smart-toolz/assets/global-fonts.js" defer></script>', 1
+              Set-Content $file $s -Encoding UTF8 -NoNewline
+            }
+          }
+      - name: Commit and remove one-time workflow
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add smart-toolz/tools/favicon-generator.php smart-toolz/tools/favicon-ico-generator.php
+          if (-not (git diff --cached --quiet)) {
+            git commit -m 'Link global font list to favicon tools'
+            git push
+          }
+          git rm .github/workflows/add-global-fonts-to-favicons.yml
+          git commit -m 'Remove one-time favicon font linker'
+          git push

@@ -1,6 +1,9 @@
 name: Apply global favicon fonts
 
 on:
+  push:
+    paths:
+      - '.github/workflows/apply-global-fonts.yml'
   workflow_dispatch:
 
 permissions:

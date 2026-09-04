@@ -1,17 +1,76 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="cache-control" content="no-cache"><title>SmartToolz Live Error Monitor</title><style>body{font-family:Inter,Arial,sans-serif;background:#f7f9fd;color:#172033;margin:0;padding:32px}.box{max-width:1000px;margin:auto;background:#fff;border:1px solid #e5e8f0;border-radius:18px;padding:24px;box-shadow:0 18px 50px rgba(30,35,80,.08)}h1{margin:8px 0}.muted{color:#707b8e}.pill{display:inline-block;padding:7px 11px;border-radius:999px;background:#eee;font-size:12px;font-weight:800}.row{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.card{padding:14px;border:1px solid #e5e8f0;border-radius:12px;min-width:180px;flex:1}.n{font-size:24px;font-weight:900}pre{background:#111827;color:#e5e7eb;padding:16px;border-radius:12px;overflow:auto;white-space:pre-wrap}.status{padding:12px 14px;border-radius:12px;background:#f1f5f9;margin:16px 0}.ok{background:#ecfdf5}.bad{background:#fef2f2}.error{border:1px solid #fecaca;border-radius:12px;padding:14px;margin:10px 0;background:#fff}.error b{display:block;margin-bottom:5px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-block;padding:9px 12px;border-radius:9px;background:#111827;color:#fff;text-decoration:none;font-weight:800;font-size:12px}.small{font-size:12px}</style></head><body><main class="box"><span class="pill">DEMO / demo_1.0V</span><h1>SmartToolz Live Error Monitor</h1><p class="muted">Live crawler report from Hostinger. Auto-refreshes every 30 seconds.</p><div class="row"><div class="card"><div class="n" id="liveStatus">CHECKING</div><div class="muted">Crawler status</div></div><div class="card"><div class="n" id="checked">—</div><div class="muted">Pages checked</div></div><div class="card"><div class="n" id="errors">—</div><div class="muted">Live errors</div></div><div class="card"><div class="n" id="updated">—</div><div class="muted">Last report</div></div></div><div id="status" class="status">Loading latest crawler report…</div><h2>Workflow</h2><pre>Hostinger LIVE → Crawler → Full error report → Discord
-                         ↓
-                    Git source locate
-                         ↓
-                    Backup tag
-                         ↓
-                    AI fix + Git push
-                         ↓
-                 Live verification → repeat</pre><h2>Current Errors</h2><div id="errorsList"><p class="muted">Loading…</p></div><div class="actions"><a class="btn" href="https://github.com/codingbotlab/smarttoolz.in/actions/workflows/live-error-crawler.yml" target="_blank" rel="noopener">GitHub Actions</a><a class="btn" href="https://github.com/codingbotlab/smarttoolz.in/tree/main/monitor" target="_blank" rel="noopener">Monitor Files</a></div><p class="muted small" id="source">Source: smart-toolz/monitor/latest-report.json</p></main><script>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="cache-control" content="no-cache,no-store,must-revalidate">
+<title>SmartToolz Live Error Monitor</title>
+<style>
+body{font-family:Inter,Arial,sans-serif;background:#f7f9fd;color:#172033;margin:0;padding:32px}
+.box{max-width:1050px;margin:auto;background:#fff;border:1px solid #e5e8f0;border-radius:18px;padding:24px;box-shadow:0 18px 50px rgba(30,35,80,.08)}
+h1{margin:8px 0}.muted{color:#707b8e}.pill{display:inline-block;padding:7px 11px;border-radius:999px;background:#eee;font-size:12px;font-weight:800}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.card{padding:14px;border:1px solid #e5e8f0;border-radius:12px;min-width:180px;flex:1}.n{font-size:24px;font-weight:900}
+.status{padding:14px;border-radius:12px;background:#f1f5f9;margin:16px 0}.ok{background:#ecfdf5}.bad{background:#fef2f2}.wait{background:#fff7ed}
+.error{border:1px solid #fecaca;border-radius:12px;padding:14px;margin:10px 0;background:#fff}.error b{display:block;margin-bottom:5px}.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;padding:9px 12px;border-radius:9px;background:#111827;color:#fff;text-decoration:none;font-weight:800;font-size:12px}.small{font-size:12px}
+pre{background:#111827;color:#e5e7eb;padding:16px;border-radius:12px;overflow:auto;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<main class="box">
+<span class="pill">DEMO / demo_1.0V</span>
+<h1>SmartToolz Live Error Monitor</h1>
+<p class="muted">Hostinger crawler report · auto-refresh every 30 seconds</p>
+<div class="row">
+<div class="card"><div class="n" id="liveStatus">CHECKING</div><div class="muted">Crawler status</div></div>
+<div class="card"><div class="n" id="checked">—</div><div class="muted">Pages checked</div></div>
+<div class="card"><div class="n" id="errors">—</div><div class="muted">Live errors</div></div>
+<div class="card"><div class="n" id="updated">—</div><div class="muted">Last report</div></div>
+</div>
+<div id="status" class="status">Loading latest crawler report…</div>
+<h2>Workflow</h2>
+<pre>Hostinger LIVE → Cron → Crawler → latest-report.json → Live verification</pre>
+<h2>Current Errors</h2>
+<div id="errorsList"><p class="muted">Loading…</p></div>
+<div class="actions">
+<a class="btn" href="https://github.com/codingbotlab/smarttoolz.in/tree/main/smart-toolz/monitor" target="_blank" rel="noopener">Monitor Files</a>
+</div>
+<p class="muted small" id="source">Source: /smart-toolz/monitor/latest-report.json</p>
+</main>
+<script>
 const REPORT='/smart-toolz/monitor/latest-report.json';
 const RAW='https://raw.githubusercontent.com/codingbotlab/smarttoolz.in/main/smart-toolz/monitor/latest-report.json';
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-async function getReport(){const urls=[REPORT+'?t='+Date.now(),RAW+'?t='+Date.now()];let last='Report not available yet';for(const url of urls){try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();return d;}catch(e){last=e.message;}}throw new Error(last);}
-async function load(){try{const d=await getReport();const count=Number(d.errorCount||0);$('checked').textContent=d.pagesChecked??0;$('errors').textContent=count;$('updated').textContent=d.generatedAt?new Date(d.generatedAt).toLocaleTimeString(): 'Waiting';const bad=count>0;$('liveStatus').textContent=d.status==='waiting'?'WAIT':(bad?'ERROR':'OK');$('status').className='status '+(bad?'bad':(d.status==='waiting'?'':'ok'));$('status').innerHTML=d.status==='waiting'?'⏳ <b>Waiting for first Hostinger Cron report.</b>':(bad?'🔴 <b>Live errors detected.</b> See the full error details below.':'🟢 <b>No live errors detected.</b> Latest crawler report is clean.');if(!d.errors?.length){$('errorsList').innerHTML='<p class="muted">No errors in the latest report.</p>';}else{$('errorsList').innerHTML=d.errors.map((e,i)=>`<div class="error"><b>${i+1}. ${esc(e.type)} — ${esc(e.url)}</b><div>${esc(e.detail)}</div></div>`).join('');}$('source').textContent='Source: '+(d.baseUrl||REPORT)+' · Updated '+(d.generatedAt||'waiting');}catch(e){$('liveStatus').textContent='WAIT';$('status').className='status';$('status').textContent='⏳ '+e.message;$('errorsList').innerHTML='<p class="muted">Waiting for the crawler to publish its first readable report.</p>';}}
+async function getReport(){
+ const urls=[REPORT+'?t='+Date.now(),RAW+'?t='+Date.now()];
+ let last='Report not available yet';
+ for(const url of urls){try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json();}catch(e){last=e.message;}}
+ throw new Error(last);
+}
+async function load(){
+ try{
+  const d=await getReport();
+  const count=Number(d.errorCount||0);
+  const status=String(d.status||'waiting').toLowerCase();
+  $('checked').textContent=d.pagesChecked??0;
+  $('errors').textContent=count;
+  $('updated').textContent=d.generatedAt?new Date(d.generatedAt).toLocaleTimeString():'Waiting';
+  $('liveStatus').textContent=count>0?'ERROR':(status==='running'?'RUNNING':(status==='waiting'?'WAIT':'OK'));
+  $('status').className='status '+(count>0?'bad':(status==='waiting'?'wait':'ok'));
+  if(count>0){$('status').innerHTML='🔴 <b>Live errors detected.</b> Full details are listed below.';}
+  else if(status==='running'){$('status').innerHTML='🟡 <b>Crawler is running.</b> Waiting for the completed report.';}
+  else if(status==='waiting'){$('status').innerHTML='⏳ <b>Waiting for the first Hostinger Cron report.</b> The dashboard is connected.';}
+  else{$('status').innerHTML='🟢 <b>No live errors detected.</b> Latest crawler report is clean.';}
+  if(!d.errors?.length){$('errorsList').innerHTML='<p class="muted">No errors in the latest report.</p>';}else{$('errorsList').innerHTML=d.errors.map((e,i)=>`<div class="error"><b>${i+1}. ${esc(e.type)} — ${esc(e.url)}</b><div>${esc(e.detail)}</div></div>`).join('');}
+  $('source').textContent='Source: '+(d.baseUrl||REPORT)+' · Updated '+(d.generatedAt||'waiting');
+ }catch(e){
+  $('liveStatus').textContent='OFFLINE';$('checked').textContent='—';$('errors').textContent='—';$('updated').textContent='—';
+  $('status').className='status bad';$('status').innerHTML='🔴 <b>Report could not be loaded.</b> '+esc(e.message);
+  $('errorsList').innerHTML='<p class="muted">The Hostinger report endpoint is not published yet. Cron/deployment must publish <code>monitor/latest-report.json</code>.</p>';
+ }
+}
 load();setInterval(load,30000);
-</script></body></html>
+</script>
+</body>
+</html>

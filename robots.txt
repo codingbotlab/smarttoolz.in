@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Keep crawler internals out of search indexes.
+Disallow: /smart-toolz/monitor/cron-live-error.php
+Disallow: /smart-toolz/monitor/latest-report.json
+
+# Git and server metadata should never be indexed.
+Disallow: /.git/
+Disallow: /.github/
+
+Sitemap: https://smarttoolz.in/sitemap.xml

@@ -1,0 +1,46 @@
+name: Link global fonts self-hosted
+
+on:
+  push:
+    paths:
+      - '.github/workflows/link-global-fonts-selfhosted.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  link:
+    if: ${{ !contains(github.event.head_commit.message, '[global-fonts-done]') }}
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link global font list in SmartToolz header
+        shell: pwsh
+        run: |
+          $p = 'smart-toolz/header.php'
+          $s = Get-Content $p -Raw -Encoding UTF8
+          $tag = '<script src="/smart-toolz/assets/global-fonts.js" defer></script>'
+          if ($s -notlike "*$tag*") {
+            $marker = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">'
+            if ($s -notlike "*$marker*") { throw 'Header font marker not found' }
+            $s = $s.Replace($marker, $marker + $tag)
+            Set-Content $p $s -Encoding UTF8 -NoNewline
+          }
+      - name: Commit changes
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add smart-toolz/header.php
+          if (-not (git diff --cached --quiet)) {
+            git commit -m 'Link global fonts [global-fonts-done]'
+            git push
+          }
+      - name: Remove one-time workflow
+        if: success()
+        shell: pwsh
+        run: |
+          git rm .github/workflows/link-global-fonts-selfhosted.yml
+          git commit -m 'Remove one-time font linker [global-fonts-done]'
+          git push

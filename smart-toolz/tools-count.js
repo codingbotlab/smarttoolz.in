@@ -1,16 +1,6 @@
 /*
  * Smart Toolz - Dynamic GitHub Tools Counter
- * Reads smart-toolz/tools/ from the GitHub repository and keeps the
- * frontend count/list synchronized without changing the existing tools.
- *
- * HTML usage:
- *   <span id="tools-count">0</span>
- *   <script src="tools-count.js" defer></script>
- *
- * Optional list container:
- *   <div id="tools-list"></div>
- *
- * v1.0 - dynamic tools count/list
+ * Reads smart-toolz/tools/ and keeps the homepage count/list synchronized.
  */
 (() => {
     "use strict";
@@ -25,12 +15,30 @@
         refreshMs: 5 * 60 * 1000
     };
 
-    const countEl = document.querySelector(CONFIG.countSelector);
-    const listEl = document.querySelector(CONFIG.listSelector);
+    function ensureCountElement() {
+        let countEl = document.querySelector(CONFIG.countSelector);
+        if (countEl) return countEl;
 
-    if (!countEl && !listEl) return;
+        const stats = document.querySelector(".stats");
+        if (!stats) return null;
+
+        const stat = document.createElement("div");
+        stat.className = "stat";
+        stat.innerHTML = `
+            <span class="stat-icon"><span class="material-symbols-rounded">build</span></span>
+            <strong id="tools-count">—</strong>
+            <small>Tools Available</small>
+        `;
+        stats.appendChild(stat);
+        return stat.querySelector("#tools-count");
+    }
 
     async function loadTools() {
+        const countEl = ensureCountElement();
+        const listEl = document.querySelector(CONFIG.listSelector);
+
+        if (!countEl && !listEl) return;
+
         const apiUrl = new URL(
             `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`
         );
@@ -49,8 +57,6 @@
 
             const entries = await response.json();
 
-            // In this repository the actual tools are PHP files.
-            // Ignore dot-files and internal/trigger files beginning with "_".
             const tools = entries
                 .filter(item =>
                     item.type === "file" &&
@@ -62,6 +68,7 @@
 
             if (countEl) {
                 countEl.textContent = tools.length.toLocaleString("en-IN");
+                countEl.setAttribute("data-tools-updated", new Date().toISOString());
             }
 
             if (listEl) {
@@ -74,11 +81,8 @@
                     })
                 );
             }
-
-            countEl?.setAttribute("data-tools-updated", new Date().toISOString());
         } catch (error) {
             console.error("Unable to update GitHub tools count:", error);
-            // Keep the last successful value instead of replacing it with 0.
         }
     }
 

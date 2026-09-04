@@ -10,53 +10,57 @@ permissions:
 
 jobs:
   cleanup:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        shell: powershell
+        uses: actions/checkout@v4
+
+      - name: Remove legacy feedback UI everywhere
+        shell: bash
         run: |
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
 
-      - name: Remove legacy feedback UI from every tool page
-        shell: powershell
-        run: |
-          $root = Join-Path $env:GITHUB_WORKSPACE 'smart-toolz/tools'
-          $changed = New-Object System.Collections.Generic.List[string]
+          root = Path('smart-toolz/tools')
+          changed = []
 
-          $htmlPattern = '(?is)<div\s+class=["'']tool-support-actions["''][^>]*>.*?</div>\s*'
-          $cssPatterns = @(
-            '(?is)\.tool-support-actions\s*\{[^{}]*\}\s*',
-            '(?is)\.tool-support-card(?:\.report|\.request)?(?:\s*,\s*\.tool-support-card(?:\.report|\.request)?)*\s*\{[^{}]*\}\s*',
-            '(?is)\.support-icon\s*\{[^{}]*\}\s*',
-            '(?is)\.tool-support-card\s+strong\s*\{[^{}]*\}\s*',
-            '(?is)\.tool-support-card\s+small\s*\{[^{}]*\}\s*',
-            '(?is)\.tool-support-card\s+\.arrow\s*\{[^{}]*\}\s*'
-          )
+          html_pattern = re.compile(r'<div\s+class=["\']tool-support-actions["\'][^>]*>.*?</div>\s*', re.I | re.S)
+          css_patterns = [
+              re.compile(r'\.tool-support-actions\s*\{[^{}]*\}\s*', re.I | re.S),
+              re.compile(r'\.tool-support-card(?:\.report|\.request)?(?:\s*,\s*\.tool-support-card(?:\.report|\.request)?)*\s*\{[^{}]*\}\s*', re.I | re.S),
+              re.compile(r'\.support-icon\s*\{[^{}]*\}\s*', re.I | re.S),
+              re.compile(r'\.tool-support-card\s+strong\s*\{[^{}]*\}\s*', re.I | re.S),
+              re.compile(r'\.tool-support-card\s+small\s*\{[^{}]*\}\s*', re.I | re.S),
+              re.compile(r'\.tool-support-card\s+\.arrow\s*\{[^{}]*\}\s*', re.I | re.S),
+          ]
 
-          Get-ChildItem -LiteralPath $root -Filter '*.php' -File | ForEach-Object {
-            if ($_.Name -in @('feedback-remove.php','tool-shell.php','tool-sidebar.php')) { return }
-            $text = [System.IO.File]::ReadAllText($_.FullName)
-            $original = $text
-            $text = [regex]::Replace($text, $htmlPattern, '')
-            foreach ($pattern in $cssPatterns) { $text = [regex]::Replace($text, $pattern, '') }
-            if ($text -ne $original) {
-              [System.IO.File]::WriteAllText($_.FullName, $text, [System.Text.UTF8Encoding]::new($false))
-              $changed.Add($_.FullName)
-            }
-          }
+          for path in sorted(root.glob('*.php')):
+              if path.name in {'feedback-remove.php','tool-shell.php','tool-sidebar.php'}:
+                  continue
+              text = path.read_text(encoding='utf-8-sig')
+              original = text
+              text = html_pattern.sub('', text)
+              for pattern in css_patterns:
+                  text = pattern.sub('', text)
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  changed.append(str(path))
 
-          Write-Host "Cleaned $($changed.Count) tool files"
-          $changed | ForEach-Object { Write-Host $_ }
+          print(f'Cleaned {len(changed)} tool files')
+          for item in changed:
+              print(item)
+          PY
 
       - name: Commit and push
-        shell: powershell
+        shell: bash
         run: |
           git config user.name 'smarttoolz-cleanup-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add smart-toolz/tools
-          git diff --cached --quiet
-          if ($LASTEXITCODE -eq 0) { Write-Host 'Nothing to commit.'; exit 0 }
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit.'
+            exit 0
+          fi
           git commit -m 'Remove legacy tool feedback from tool pages'
           git push origin HEAD:main

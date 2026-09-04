@@ -1,0 +1,33 @@
+name: SmartToolz Live Error Crawler
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run live crawler
+        env:
+          CRAWLER_BASE_URL: https://smarttoolz.in/smart-toolz/
+          CRAWLER_MAX_PAGES: 40
+          CRAWLER_TIMEOUT_MS: 15000
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: node monitor/live-error-crawler.mjs
+
+      - name: Upload crawler report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-error-report-${{ github.run_id }}
+          path: monitor/latest-report.json
+          if-no-files-found: ignore

@@ -22,9 +22,13 @@ jobs:
           from pathlib import Path
           import re
 
-          root = Path('smart-toolz/tools')
+          base = Path('smart-toolz')
           changed = []
 
+          header_html = re.compile(
+              r'<\?php\s+if\s*\(\$isToolPage\)\s*:\s*\?><div\s+class=["\']tool-support-actions["\'][^>]*>.*?</div>\s*<\?php\s+endif;\s*\?>',
+              re.I | re.S,
+          )
           html_pattern = re.compile(r'<div\s+class=["\']tool-support-actions["\'][^>]*>.*?</div>\s*', re.I | re.S)
           css_patterns = [
               re.compile(r'\.tool-support-actions\s*\{[^{}]*\}\s*', re.I | re.S),
@@ -35,11 +39,14 @@ jobs:
               re.compile(r'\.tool-support-card\s+\.arrow\s*\{[^{}]*\}\s*', re.I | re.S),
           ]
 
-          for path in sorted(root.glob('*.php')):
+          targets = [base / 'header.php'] + sorted((base / 'tools').glob('*.php'))
+          for path in targets:
               if path.name in {'feedback-remove.php','tool-shell.php','tool-sidebar.php'}:
                   continue
               text = path.read_text(encoding='utf-8-sig')
               original = text
+              if path == base / 'header.php':
+                  text = header_html.sub('', text)
               text = html_pattern.sub('', text)
               for pattern in css_patterns:
                   text = pattern.sub('', text)
@@ -47,7 +54,7 @@ jobs:
                   path.write_text(text, encoding='utf-8')
                   changed.append(str(path))
 
-          print(f'Cleaned {len(changed)} tool files')
+          print(f'Cleaned {len(changed)} PHP files')
           for item in changed:
               print(item)
           PY
@@ -57,10 +64,10 @@ jobs:
         run: |
           git config user.name 'smarttoolz-cleanup-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add smart-toolz/tools
+          git add smart-toolz/header.php smart-toolz/tools
           if git diff --cached --quiet; then
             echo 'Nothing to commit.'
             exit 0
           fi
-          git commit -m 'Remove legacy tool feedback from tool pages'
+          git commit -m 'Remove legacy tool feedback from shared header'
           git push origin HEAD:main

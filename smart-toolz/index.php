@@ -44,6 +44,8 @@ $sitePromo = '<div class="st-site-promo" role="region" aria-label="SmartToolz si
     . '.st-hero-learning .st-hero-tool-copy small{color:#2563eb}'
     . '.st-hero-learning .st-hero-tool-arrow{color:#2563eb}'
     . '.st-hero-stack{width:min(560px,100%);margin:0 auto;display:grid;gap:10px}'
+    . '.st-tool-count{width:min(560px,100%);margin:10px auto 0;display:flex;align-items:center;justify-content:center;gap:7px;color:#5f6878;font-size:12px;font-weight:750}'
+    . '.st-tool-count strong{color:#635bff;font-size:17px;min-width:24px;text-align:right}'
     . '.wrap{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;padding-left:32px!important;padding-right:32px!important}'
     . '@media(max-width:900px){.st-site-promo-inner{align-items:flex-start;flex-direction:column;gap:9px}.st-site-promo-links{justify-content:flex-start}}'
     . '@media(max-width:560px){.st-site-promo-inner{padding:10px 14px}.st-site-promo-copy span:last-child{display:none}.st-site-promo-links{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.st-site-promo-links a{font-size:10px;padding:7px 9px}.st-hero-tool{margin-top:0;padding:10px 11px}.st-hero-stack{gap:8px}.st-hero-tool-icon{width:43px;height:43px;flex-basis:43px}.st-hero-tool-copy strong{font-size:13px}.st-hero-tool-copy span{font-size:9.5px}.wrap{padding-left:12px!important;padding-right:12px!important}}'
@@ -62,7 +64,9 @@ $heroTools = '<div class="st-hero-stack">'
     . '<span class="st-hero-tool-copy"><small>LEARNING HUB</small><strong>Learn • Practice • Build</strong><span>Practical courses, lessons and hands-on learning paths.</span></span>'
     . '<span class="st-hero-tool-arrow"><span class="material-symbols-rounded">arrow_forward</span></span>'
     . '</a>'
-    . '</div>';
+    . '<div class="st-tool-count" aria-live="polite"><strong id="tools-count">—</strong><span>tools available</span></div>'
+    . '</div>'
+    . '<script src="/smart-toolz/tools-count.js" defer></script>';
 
 $heroImg = '<img class="hero-art" src="/smart-toolz/assets/home/hero-tools.svg" alt="SmartToolz tools illustration">';
 if (strpos($html, $heroImg) !== false) {

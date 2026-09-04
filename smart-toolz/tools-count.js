@@ -9,6 +9,8 @@
  *
  * Optional list container:
  *   <div id="tools-list"></div>
+ *
+ * v1.0 - dynamic tools count/list
  */
 (() => {
     "use strict";

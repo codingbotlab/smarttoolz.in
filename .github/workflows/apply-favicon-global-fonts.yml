@@ -1,0 +1,50 @@
+name: Apply favicon global fonts
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-favicon-global-fonts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Link global font list
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          tag = '<script src="/smart-toolz/assets/global-fonts.js" defer></script>'
+          for name in ['favicon-generator.php', 'favicon-ico-generator.php']:
+              p = Path('smart-toolz/tools') / name
+              s = p.read_text(encoding='utf-8')
+              if tag not in s:
+                  marker = '<meta name="robots"'
+                  i = s.find(marker)
+                  if i < 0:
+                      raise SystemExit(f'robots meta not found: {p}')
+                  end = s.find('>', i)
+                  if end < 0:
+                      raise SystemExit(f'robots meta malformed: {p}')
+                  s = s[:end+1] + '\n' + tag + s[end+1:]
+                  p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verify both links
+        run: |
+          grep -q 'global-fonts.js' smart-toolz/tools/favicon-generator.php
+          grep -q 'global-fonts.js' smart-toolz/tools/favicon-ico-generator.php
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add smart-toolz/tools/favicon-generator.php smart-toolz/tools/favicon-ico-generator.php
+          git diff --cached --quiet && exit 0
+          git commit -m 'Link global font list to favicon text tools'
+          git push

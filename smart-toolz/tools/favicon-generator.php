@@ -156,7 +156,12 @@ function roundedRect(c,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));c.beginPath(
 function drawFavicon(c,size){
  const bg=$('bg').value,fg=$('fg').value,r=+$('radius').value,p=+$('padding').value,fit=$('fit').value;
  c.clearRect(0,0,size,size);
- c.save();c.fillStyle=bg;roundedRect(c,0,0,size,size,r*size/100);c.clip();
+ c.save();
+ roundedRect(c,0,0,size,size,r*size/100);
+ c.clip();
+ // Fill AFTER clip so the selected background is actually painted into the canvas.
+ c.fillStyle=bg;
+ c.fillRect(0,0,size,size);
  if(activeSource==='image' && image){
    const iw=image.naturalWidth||image.width, ih=image.naturalHeight||image.height;
    const box=size*(1-p/100);

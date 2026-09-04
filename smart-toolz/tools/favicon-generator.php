@@ -167,7 +167,7 @@ function drawFavicon(c,size){
    const value=activeSource==='emoji'?($('emoji').value.trim()||'🚀'):($('text').value.trim()||'S');
    c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';
    const px=activeSource==='emoji'?Math.round(size*.76):Math.round(size*.68);
-   c.font=(activeSource==='emoji'?px+'px':'800 '+px+'px')+' '+(activeSource==='emoji'?'"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif':'Arial,sans-serif');
+   c.font=(activeSource==='emoji'?px+'px':'800 '+px+'px')+' '+(activeSource==='emoji'? '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif':'Arial,sans-serif');
    c.fillText(value.slice(0,3),size/2,size/2+size*.02);
  }
  c.restore();
@@ -175,13 +175,14 @@ function drawFavicon(c,size){
 function drawPreview(){drawFavicon(pctx,512);}
 function selectedSizes(){return [...document.querySelectorAll('.size:checked')].map(x=>+x.value).sort((a,b)=>a-b);}
 function updateRangeLabels(){$('radiusValue').textContent=$('radius').value+'%';$('paddingValue').textContent=$('padding').value+'%';}
+function refreshPreview(){drawPreview();}
 function setSource(source){
  activeSource=source;
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.source===source));
  document.querySelectorAll('input[name="source"]').forEach(r=>r.checked=r.value===source);
  $('uploadWrap').classList.toggle('hidden',source!=='image');$('emojiInput').classList.toggle('hidden',source!=='emoji');$('textInput').classList.toggle('hidden',source!=='text');
  $('status').textContent=source==='image'?(image?'Image loaded. Adjust options and generate.':'Upload an image, then generate your favicons.'):source==='emoji'?'Enter an emoji, then generate your favicons.':'Enter a letter or short text, then generate your favicons.';
- drawPreview();
+ refreshPreview();
 }
 function makeCanvas(size){const c=document.createElement('canvas');c.width=c.height=size;drawFavicon(c.getContext('2d'),size);return c;}
 function canvasBlob(c){return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('PNG creation failed')),'image/png'));}
@@ -222,7 +223,7 @@ async function downloadZip(){
 $('file').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>5*1024*1024){$('fileName').textContent='File is larger than 5 MB.';e.target.value='';return;}const url=URL.createObjectURL(f);const im=new Image();im.onload=()=>{image=im;URL.revokeObjectURL(url);$('fileName').textContent=f.name;setSource('image');};im.onerror=()=>{URL.revokeObjectURL(url);$('fileName').textContent='Unable to read this image.';};im.src=url;});
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setSource(b.dataset.source)));
 document.querySelectorAll('input[name="source"]').forEach(r=>r.addEventListener('change',()=>setSource(r.value)));
-['emoji','text','bg','fg','radius','padding','fit'].forEach(id=>$(id).addEventListener('input',()=>{updateRangeLabels();drawPreview();}));
+['emoji','text','bg','fg','radius','padding','fit'].forEach(id=>{const el=$(id);el.addEventListener('input',()=>{updateRangeLabels();refreshPreview();});el.addEventListener('change',()=>{updateRangeLabels();refreshPreview();});});
 $('generate').addEventListener('click',generate);$('downloadZip').addEventListener('click',downloadZip);
 $('selectAll').addEventListener('click',()=>document.querySelectorAll('.size').forEach(x=>x.checked=true));$('clearAll').addEventListener('click',()=>document.querySelectorAll('.size').forEach(x=>x.checked=false));
 $('copySnippet').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('snippet').value);$('copySnippet').textContent='Copied!';setTimeout(()=>$('copySnippet').textContent='Copy Code',1200);}catch(e){$('snippet').select();document.execCommand('copy');$('copySnippet').textContent='Copied!';setTimeout(()=>$('copySnippet').textContent='Copy Code',1200);}});

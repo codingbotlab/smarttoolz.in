@@ -3,6 +3,7 @@ name: Cleanup legacy tool feedback
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,46 +15,58 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Remove legacy feedback UI from shared header
+      - name: Remove legacy feedback UI from every tool page
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
 
-          path = Path('smart-toolz/header.php')
-          text = path.read_text(encoding='utf-8')
-          original = text
+          root = Path('smart-toolz/tools')
+          changed = []
 
-          text = text.replace(
-              "$toolReportUrl = '/smart-toolz/report-tool.php?tool=' . rawurlencode($slug) . '&name=' . rawurlencode($toolTitle) . '&url=' . rawurlencode('/smart-toolz/tools/' . $slug . '.php');\n",
-              ''
+          html_block = re.compile(
+              r'<div\s+class=["\']tool-support-actions["\'][^>]*>.*?</div>\s*',
+              re.I | re.S,
           )
 
-          text, count = re.subn(
-              r'\\n?\\<\\?php if \(\$isToolPage\): \?\\>\\s*<div class="tool-support-actions">.*?</div>\\s*<\\?php endif; \?\\>\\n?',
-              '\\n',
-              text,
-              count=1,
-              flags=re.S,
+          support_css = re.compile(
+              r'\.tool-support-actions\s*\{[^{}]*\}\s*',
+              re.I | re.S,
+          )
+          card_css = re.compile(
+              r'\.tool-support-card(?:\.report|\.request)?(?:\s*,\s*\.tool-support-card(?:\.report|\.request)?)*\s*\{[^{}]*\}\s*',
+              re.I | re.S,
           )
 
-          if text == original:
-              print('No legacy feedback HTML found; nothing to change.')
-          else:
-              path.write_text(text, encoding='utf-8')
-              print(f'Updated header.php; removed {count} legacy feedback block(s).')
+          for path in sorted(root.glob('*.php')):
+              if path.name in {'feedback-remove.php', 'tool-shell.php', 'tool-sidebar.php'}:
+                  continue
+              text = path.read_text(encoding='utf-8-sig')
+              original = text
+
+              text = html_block.sub('', text)
+              text = support_css.sub('', text)
+              text = card_css.sub('', text)
+
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  changed.append(str(path))
+
+          print(f'Cleaned {len(changed)} tool files')
+          for item in changed:
+              print(item)
           PY
 
-      - name: Commit and push cleanup
+      - name: Commit and push
         shell: bash
         run: |
-          if git diff --quiet -- smart-toolz/header.php; then
-            echo 'No changes to commit.'
+          if git diff --quiet -- smart-toolz/tools; then
+            echo 'No legacy feedback markup found in tool files.'
             exit 0
           fi
           git config user.name 'smarttoolz-cleanup-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add smart-toolz/header.php
-          git commit -m 'Remove legacy tool feedback from shared header'
+          git add smart-toolz/tools
+          git commit -m 'Remove legacy tool feedback from tool pages'
           git push

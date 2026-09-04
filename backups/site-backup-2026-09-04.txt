@@ -1,0 +1,5 @@
+SmartToolz site backup marker
+Created before live-error monitoring/fix workflow.
+Repository: codingbotlab/smarttoolz.in
+Branch: main
+Purpose: rollback/checkpoint marker before automated error-fix work.

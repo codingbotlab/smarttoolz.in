@@ -1,19 +1,15 @@
 name: SmartToolz Live Error Crawler
 
+# Automatic monitoring now runs on Hostinger cron to avoid GitHub Actions billing.
+# Keep this workflow for manual diagnostics only.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
 
-concurrency:
-  group: smarttoolz-live-error-loop
-  cancel-in-progress: false
-
 jobs:
-  crawl-and-fix:
+  manual-diagnostic:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -21,39 +17,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Run live crawler
+      - name: Run crawler
         continue-on-error: true
         env:
           CRAWLER_BASE_URL: https://smarttoolz.in/smart-toolz/
           CRAWLER_MAX_PAGES: 40
           CRAWLER_TIMEOUT_MS: 15000
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: node monitor/live-error-crawler.mjs
-
-      - name: Upload live report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: live-error-report-${{ github.run_id }}
-          path: monitor/latest-report.json
-          if-no-files-found: ignore
-
-      - name: Publish live report for demo
-        if: always()
-        run: |
-          git config user.name "SmartToolz Monitor"
-          git config user.email "actions@smarttoolz.in"
-          git add monitor/latest-report.json
-          git diff --cached --quiet || git commit -m "Update live crawler report"
-          git push origin HEAD:main
-
-      - name: Run AI fix + verify loop
-        if: always()
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5' }}
-          CRAWLER_BASE_URL: https://smarttoolz.in/smart-toolz/
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          FIX_MAX_ATTEMPTS: 3
-        run: node monitor/ai-live-fixer.mjs

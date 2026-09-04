@@ -1,15 +1,12 @@
 /*
- * Smart Toolz - Dynamic GitHub Tools Counter
- * Reads smart-toolz/tools/ and keeps the homepage count/list synchronized.
+ * SmartToolz - Dynamic Tools Counter
+ * Uses the site's public tool registry instead of the private GitHub API.
  */
 (() => {
     "use strict";
 
     const CONFIG = {
-        owner: "codingbotlab",
-        repo: "smarttoolz.in",
-        branch: "main",
-        path: "smart-toolz/tools",
+        endpoint: "/smart-toolz/tool-registry.php",
         countSelector: "#tools-count",
         listSelector: "#tools-list",
         refreshMs: 5 * 60 * 1000
@@ -39,32 +36,32 @@
 
         if (!countEl && !listEl) return;
 
-        const apiUrl = new URL(
-            `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`
-        );
-        apiUrl.searchParams.set("ref", CONFIG.branch);
+        const apiUrl = new URL(CONFIG.endpoint, window.location.origin);
         apiUrl.searchParams.set("_", Date.now().toString());
 
         try {
             const response = await fetch(apiUrl.toString(), {
                 cache: "no-store",
-                headers: { Accept: "application/vnd.github+json" }
+                headers: { Accept: "application/json" }
             });
 
             if (!response.ok) {
-                throw new Error(`GitHub API returned ${response.status}`);
+                throw new Error(`Tool registry returned ${response.status}`);
             }
 
-            const entries = await response.json();
+            const payload = await response.json();
+            const entries = Array.isArray(payload.tools) ? payload.tools : [];
 
-            const tools = entries
-                .filter(item =>
-                    item.type === "file" &&
-                    item.name.toLowerCase().endsWith(".php") &&
-                    !item.name.startsWith(".") &&
-                    !item.name.startsWith("_")
-                )
-                .sort((a, b) => a.name.localeCompare(b.name));
+            const tools = [];
+            const seenUrls = new Set();
+
+            for (const tool of entries) {
+                const name = String(tool?.name || "").trim();
+                const url = String(tool?.url || "").trim();
+                if (!name || !url || seenUrls.has(url)) continue;
+                seenUrls.add(url);
+                tools.push({ ...tool, name, url });
+            }
 
             if (countEl) {
                 countEl.textContent = tools.length.toLocaleString("en-IN");
@@ -75,14 +72,15 @@
                 listEl.replaceChildren(
                     ...tools.map(tool => {
                         const link = document.createElement("a");
-                        link.href = `tools/${encodeURIComponent(tool.name)}`;
-                        link.textContent = tool.name.replace(/\.php$/i, "").replace(/[-_]+/g, " ");
+                        link.href = tool.url;
+                        link.textContent = tool.name;
                         return link;
                     })
                 );
             }
         } catch (error) {
-            console.error("Unable to update GitHub tools count:", error);
+            // Keep the existing UI intact when the registry is temporarily unavailable.
+            console.error("Unable to update SmartToolz tools count:", error);
         }
     }
 

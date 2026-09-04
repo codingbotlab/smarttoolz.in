@@ -1,5 +1,7 @@
 <?php
-// Shared SmartToolz mobile-app shell footer.
+// Shared SmartToolz footer.
+$isSmartToolzMain = basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php'
+    && str_contains((string)($_SERVER['REQUEST_URI'] ?? ''), '/smart-toolz/');
 ?>
 <link rel="stylesheet" href="/core/ui/app.css">
 <script defer src="/core/ui/app.js"></script>
@@ -10,3 +12,12 @@
   <a href="/learning-hub/" data-st-nav="learn"><span>◈</span><small>Learn</small></a>
   <a href="/knowledge-base/" data-st-nav="kb"><span>▤</span><small>Knowledge</small></a>
 </nav>
+<?php if ($isSmartToolzMain): ?>
+<style>
+@media (max-width: 820px) {
+  .site-header { display: none !important; }
+  .st-app-footer { display: none !important; }
+  body { padding-bottom: 0 !important; }
+}
+</style>
+<?php endif; ?>

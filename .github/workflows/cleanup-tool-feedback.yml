@@ -1,0 +1,59 @@
+name: Cleanup legacy tool feedback
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove legacy feedback UI from shared header
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('smart-toolz/header.php')
+          text = path.read_text(encoding='utf-8')
+          original = text
+
+          text = text.replace(
+              "$toolReportUrl = '/smart-toolz/report-tool.php?tool=' . rawurlencode($slug) . '&name=' . rawurlencode($toolTitle) . '&url=' . rawurlencode('/smart-toolz/tools/' . $slug . '.php');\n",
+              ''
+          )
+
+          text, count = re.subn(
+              r'\\n?\\<\\?php if \(\$isToolPage\): \?\\>\\s*<div class="tool-support-actions">.*?</div>\\s*<\\?php endif; \?\\>\\n?',
+              '\\n',
+              text,
+              count=1,
+              flags=re.S,
+          )
+
+          if text == original:
+              print('No legacy feedback HTML found; nothing to change.')
+          else:
+              path.write_text(text, encoding='utf-8')
+              print(f'Updated header.php; removed {count} legacy feedback block(s).')
+          PY
+
+      - name: Commit and push cleanup
+        shell: bash
+        run: |
+          if git diff --quiet -- smart-toolz/header.php; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'smarttoolz-cleanup-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add smart-toolz/header.php
+          git commit -m 'Remove legacy tool feedback from shared header'
+          git push

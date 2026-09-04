@@ -159,19 +159,18 @@ function drawFavicon(c,size){
  c.save();
  roundedRect(c,0,0,size,size,r*size/100);
  c.clip();
- // Fill AFTER clip so the selected background is actually painted into the canvas.
  c.fillStyle=bg;
  c.fillRect(0,0,size,size);
+ const box=Math.max(1,size*(1-p/100));
  if(activeSource==='image' && image){
    const iw=image.naturalWidth||image.width, ih=image.naturalHeight||image.height;
-   const box=size*(1-p/100);
    const scale=fit==='cover'?Math.max(box/iw,box/ih):Math.min(box/iw,box/ih);
    const w=iw*scale,h=ih*scale;
    c.drawImage(image,(size-w)/2,(size-h)/2,w,h);
  }else{
    const value=activeSource==='emoji'?($('emoji').value.trim()||'🚀'):($('text').value.trim()||'S');
    c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';
-   const px=activeSource==='emoji'?Math.round(size*.76):Math.round(size*.68);
+   const px=activeSource==='emoji'?Math.round(box*.76):Math.round(box*.68);
    c.font=(activeSource==='emoji'?px+'px':'800 '+px+'px')+' '+(activeSource==='emoji'? '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif':'Arial,sans-serif');
    c.fillText(value.slice(0,3),size/2,size/2+size*.02);
  }

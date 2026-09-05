@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-// Real-viewer growth assistant: improves discovery and participation without
-// creating or simulating viewers, likes, comments, or other engagement.
+// Real-viewer growth assistant. It only encourages genuine audience discovery;
+// it never creates or simulates viewers, likes, comments, or other engagement.
 const KEDDY_VIEWER_GOAL = 200;
-const KEDDY_GROWTH_INTERVAL = 180;
+// Sending a live-chat message costs quota, so keep automated prompts conservative.
+const KEDDY_GROWTH_INTERVAL = 600;
 const KEDDY_GROWTH_MESSAGES = [
     '🔥 Dosto, live achchi lag rahi ho to Like kar do ❤️ aur Share button se ek friend ko bulao!',
     '👀 New viewers, chat mein ek ❤️ ya Hello drop karo — Keddy yahin hai 😎',
@@ -52,10 +53,12 @@ function keddyGrowthTick(array $live):bool{
         sv('growth_last_sent','0');
         sv('growth_viewer_count','');
     }
-    $viewers=keddyGrowthViewerCount($liveId);
-    sv('growth_viewer_count',$viewers===null?'':(string)$viewers);
+    // IMPORTANT: do not call the viewer-statistics endpoint on every heartbeat.
+    // Check the send interval first; this removes thousands of unnecessary API calls.
     $last=(int)gv('growth_last_sent','0');
     if(time()-$last<KEDDY_GROWTH_INTERVAL)return false;
+    $viewers=keddyGrowthViewerCount($liveId);
+    sv('growth_viewer_count',$viewers===null?'':(string)$viewers);
     $msg=keddyGrowthMessage($viewers).' 🔗 '.keddyGrowthShareUrl($liveId);
     try{
         sendBotMsg($msg);

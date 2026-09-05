@@ -32,13 +32,16 @@ permissions:
 jobs:
   render:
     name: Record, narrate and render tutorial
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 35
     env:
       TUTORIAL_SLUG: ${{ inputs.tutorial_slug || 'image-background-remover' }}
       SMARTTOOLZ_BASE_URL: https://smarttoolz.in
       VIDEO_FORMAT: ${{ inputs.format || 'landscape' }}
       VIDEO_VOICE: ${{ inputs.voice || 'hi-IN-MadhurNeural' }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,7 +65,7 @@ jobs:
       - name: Install browser recording tools
         run: |
           python -m pip install --upgrade pip edge-tts mutagen pillow playwright
-          python -m playwright install --with-deps chromium
+          python -m playwright install chromium
 
       - name: Create demo input image
         run: |
@@ -116,7 +119,6 @@ jobs:
           npx remotion render src/index.ts Video "../video-library/tutorial.mp4" --codec=h264 --crf=18 --concurrency=2 --props="$PROPS"
 
       - name: Publish generated video into Git
-        shell: bash
         run: |
           DEST=$(python - <<'PY'
           import json, os

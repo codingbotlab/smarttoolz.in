@@ -55,13 +55,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install free open-source FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-          ffmpeg -version | head -n 1
-          ffprobe -version | head -n 1
-
       - name: Install Remotion dependencies
         working-directory: video
         run: npm install --no-audit --no-fund
@@ -115,7 +108,7 @@ jobs:
         working-directory: video
         run: npx remotion browser ensure
 
-      - name: Render synced MP4
+      - name: Render synced MP4 with Remotion
         working-directory: video
         run: |
           PROPS=$(node -e "process.stdout.write(JSON.stringify(require('./public/render-props.json')))" )
@@ -126,8 +119,8 @@ jobs:
         shell: bash
         run: |
           DEST=$(python - <<'PY'
-          import json
-          print(json.load(open('video/tutorials.json'))[__import__('os').environ['TUTORIAL_SLUG']]['output'])
+          import json, os
+          print(json.load(open('video/tutorials.json'))[os.environ['TUTORIAL_SLUG']]['output'])
           PY
           )
           mkdir -p "$(dirname "$DEST")"

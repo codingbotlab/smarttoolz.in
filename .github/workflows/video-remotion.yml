@@ -39,9 +39,6 @@ jobs:
       SMARTTOOLZ_BASE_URL: https://smarttoolz.in
       VIDEO_FORMAT: ${{ inputs.format || 'landscape' }}
       VIDEO_VOICE: ${{ inputs.voice || 'hi-IN-MadhurNeural' }}
-    defaults:
-      run:
-        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,31 +66,13 @@ jobs:
 
       - name: Create demo input image
         run: |
-          python - <<'PY'
-          from PIL import Image, ImageDraw
-          from pathlib import Path
-          p=Path('video/fixtures'); p.mkdir(parents=True,exist_ok=True)
-          im=Image.new('RGB',(1000,700),'white'); d=ImageDraw.Draw(im)
-          d.rounded_rectangle((110,90,890,610),radius=36,fill=(98,91,255))
-          d.ellipse((360,170,640,450),fill=(255,190,80))
-          d.rounded_rectangle((300,455,700,545),radius=24,fill=(25,32,55))
-          d.text((330,570),'SMARTTOOLZ DEMO IMAGE',fill=(25,32,55))
-          im.save(p/'background-remover-demo.png')
-          PY
+          python -c "from PIL import Image,ImageDraw; from pathlib import Path; p=Path('video/fixtures'); p.mkdir(parents=True,exist_ok=True); im=Image.new('RGB',(1000,700),'white'); d=ImageDraw.Draw(im); d.rounded_rectangle((110,90,890,610),radius=36,fill=(98,91,255)); d.ellipse((360,170,640,450),fill=(255,190,80)); d.rounded_rectangle((300,455,700,545),radius=24,fill=(25,32,55)); d.text((330,570),'SMARTTOOLZ DEMO IMAGE',fill=(25,32,55)); im.save(p/'background-remover-demo.png')"
 
       - name: Generate tutorial script automatically
         working-directory: video
         run: |
           python generate_tutorial.py
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          p=Path('public/job.json'); j=json.loads(p.read_text())
-          j['base_url']=os.environ['SMARTTOOLZ_BASE_URL']
-          j['voice']=os.environ['VIDEO_VOICE']
-          j['format']=os.environ['VIDEO_FORMAT']
-          p.write_text(json.dumps(j,ensure_ascii=False,indent=2),encoding='utf-8')
-          PY
+          python -c "import json,os; from pathlib import Path; p=Path('public/job.json'); j=json.loads(p.read_text(encoding='utf-8')); j['base_url']=os.environ['SMARTTOOLZ_BASE_URL']; j['voice']=os.environ['VIDEO_VOICE']; j['format']=os.environ['VIDEO_FORMAT']; p.write_text(json.dumps(j,ensure_ascii=False,indent=2),encoding='utf-8')"
 
       - name: Generate realistic male narration
         working-directory: video
@@ -103,7 +82,7 @@ jobs:
         working-directory: video
         run: python record_tutorial.py
 
-      - name: Attach recording frames to narration
+      - name: Attach recording to narration
         working-directory: video
         run: python attach_recording.py
 
@@ -114,23 +93,22 @@ jobs:
       - name: Render synced MP4 with Remotion
         working-directory: video
         run: |
-          PROPS=$(node -e "process.stdout.write(JSON.stringify(require('./public/render-props.json')))" )
-          mkdir -p "../video-library"
-          npx remotion render src/index.ts Video "../video-library/tutorial.mp4" --codec=h264 --crf=18 --concurrency=2 --props="$PROPS"
+          $props = Get-Content -Raw public/render-props.json
+          New-Item -ItemType Directory -Force ../video-library | Out-Null
+          npx remotion render src/index.ts Video ../video-library/tutorial.mp4 --codec=h264 --crf=18 --concurrency=2 --props=$props
 
       - name: Publish generated video into Git
+        shell: pwsh
         run: |
-          DEST=$(python - <<'PY'
-          import json, os
-          print(json.load(open('video/tutorials.json'))[os.environ['TUTORIAL_SLUG']]['output'])
-          PY
-          )
-          mkdir -p "$(dirname "$DEST")"
-          cp video-library/tutorial.mp4 "$DEST"
+          $config = Get-Content -Raw video/tutorials.json | ConvertFrom-Json
+          $dest = $config.($env:TUTORIAL_SLUG).output
+          New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
+          Copy-Item video-library/tutorial.mp4 $dest -Force
           git config user.name "smarttoolz-video-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add "$DEST"
-          if git diff --cached --quiet; then echo "No video changes to commit"; else git commit -m "Generate $TUTORIAL_SLUG tutorial video"; git push; fi
+          git add $dest
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { Write-Host 'No video changes to commit' } else { git commit -m "Generate $env:TUTORIAL_SLUG tutorial video"; git push }
 
       - name: Upload preview artifact
         uses: actions/upload-artifact@v4

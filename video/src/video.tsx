@@ -1,91 +1,56 @@
 import React from 'react';
-import {Audio, AbsoluteFill, CalculateMetadataFunction, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig, interpolate, spring, CalculateMetadataFunction} from 'remotion';
 import {getAudioDurationInSeconds} from '@remotion/media-utils';
 
-export type Section = {text: string; audio: string};
-export type VideoProps = {
-  title: string;
-  sections: Section[];
-  format: 'landscape' | 'portrait';
-  durations?: number[];
-};
+export type Section = {text: string; audio: string; screenshot: string};
+export type VideoProps = {title: string; sections: Section[]; format: 'landscape' | 'portrait'};
 
 export const calculateMetadata: CalculateMetadataFunction<VideoProps> = async ({props}) => {
-  const durations = await Promise.all(
-    props.sections.map((section) => getAudioDurationInSeconds(staticFile(section.audio))),
-  );
   const fps = 30;
-  const durationInFrames = Math.max(30, Math.ceil(durations.reduce((a, b) => a + b, 0) * fps));
+  const durations = await Promise.all(props.sections.map((s) => getAudioDurationInSeconds(staticFile(s.audio))));
   return {
     fps,
     width: props.format === 'portrait' ? 1080 : 1920,
     height: props.format === 'portrait' ? 1920 : 1080,
-    durationInFrames,
-    props: {...props, durations},
-    defaultOutName: `smarttoolz-video-${Date.now()}`,
+    durationInFrames: Math.max(30, Math.ceil(durations.reduce((a, b) => a + b, 0) * fps)),
+    props: {...props},
   };
 };
 
-const SectionScene: React.FC<{
-  title: string;
-  text: string;
-  index: number;
-  total: number;
-  startFrame: number;
-  durationFrames: number;
-}> = ({title, text, index, total, startFrame, durationFrames}) => {
+const Scene: React.FC<{title: string; text: string; screenshot: string; index: number; total: number; durationFrames: number}> = ({title, text, screenshot, index, total, durationFrames}) => {
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
-  const local = Math.max(0, frame - startFrame);
-  const enter = spring({fps, frame: local, config: {damping: 18, stiffness: 110, mass: 0.7}});
-  const fadeOut = interpolate(local, [Math.max(0, durationFrames - 18), durationFrames], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const progress = Math.min(1, (index + 1) / Math.max(1, total));
-  const words = text.trim().split(/\s+/).filter(Boolean);
-  const visibleWords = Math.min(words.length, Math.max(1, Math.floor((local / Math.max(1, durationFrames)) * (words.length + 2))));
-  const caption = words.slice(0, visibleWords).join(' ');
+  const enter = spring({fps, frame, config: {damping: 20, stiffness: 90, mass: .8}});
+  const scale = interpolate(enter, [0, 1], [1.035, 1]);
+  const fade = interpolate(frame, [Math.max(0, durationFrames - 15), durationFrames], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const words = text.split(/\s+/).filter(Boolean);
+  const count = Math.min(words.length, Math.max(1, Math.floor((frame / Math.max(1, durationFrames)) * (words.length + 1))));
+  const caption = words.slice(0, count).join(' ');
   const portrait = height > width;
-
-  return (
-    <AbsoluteFill style={{opacity: fadeOut, background: 'linear-gradient(135deg,#0b1020 0%,#171f3b 48%,#32286b 100%)', color: '#fff', fontFamily: 'Inter, Arial, sans-serif', overflow: 'hidden'}}>
-      <AbsoluteFill style={{background: 'radial-gradient(circle at 80% 18%,rgba(139,124,255,.34),transparent 28%),radial-gradient(circle at 12% 82%,rgba(34,211,238,.16),transparent 25%)'}} />
-      <div style={{position: 'absolute', inset: 0, opacity: .08, backgroundImage: 'linear-gradient(rgba(255,255,255,.7) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.7) 1px,transparent 1px)', backgroundSize: '48px 48px'}} />
-      <div style={{position: 'relative', height: '100%', padding: portrait ? '90px 62px' : '74px 92px', display: 'flex', flexDirection: 'column'}}>
-        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', transform: `translateY(${interpolate(enter,[0,1],[28,0])}px)`, opacity: enter}}>
-          <div style={{fontSize: portrait ? 22 : 20, fontWeight: 900, letterSpacing: 2, color: '#a9a1ff'}}>SMARTTOOLZ</div>
-          <div style={{fontSize: portrait ? 19 : 17, fontWeight: 700, opacity: .65}}>{index + 1} / {total}</div>
-        </div>
-
-        <div style={{flex: 1, display: 'flex', alignItems: portrait ? 'center' : 'center', justifyContent: 'center'}}>
-          <div style={{width: portrait ? '100%' : '86%', transform: `translateY(${interpolate(enter,[0,1],[55,0])}px) scale(${interpolate(enter,[0,1],[.97,1])})`, opacity: enter}}>
-            {index === 0 && <div style={{fontSize: portrait ? 24 : 22, fontWeight: 800, color: '#8be9ff', marginBottom: 18}}>TUTORIAL</div>}
-            <div style={{fontSize: portrait ? 62 : 72, lineHeight: 1.04, fontWeight: 900, letterSpacing: -2.5, marginBottom: 28}}>{index === 0 ? title : `Step ${index}: ${title}`}</div>
-            <div style={{fontSize: portrait ? 32 : 34, lineHeight: 1.42, color: 'rgba(255,255,255,.9)', maxWidth: portrait ? '100%' : 1300}}>{caption}</div>
-          </div>
-        </div>
-
-        <div style={{height: 8, borderRadius: 99, background: 'rgba(255,255,255,.13)', overflow: 'hidden'}}>
-          <div style={{height: '100%', width: `${progress * 100}%`, background: 'rgba(255,255,255,.82)', borderRadius: 99}} />
+  return <AbsoluteFill style={{background:'#0b1020', opacity:fade, color:'#fff', fontFamily:'Inter,Arial,sans-serif'}}>
+    <AbsoluteFill style={{background:'radial-gradient(circle at 85% 15%,rgba(99,91,255,.34),transparent 28%),radial-gradient(circle at 10% 85%,rgba(34,211,238,.18),transparent 24%)'}} />
+    <div style={{position:'relative',height:'100%',padding:portrait?'70px 44px':'58px 76px',display:'flex',flexDirection:'column',gap:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',fontWeight:900}}><span style={{letterSpacing:2,color:'#a9a1ff'}}>SMARTTOOLZ</span><span style={{opacity:.65,fontSize:18}}>{index+1} / {total}</span></div>
+      <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',gap:24}}>
+        <div style={{fontSize:portrait?25:23,fontWeight:850,color:'#8be9ff'}}>TUTORIAL • {title}</div>
+        <div style={{fontSize:portrait?44:48,fontWeight:900,lineHeight:1.08}}>{index === 0 ? 'How to use it' : `Step ${index}`}</div>
+        <div style={{position:'relative',width:'100%',height:portrait?'42%':'54%',borderRadius:20,overflow:'hidden',border:'1px solid rgba(255,255,255,.16)',boxShadow:'0 25px 80px rgba(0,0,0,.38)',transform:`scale(${scale})`,opacity:enter,background:'#111827'}}>
+          <Img src={staticFile(screenshot)} style={{width:'100%',height:'100%',objectFit:'cover'}} />
+          <div style={{position:'absolute',left:18,right:18,bottom:18,padding:'14px 18px',borderRadius:13,background:'rgba(10,14,28,.9)',fontSize:portrait?22:24,lineHeight:1.35,fontWeight:700}}>{caption}</div>
         </div>
       </div>
-      <Audio src={staticFile('audio/section-' + String(index + 1).padStart(3, '0') + '.mp3')} />
-    </AbsoluteFill>
-  );
+      <div style={{height:7,borderRadius:99,background:'rgba(255,255,255,.14)'}}><div style={{height:'100%',width:`${((index+1)/total)*100}%`,background:'#fff',borderRadius:99}} /></div>
+    </div>
+    <Audio src={staticFile(`audio/section-${String(index+1).padStart(3,'0')}.mp3`)} />
+  </AbsoluteFill>;
 };
 
-export const Video: React.FC<VideoProps> = ({title, sections, durations = []}) => {
+export const Video: React.FC<VideoProps> = ({title, sections}) => {
   let start = 0;
-  return (
-    <AbsoluteFill>
-      {sections.map((section, index) => {
-        const durationFrames = Math.max(1, Math.ceil((durations[index] ?? 1) * 30));
-        const currentStart = start;
-        start += durationFrames;
-        return (
-          <Sequence key={section.audio} from={currentStart} durationInFrames={durationFrames}>
-            <SectionScene title={title} text={section.text} index={index} total={sections.length} startFrame={currentStart} durationFrames={durationFrames} />
-          </Sequence>
-        );
-      })}
-    </AbsoluteFill>
-  );
+  return <AbsoluteFill>{sections.map((s, i) => {
+    // Audio duration is also used to create the exact section boundaries in generate_audio.py.
+    const frames = Math.max(1, Math.ceil((s as any).duration * 30 || 1));
+    const from = start; start += frames;
+    return <Sequence key={s.audio} from={from} durationInFrames={frames}><Scene title={title} text={s.text} screenshot={s.screenshot} index={i} total={sections.length} durationFrames={frames}/></Sequence>;
+  })}</AbsoluteFill>;
 };

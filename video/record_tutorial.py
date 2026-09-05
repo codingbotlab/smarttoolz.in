@@ -24,20 +24,24 @@ async def main():
 
         picker = page.locator('#picker')
         input_file = Path(job['input']).resolve()
-        if await picker.count() and input_file.exists():
-            await picker.set_input_files(str(input_file))
-            await page.wait_for_timeout(1200)
-            await page.screenshot(path=str(recording / '002-uploading.png'), full_page=False)
-            try:
-                await page.locator('#status').wait_for(state='visible', timeout=15000)
-            except Exception:
-                pass
-            await page.wait_for_timeout(12000)
-            await page.screenshot(path=str(recording / '003-result.png'), full_page=False)
-            download = page.locator('#download')
-            if await download.count():
-                await download.scroll_into_view_if_needed()
-                await page.screenshot(path=str(recording / '004-download-ready.png'), full_page=False)
+        if not await picker.count() or not input_file.exists():
+            raise SystemExit(f'Tutorial input or file picker missing: {input_file}')
+
+        await picker.set_input_files(str(input_file))
+        await page.wait_for_timeout(1200)
+        await page.screenshot(path=str(recording / '002-uploading.png'), full_page=False)
+
+        try:
+            await page.get_by_text('Background removed', exact=True).wait_for(timeout=120000)
+        except Exception:
+            await page.wait_for_timeout(5000)
+        await page.screenshot(path=str(recording / '003-result.png'), full_page=False)
+
+        download = page.locator('#download')
+        if await download.count():
+            await download.scroll_into_view_if_needed()
+            await page.wait_for_timeout(800)
+            await page.screenshot(path=str(recording / '004-download-ready.png'), full_page=False)
 
         await browser.close()
 

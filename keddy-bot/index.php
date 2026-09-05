@@ -2,7 +2,18 @@
 declare(strict_types=1);
 session_start();
 $error='';
-try { require_once __DIR__.'/bot.php'; require_once __DIR__.'/registered-users.php'; } catch (Throwable $e) { http_response_code(500); echo '<!doctype html><meta charset="utf-8"><title>Keddy Bot Error</title><body style="font-family:system-ui;background:#090b10;color:#fff;padding:30px"><h1>🤖 Keddy Bot</h1><p>Startup error:</p><pre style="white-space:pre-wrap;background:#2d1418;padding:15px;border-radius:8px">'.htmlspecialchars($e->getMessage(),ENT_QUOTES,'UTF-8').'</pre></body>'; exit; }
+try {
+    require_once __DIR__.'/bot.php';
+    require_once __DIR__.'/registered-users.php';
+} catch (Throwable $e) {
+    http_response_code(500);
+    $detail = $e->getMessage();
+    if ($e instanceof ParseError) {
+        $detail .= "\n\nFile: " . $e->getFile() . "\nLine: " . $e->getLine();
+    }
+    echo '<!doctype html><meta charset="utf-8"><title>Keddy Bot Error</title><body style="font-family:system-ui;background:#090b10;color:#fff;padding:30px"><h1>🤖 Keddy Bot</h1><p>Startup error:</p><pre style="white-space:pre-wrap;background:#2d1418;padding:15px;border-radius:8px">'.htmlspecialchars($detail,ENT_QUOTES,'UTF-8').'</pre></body>';
+    exit;
+}
 if(empty($_SESSION['keddy_heartbeat_token'])) $_SESSION['keddy_heartbeat_token']=bin2hex(random_bytes(24));
 $heartbeatToken=$_SESSION['keddy_heartbeat_token'];
 if($_SERVER['REQUEST_METHOD']==='POST') try { $a=$_POST['action']??''; if($a==='start') startS(); elseif($a==='stop') stopS(); elseif($a==='next') nextS(); } catch(Throwable $e) { $error=$e->getMessage(); }

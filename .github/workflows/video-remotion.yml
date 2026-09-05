@@ -50,41 +50,66 @@ jobs:
           cache: npm
           cache-dependency-path: video/package.json
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Check system Python
+        shell: pwsh
+        run: |
+          if (Get-Command py -ErrorAction SilentlyContinue) {
+            py -3 --version
+          } elseif (Get-Command python -ErrorAction SilentlyContinue) {
+            python --version
+          } else {
+            throw 'Python 3 is required on the self-hosted runner.'
+          }
 
       - name: Install Remotion dependencies
         working-directory: video
         run: npm install --no-audit --no-fund
 
       - name: Install browser recording tools
+        shell: pwsh
         run: |
-          python -m pip install --upgrade pip edge-tts mutagen pillow playwright
-          python -m playwright install chromium
+          if (Get-Command py -ErrorAction SilentlyContinue) {
+            py -3 -m pip install --upgrade pip edge-tts mutagen pillow playwright
+            py -3 -m playwright install chromium
+          } else {
+            python -m pip install --upgrade pip edge-tts mutagen pillow playwright
+            python -m playwright install chromium
+          }
 
       - name: Create demo input image
+        shell: pwsh
         run: |
-          python -c "from PIL import Image,ImageDraw; from pathlib import Path; p=Path('video/fixtures'); p.mkdir(parents=True,exist_ok=True); im=Image.new('RGB',(1000,700),'white'); d=ImageDraw.Draw(im); d.rounded_rectangle((110,90,890,610),radius=36,fill=(98,91,255)); d.ellipse((360,170,640,450),fill=(255,190,80)); d.rounded_rectangle((300,455,700,545),radius=24,fill=(25,32,55)); d.text((330,570),'SMARTTOOLZ DEMO IMAGE',fill=(25,32,55)); im.save(p/'background-remover-demo.png')"
+          if (Get-Command py -ErrorAction SilentlyContinue) {
+            py -3 -c "from PIL import Image,ImageDraw; from pathlib import Path; p=Path('video/fixtures'); p.mkdir(parents=True,exist_ok=True); im=Image.new('RGB',(1000,700),'white'); d=ImageDraw.Draw(im); d.rounded_rectangle((110,90,890,610),radius=36,fill=(98,91,255)); d.ellipse((360,170,640,450),fill=(255,190,80)); d.rounded_rectangle((300,455,700,545),radius=24,fill=(25,32,55)); d.text((330,570),'SMARTTOOLZ DEMO IMAGE',fill=(25,32,55)); im.save(p/'background-remover-demo.png')"
+          } else {
+            python -c "from PIL import Image,ImageDraw; from pathlib import Path; p=Path('video/fixtures'); p.mkdir(parents=True,exist_ok=True); im=Image.new('RGB',(1000,700),'white'); d=ImageDraw.Draw(im); d.rounded_rectangle((110,90,890,610),radius=36,fill=(98,91,255)); d.ellipse((360,170,640,450),fill=(255,190,80)); d.rounded_rectangle((300,455,700,545),radius=24,fill=(25,32,55)); d.text((330,570),'SMARTTOOLZ DEMO IMAGE',fill=(25,32,55)); im.save(p/'background-remover-demo.png')"
+          }
 
       - name: Generate tutorial script automatically
         working-directory: video
+        shell: pwsh
         run: |
-          python generate_tutorial.py
-          python -c "import json,os; from pathlib import Path; p=Path('public/job.json'); j=json.loads(p.read_text(encoding='utf-8')); j['base_url']=os.environ['SMARTTOOLZ_BASE_URL']; j['voice']=os.environ['VIDEO_VOICE']; j['format']=os.environ['VIDEO_FORMAT']; p.write_text(json.dumps(j,ensure_ascii=False,indent=2),encoding='utf-8')"
+          if (Get-Command py -ErrorAction SilentlyContinue) { py -3 generate_tutorial.py } else { python generate_tutorial.py }
+          $p = Get-Content -Raw public/job.json | ConvertFrom-Json
+          $p.base_url = $env:SMARTTOOLZ_BASE_URL
+          $p.voice = $env:VIDEO_VOICE
+          $p.format = $env:VIDEO_FORMAT
+          $p | ConvertTo-Json -Depth 20 | Set-Content public/job.json -Encoding UTF8
 
       - name: Generate realistic male narration
         working-directory: video
-        run: python generate_audio.py
+        shell: pwsh
+        run: if (Get-Command py -ErrorAction SilentlyContinue) { py -3 generate_audio.py } else { python generate_audio.py }
 
       - name: Record real tool interaction in Chromium
         working-directory: video
-        run: python record_tutorial.py
+        shell: pwsh
+        run: if (Get-Command py -ErrorAction SilentlyContinue) { py -3 record_tutorial.py } else { python record_tutorial.py }
 
       - name: Attach recording to narration
         working-directory: video
-        run: python attach_recording.py
+        shell: pwsh
+        run: if (Get-Command py -ErrorAction SilentlyContinue) { py -3 attach_recording.py } else { python attach_recording.py }
 
       - name: Ensure Remotion browser
         working-directory: video
@@ -92,6 +117,7 @@ jobs:
 
       - name: Render synced MP4 with Remotion
         working-directory: video
+        shell: pwsh
         run: |
           $props = Get-Content -Raw public/render-props.json
           New-Item -ItemType Directory -Force ../video-library | Out-Null

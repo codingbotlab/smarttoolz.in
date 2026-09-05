@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from pathlib import Path
 
@@ -15,9 +16,7 @@ def build_script(tool):
     name = clean(tool['name'])
     description = clean(tool.get('description', ''))
     steps = [clean(x) for x in tool.get('steps', []) if clean(x)]
-    paragraphs = [
-        f"In this SmartToolz tutorial, we are going to use {name}. {description}",
-    ]
+    paragraphs = [f"In this SmartToolz tutorial, we are going to use {name}. {description}"]
     for i, step in enumerate(steps, 1):
         paragraphs.append(f"Step {i}. {step}")
     paragraphs.append("That is it. The tool is ready to use, and the result can be downloaded directly from SmartToolz.")
@@ -26,11 +25,15 @@ def build_script(tool):
 
 def main():
     data = json.loads(CONFIG.read_text(encoding='utf-8'))
-    slug = __import__('os').environ.get('TUTORIAL_SLUG', 'image-background-remover')
+    slug = os.environ.get('TUTORIAL_SLUG', 'image-background-remover')
     if slug not in data:
         raise SystemExit(f'Unknown tutorial: {slug}')
     tool = data[slug]
     job = {
+        'slug': slug,
+        'name': tool['name'],
+        'url': tool['url'],
+        'input': str((ROOT.parent / tool['input']).resolve()) if not str(tool['input']).startswith('/') else tool['input'],
         'title': f"{tool['name']} — SmartToolz Tutorial",
         'script': build_script(tool),
         'voice': tool.get('voice', 'hi-IN-MadhurNeural'),

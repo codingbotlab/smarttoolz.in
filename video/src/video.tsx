@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig, interpolate, spring, CalculateMetadataFunction} from 'remotion';
 import {getAudioDurationInSeconds} from '@remotion/media-utils';
 
-export type Section = {text: string; audio: string; screenshot: string};
+export type Section = {text: string; audio: string; screenshot: string; duration: number};
 export type VideoProps = {title: string; sections: Section[]; format: 'landscape' | 'portrait'};
 
 export const calculateMetadata: CalculateMetadataFunction<VideoProps> = async ({props}) => {
@@ -13,7 +13,7 @@ export const calculateMetadata: CalculateMetadataFunction<VideoProps> = async ({
     width: props.format === 'portrait' ? 1080 : 1920,
     height: props.format === 'portrait' ? 1920 : 1080,
     durationInFrames: Math.max(30, Math.ceil(durations.reduce((a, b) => a + b, 0) * fps)),
-    props: {...props},
+    props: {...props, sections: props.sections.map((s, i) => ({...s, duration: durations[i]}))},
   };
 };
 
@@ -48,9 +48,9 @@ const Scene: React.FC<{title: string; text: string; screenshot: string; index: n
 export const Video: React.FC<VideoProps> = ({title, sections}) => {
   let start = 0;
   return <AbsoluteFill>{sections.map((s, i) => {
-    // Audio duration is also used to create the exact section boundaries in generate_audio.py.
-    const frames = Math.max(1, Math.ceil((s as any).duration * 30 || 1));
-    const from = start; start += frames;
+    const frames = Math.max(1, Math.ceil(s.duration * 30));
+    const from = start;
+    start += frames;
     return <Sequence key={s.audio} from={from} durationInFrames={frames}><Scene title={title} text={s.text} screenshot={s.screenshot} index={i} total={sections.length} durationFrames={frames}/></Sequence>;
   })}</AbsoluteFill>;
 };

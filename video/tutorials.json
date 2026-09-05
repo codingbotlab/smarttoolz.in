@@ -1,0 +1,16 @@
+{
+  "image-background-remover": {
+    "name": "Image Background Remover",
+    "url": "/smart-toolz/tools/image-background-remover.php",
+    "description": "Remove the background from any image in your browser.",
+    "input": "video/fixtures/background-remover-demo.png",
+    "steps": [
+      "Open the Image Background Remover tool.",
+      "Choose a sample image and wait while SmartToolz removes the background automatically.",
+      "Review the transparent-background result and download the PNG."
+    ],
+    "voice": "hi-IN-MadhurNeural",
+    "format": "landscape",
+    "output": "video-library/image-background-remover.mp4"
+  }
+}

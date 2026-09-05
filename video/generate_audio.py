@@ -1,10 +1,10 @@
 import asyncio
 import json
-import os
 import re
 from pathlib import Path
 
 import edge_tts
+from mutagen.mp3 import MP3
 
 ROOT = Path(__file__).resolve().parent
 PUBLIC = ROOT / 'public'
@@ -19,15 +19,11 @@ VOICES = {
 
 
 def clean_text(value: str) -> str:
-    value = re.sub(r'\s+', ' ', value.replace('\r', ' ').replace('\n', ' ')).strip()
-    return value
+    return re.sub(r'\s+', ' ', value.replace('\r', ' ').replace('\n', ' ')).strip()
 
 
 def split_sections(script: str):
-    paragraphs = [clean_text(x) for x in re.split(r'\n\s*\n+', script) if clean_text(x)]
-    if paragraphs:
-        return paragraphs
-    return [clean_text(script)]
+    return [clean_text(x) for x in re.split(r'\n\s*\n+', script) if clean_text(x)] or [clean_text(script)]
 
 
 async def generate():
@@ -40,26 +36,25 @@ async def generate():
     if not script:
         raise ValueError('Script is empty')
 
-    sections = split_sections(script)
     AUDIO.mkdir(parents=True, exist_ok=True)
-
     for old in AUDIO.glob('section-*.mp3'):
         old.unlink()
 
+    sections = split_sections(script)
     cfg = VOICES[voice]
     result = []
     for i, text in enumerate(sections, 1):
         filename = f'section-{i:03d}.mp3'
         output = AUDIO / filename
-        communicate = edge_tts.Communicate(text, voice, rate=cfg['rate'], pitch=cfg['pitch'])
-        await communicate.save(str(output))
-        result.append({'text': text, 'audio': f'audio/{filename}'})
-        print(f'Generated {filename}: {len(text)} chars')
+        await edge_tts.Communicate(text, voice, rate=cfg['rate'], pitch=cfg['pitch']).save(str(output))
+        duration = float(MP3(str(output)).info.length)
+        result.append({'text': text, 'audio': f'audio/{filename}', 'duration': duration})
+        print(f'Generated {filename}: {len(text)} chars, {duration:.2f}s')
 
     render_props = {
         'title': title,
         'sections': result,
-        'format': str(job.get('format', 'landscape')) if str(job.get('format', 'landscape')) in ('landscape', 'portrait') else 'landscape',
+        'format': job.get('format', 'landscape'),
     }
     (PUBLIC / 'render-props.json').write_text(json.dumps(render_props, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Prepared {len(result)} narrated sections with voice {voice}.')

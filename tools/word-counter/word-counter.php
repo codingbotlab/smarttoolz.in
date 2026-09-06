@@ -5,6 +5,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Word Counter Online — Word & Character Counter | SmartToolz</title>
@@ -51,6 +53,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="word-counter-page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE TEXT TOOL</span><h1>Free Word Counter Online</h1><p>Count words, characters, sentences and paragraphs instantly. Paste or type your text, check reading time, copy your text, or clear it in one click.</p></section>
 <section class="tool-card" aria-label="Free word counter tool">
@@ -98,6 +102,9 @@ require_once dirname(__DIR__) . '/header.php';
   updateCounts();
 })();
 </script>
+
+
+
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

@@ -7,6 +7,8 @@ function smartToolzMemeAd(string $key): void {}
 <html lang="en">
 
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 
 <meta charset="UTF-8">
 
@@ -906,6 +908,9 @@ footer p {
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
 
 
+
+
+
 <!-- ============================================================
      HEADER
 ============================================================ -->
@@ -1796,6 +1801,9 @@ if (menuButton) {
 }
 
 </script>
+
+
+
 
 
 

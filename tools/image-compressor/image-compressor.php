@@ -5,6 +5,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Image Compressor Online — JPG, PNG & WebP | SmartToolz</title>
@@ -51,6 +53,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="compressor-page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE ONLINE TOOL</span><h1>Free Image Compressor Online</h1><p>Reduce JPG, PNG and WebP image file sizes quickly. Choose your compression quality, compare the original with the result, and download the smaller image without creating an account.</p></section>
 <section class="tool-card" aria-label="Free image compressor tool">
@@ -69,6 +73,9 @@ require_once dirname(__DIR__) . '/header.php';
 <script>
 (function(){const $=id=>document.getElementById(id);const drop=$('dropZone'),input=$('fileInput'),choose=$('chooseBtn'),work=$('workArea'),name=$('fileName'),size=$('fileSize'),quality=$('quality'),qualityValue=$('qualityValue'),compress=$('compressBtn'),reset=$('resetBtn'),progress=$('progress'),progressText=$('progressText'),bar=$('barFill'),error=$('error'),result=$('result'),original=$('originalPreview'),compressed=$('compressedPreview'),originalSize=$('originalSize'),compressedSize=$('compressedSize'),savedSize=$('savedSize'),savedBadge=$('savedBadge'),download=$('downloadBtn');let file=null,originalUrl='',resultUrl='';function fmt(bytes){if(bytes<1024)return bytes+' B';if(bytes<1048576)return(bytes/1024).toFixed(1)+' KB';return(bytes/1048576).toFixed(2)+' MB'}function showError(msg){error.textContent=msg;error.style.display='block';progress.style.display='none';compress.disabled=false}function pick(f){if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)){showError('Please choose a JPG, PNG or WebP image.');return}file=f;error.style.display='none';drop.style.display='none';work.style.display='block';name.textContent=f.name;size.textContent=fmt(f.size);originalSize.textContent=fmt(f.size);if(originalUrl)URL.revokeObjectURL(originalUrl);originalUrl=URL.createObjectURL(f);original.src=originalUrl;result.style.display='none';download.removeAttribute('href')}function makeBlob(canvas,mime,q){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Compression failed')),mime,q))}async function compressImage(){if(!file)return;error.style.display='none';result.style.display='none';progress.style.display='block';compress.disabled=true;bar.style.width='20%';progressText.textContent='Reading image…';try{const bitmap=await createImageBitmap(file);bar.style.width='45%';progressText.textContent='Compressing image…';const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable');ctx.drawImage(bitmap,0,0);bitmap.close();let mime=file.type==='image/png'?'image/png':'image/jpeg';let q=Number(quality.value)/100;let blob=await makeBlob(canvas,mime,q);if(mime==='image/png'&&blob.size>=file.size){mime='image/jpeg';blob=await makeBlob(canvas,mime,q)}if(blob.size>=file.size&&q>.35){const lower=Math.max(.25,q-.2);blob=await makeBlob(canvas,mime,lower)}bar.style.width='100%';progressText.textContent='Compression complete';if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=URL.createObjectURL(blob);compressed.src=resultUrl;compressedSize.textContent=fmt(blob.size);const saved=Math.max(0,(1-blob.size/file.size)*100);savedSize.textContent=saved.toFixed(1)+'%';savedBadge.textContent='Saved '+saved.toFixed(1)+'%';download.href=resultUrl;download.download='smarttoolz-compressed-image.'+(mime==='image/png'?'png':'jpg');download.style.display='inline-flex';result.style.display='block'}catch(e){console.error(e);showError('We could not compress this image. Please try another image.')}finally{compress.disabled=false;setTimeout(()=>progress.style.display='none',700)}}function resetAll(){if(originalUrl)URL.revokeObjectURL(originalUrl);if(resultUrl)URL.revokeObjectURL(resultUrl);file=null;input.value='';work.style.display='none';drop.style.display='flex';result.style.display='none';error.style.display='none';bar.style.width='0';download.removeAttribute('href')}quality.addEventListener('input',()=>qualityValue.textContent=quality.value+'%');choose.addEventListener('click',e=>{e.stopPropagation();input.click()});drop.addEventListener('click',e=>{if(e.target!==choose)input.click()});drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}});input.addEventListener('change',()=>pick(input.files&&input.files[0]));drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('dragover')});drop.addEventListener('dragleave',()=>drop.classList.remove('dragover'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('dragover');pick(e.dataTransfer.files&&e.dataTransfer.files[0])});compress.addEventListener('click',compressImage);reset.addEventListener('click',resetAll);download.addEventListener('click',e=>{if(!resultUrl){e.preventDefault();showError('Compress an image first, then download the result.')}})})();
 </script>
+
+
+
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

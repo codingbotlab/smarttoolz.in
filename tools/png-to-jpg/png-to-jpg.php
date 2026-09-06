@@ -5,6 +5,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PNG to JPG Converter Online Free | SmartToolz</title>
@@ -52,6 +54,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE ONLINE TOOL</span><h1>PNG to <span>JPG Converter</span></h1><p>Convert PNG images to JPG online for free. Choose your preferred quality, preview the converted image, and download the JPG directly from your browser.</p></section>
 <section class="tool-card" aria-label="Free PNG to JPG converter">
@@ -65,7 +69,8 @@ require_once dirname(__DIR__) . '/header.php';
 <section class="content"><h2>Free PNG to JPG Converter Online</h2><p>PNG and JPG are common image formats, but they are useful for different purposes. PNG supports transparency and often works well for graphics, screenshots and interface assets. JPG is designed for photographic images and can produce smaller files with adjustable lossy compression.</p><p>SmartToolz lets you convert PNG to JPG directly in your browser. The image is decoded on your device, rendered to a canvas with a white background for transparency, and exported as a JPG at the quality level you select.</p><h3>How to convert PNG to JPG</h3><ol><li>Choose a PNG image or drag it into the upload area.</li><li>Adjust the JPG quality slider to balance quality and file size.</li><li>Select <strong>Convert to JPG</strong> to create the new image.</li><li>Preview the result and download the JPG file.</li></ol><h3>When should you use JPG?</h3><p>JPG is a practical choice for photos, web images and situations where a smaller file is more important than lossless image quality. Keep the original PNG when you need transparency or pixel-perfect graphics.</p><div class="faq"><h3>Frequently Asked Questions</h3><details><summary>Is this PNG to JPG converter free?</summary><p>Yes. It is free to use and does not require an account.</p></details><details><summary>Does the conversion happen online or on my device?</summary><p>The conversion is performed in your browser on your device. The converter itself does not intentionally upload your selected image to SmartToolz.</p></details><details><summary>Can I control JPG quality?</summary><p>Yes. Use the quality slider before conversion. Higher values generally preserve more visual detail, while lower values usually reduce file size more aggressively.</p></details><details><summary>What happens to transparent PNG backgrounds?</summary><p>Because JPG does not support transparency, transparent pixels are filled with white during conversion.</p></details></div></section>
 <section class="related"><div class="related-head"><h2>Related Image Tools</h2><a href="/tool.php">View all tools →</a></div><div class="related-grid"><a class="related-card" href="/tools/jpg-to-png/"><span class="related-icon">↔</span><h3>JPG to PNG</h3><p>Convert JPG and JPEG images to PNG in your browser.</p><span class="related-link">Open tool →</span></a><a class="related-card" href="/tools/image-compressor/"><span class="related-icon">↘</span><h3>Image Compressor</h3><p>Reduce JPG, PNG and WebP file sizes quickly.</p><span class="related-link">Open tool →</span></a><a class="related-card" href="/tools/image-resizer/"><span class="related-icon">↔</span><h3>Image Resizer</h3><p>Resize images to exact width and height.</p><span class="related-link">Open tool →</span></a><a class="related-card" href="/tools/image-background-remover/"><span class="related-icon">✂</span><h3>Background Remover</h3><p>Remove image backgrounds and create transparent PNGs.</p><span class="related-link">Open tool →</span></a></div></section>
 </main>
-<?php require_once dirname(__DIR__) . '/footer.php'; ?>
+
+
 <script>
 (() => {
 'use strict';
@@ -101,4 +106,6 @@ convert.addEventListener('click',()=>{if(!file)return;clearError();convert.disab
 reset.addEventListener('click',()=>{input.value='';file=null;work.style.display='none';result.style.display='none';clearError();if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(resultUrl)URL.revokeObjectURL(resultUrl);sourceUrl='';resultUrl='';download.removeAttribute('href');});
 })();
 </script>
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body></html>

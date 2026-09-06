@@ -5,6 +5,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Case Converter Online | Uppercase, Lowercase & Title Case | SmartToolz</title>
@@ -51,6 +53,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="case-page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE TEXT TOOL</span><h1>Free <span>Case Converter</span> Online</h1><p>Change capitalization instantly with uppercase, lowercase, title case, sentence case, alternating case and inverse case tools. Everything runs directly in your browser.</p></section>
 <section class="tool-card" aria-label="Case converter tool">
@@ -63,7 +67,8 @@ require_once dirname(__DIR__) . '/header.php';
 <section class="faq-section"><h2>Case Converter FAQs</h2><details><summary>Is this case converter free?</summary><p>Yes. SmartToolz provides this case converter online for free with no signup required.</p></details><details><summary>Does the tool upload my text?</summary><p>The capitalization changes are performed in your browser, so the converter does not need to send your text to a server.</p></details><details><summary>What case formats are available?</summary><p>You can use uppercase, lowercase, title case, sentence case, alternating case and inverse case.</p></details><details><summary>Can I copy the converted text?</summary><p>Yes. Click Copy Text after converting your content to place the current text on your clipboard.</p></details><details><summary>Can I use it on mobile?</summary><p>Yes. The page is responsive and the case conversion tools work in modern mobile browsers.</p></details></section>
 <p class="trust-note">Need more text tools? Explore <a href="/tool.php">all SmartToolz tools</a>.</p>
 </main>
-<?php require_once dirname(__DIR__) . '/footer.php'; ?>
+
+
 <script>
 (() => {
   'use strict';
@@ -87,5 +92,7 @@ require_once dirname(__DIR__) . '/header.php';
   update();
 })();
 </script>
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

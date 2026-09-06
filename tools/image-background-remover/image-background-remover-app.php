@@ -6,6 +6,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Free Image Background Remover Online | SmartToolz</title>
@@ -30,6 +32,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="tool-page">
 <section class="tool-hero">
 <span class="badge"><span class="badge-dot" aria-hidden="true"></span>FREE • NO SIGNUP</span>
@@ -98,7 +102,8 @@ require_once dirname(__DIR__) . '/header.php';
 </section>
 </main>
 
-<?php require_once dirname(__DIR__) . '/footer.php'; ?>
+
+
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
@@ -164,5 +169,7 @@ again.onclick=reset;
 download.onclick=()=>{if(!resultUrl)return;const a=document.createElement('a');a.href=resultUrl;a.download='smarttoolz-background-removed.png';document.body.appendChild(a);a.click();a.remove()};
 window.addEventListener('beforeunload',()=>{if(resultUrl)URL.revokeObjectURL(resultUrl)});
 </script>
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

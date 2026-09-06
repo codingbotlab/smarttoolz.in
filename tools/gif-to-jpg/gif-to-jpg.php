@@ -6,6 +6,8 @@ function smartToolzMemeAd(string $key): void {}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GIF to JPG Converter - SmartToolz</title>
@@ -17,6 +19,9 @@ function smartToolzMemeAd(string $key): void {}
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 <main class="page-layout">
 <section class="tool-content">
@@ -48,6 +53,9 @@ input.addEventListener('change',()=>choose(input.files[0]));area.addEventListene
 convert.addEventListener('click',()=>{if(!file)return;clearError();const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);canvas.toBlob(blob=>{if(!blob){showError('Conversion failed. Please try another GIF.');return}if(outputUrl)URL.revokeObjectURL(outputUrl);outputBlob=blob;outputUrl=URL.createObjectURL(blob);preview.src=outputUrl;originalSize.textContent=size(file.size);outputSize.textContent=size(blob.size);const diff=((blob.size-file.size)/file.size)*100;sizeChange.textContent=(diff<=0?'':'↑ ')+Math.abs(diff).toFixed(1)+'%';result.style.display='block';download.disabled=false},'image/jpeg',Number(quality.value)/100)};img.onerror=()=>showError('Unable to read this GIF image.');img.src=reader.result};reader.onerror=()=>showError('Unable to read the selected file.');reader.readAsDataURL(file)});
 download.addEventListener('click',()=>{if(!outputUrl)return;const a=document.createElement('a');a.href=outputUrl;a.download=(file?.name.replace(/\.gif$/i,'')||'converted')+'.jpg';document.body.appendChild(a);a.click();a.remove()});reset.addEventListener('click',()=>{if(outputUrl)URL.revokeObjectURL(outputUrl);file=null;outputBlob=null;outputUrl=null;input.value='';info.textContent='GIF files only';settings.style.display='none';result.style.display='none';convert.disabled=true;download.disabled=true;clearError()});
 </script>
+
+
+
 
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>

@@ -6,6 +6,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Password Generator Online | Strong Random Passwords | SmartToolz</title>
@@ -51,6 +53,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="password-page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • SECURITY TOOL</span><h1>Free Password Generator</h1><p>Create strong random passwords with a custom length and the character types you choose. Password generation happens directly in your browser.</p></section>
 <section class="card" aria-label="Password generator">
@@ -63,7 +67,8 @@ require_once dirname(__DIR__) . '/header.php';
 <section class="content"><h2>How to Use the Password Generator</h2><ol><li>Choose the password length you need.</li><li>Select the character types to include.</li><li>Click <strong>Generate New Password</strong>.</li><li>Use <strong>Copy</strong> to copy the generated password.</li></ol><h3>What makes a password stronger?</h3><p>Longer passwords generally provide more possible combinations. Using a mix of uppercase letters, lowercase letters, numbers and symbols can also increase the number of possible combinations. Avoid reusing important passwords across different services.</p><h3>Is the password stored?</h3><p>This generator creates the password in the browser and does not intentionally send the generated value to the SmartToolz server.</p></section>
 <section class="content faq"><h2>Password Generator FAQ</h2><details><summary>Is this password generator free?</summary><p>Yes. It is free to use without an account.</p></details><details><summary>Can I change the password length?</summary><p>Yes. Use the length slider to choose from 4 to 64 characters.</p></details><details><summary>Can I include symbols and numbers?</summary><p>Yes. Enable or disable each character group in Password Settings.</p></details><details><summary>Is my generated password uploaded?</summary><p>The tool generates the password locally in your browser and does not intentionally upload it to SmartToolz.</p></details></section>
 </main>
-<?php require_once dirname(__DIR__) . '/footer.php'; ?>
+
+
 <script>
 (() => {
 'use strict';
@@ -87,5 +92,7 @@ function updateStrength(){const value=password.value;if(!value){strengthText.tex
 lengthInput.addEventListener('input',()=>{lengthValue.textContent=lengthInput.value;generatePassword()});[uppercase,lowercase,numbers,symbols].forEach(el=>el.addEventListener('change',generatePassword));generateBtn.addEventListener('click',generatePassword);copyBtn.addEventListener('click',async()=>{if(!password.value)return;try{await navigator.clipboard.writeText(password.value)}catch(e){password.select();document.execCommand('copy')}copyBtn.textContent='Copied!';setTimeout(()=>copyBtn.textContent='Copy',1400)});generatePassword();
 })();
 </script>
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

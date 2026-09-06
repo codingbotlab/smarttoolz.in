@@ -5,6 +5,8 @@ require_once dirname(__DIR__) . '/header.php';
 <!doctype html>
 <html lang="en">
 <head>
+<?php require_once dirname(__DIR__) . '/head.php'; ?>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Free JSON Formatter & Validator Online | SmartToolz</title>
@@ -50,6 +52,8 @@ require_once dirname(__DIR__) . '/header.php';
 </style>
 </head>
 <body>
+<?php require_once dirname(__DIR__) . '/header.php'; ?>
+
 <main class="page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • DEVELOPER TOOL</span><h1>Free JSON Formatter &amp; Validator</h1><p>Format, validate, beautify and minify JSON instantly in your browser. Your JSON stays in the page while you work.</p></section>
 <section class="card" aria-label="JSON formatter and validator">
@@ -63,7 +67,8 @@ require_once dirname(__DIR__) . '/header.php';
 <section class="content"><h2>How to Use the JSON Formatter</h2><ol><li>Paste or type your JSON in the editor.</li><li>Choose the indentation style you prefer.</li><li>Use <strong>Format JSON</strong> to beautify, <strong>Validate</strong> to check syntax, or <strong>Minify</strong> to compact the data.</li><li>Use <strong>Copy</strong> to copy the result.</li></ol><h3>What is JSON?</h3><p>JSON, or JavaScript Object Notation, is a text format commonly used to exchange structured data between applications, APIs and web services. Formatting makes nested objects and arrays easier to inspect and edit.</p><h3>Privacy</h3><p>SmartToolz processes the JSON in your browser for this tool and does not intentionally upload the entered JSON to a SmartToolz server.</p></section>
 <section class="content faq"><h2>JSON Formatter FAQ</h2><details><summary>Is this JSON formatter free?</summary><p>Yes. You can use it without an account.</p></details><details><summary>Can it validate invalid JSON?</summary><p>Yes. Click Validate to check the syntax and display a readable error message.</p></details><details><summary>Can I minify JSON?</summary><p>Yes. Click Minify to remove unnecessary whitespace from valid JSON.</p></details><details><summary>Does SmartToolz upload my JSON?</summary><p>The tool is designed to process the JSON directly in your browser rather than uploading it to SmartToolz.</p></details></section>
 </main>
-<?php require_once dirname(__DIR__) . '/footer.php'; ?>
+
+
 <script>
 (() => {
 'use strict';
@@ -83,5 +88,7 @@ input.addEventListener('input',()=>{clearError();setStatus('Ready')});
 input.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const start=input.selectionStart,end=input.selectionEnd,tab=indentValue();input.value=input.value.slice(0,start)+tab+input.value.slice(end);input.selectionStart=input.selectionEnd=start+String(tab).length}if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();format()}});
 })();
 </script>
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

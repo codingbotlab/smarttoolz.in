@@ -1,7 +1,20 @@
 <?php
 declare(strict_types=1);
+
 /* SmartToolz — central registry + All Tools page. */
-require_once __DIR__ . '/lib/icons.php';
+$iconsFile = __DIR__ . '/lib/icons.php';
+if (is_file($iconsFile)) {
+    require_once $iconsFile;
+}
+if (!function_exists('st_icon')) {
+    function st_icon(string $name, string $class = 'st-icon', string $label = ''): string
+    {
+        $safe = preg_replace('/[^a-z0-9_-]/i', '', $name) ?: 'build';
+        $safeClass = preg_replace('/[^a-z0-9_-]/i', ' ', $class) ?: 'st-icon';
+        $aria = $label === '' ? ' aria-hidden="true"' : ' role="img" aria-label="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '"';
+        return '<svg class="' . htmlspecialchars($safeClass, ENT_QUOTES, 'UTF-8') . '" viewBox="0 0 24 24" focusable="false"' . $aria . '><use href="/assets/icons/smarttoolz-icons.svg#' . htmlspecialchars($safe, ENT_QUOTES, 'UTF-8') . '"/></svg>';
+    }
+}
 
 $tools = [
     ['name'=>'Image Background Remover','icon'=>'content_cut','category'=>'Image Tools','description'=>'Remove image backgrounds automatically with AI.','url'=>'/tools/image-background-remover/'],
@@ -59,10 +72,18 @@ $tools = [
     ['name'=>'Stopwatch / Timer','icon'=>'timer','category'=>'Utilities','description'=>'Use an online stopwatch and timer.','url'=>'/tools/stopwatch-timer/']
 ];
 
-require_once __DIR__ . '/lib/categories.php';
-smarttoolz_apply_tool_categories($tools);
+$categoriesFile = __DIR__ . '/lib/categories.php';
+if (is_file($categoriesFile)) {
+    require_once $categoriesFile;
+}
+if (function_exists('smarttoolz_apply_tool_categories')) {
+    smarttoolz_apply_tool_categories($tools);
+}
 
-if (defined('SMARTTOOLZ_HOME_REGISTRY')) return;
+/* home.php uses this file only as the central tool registry. */
+if (defined('SMARTTOOLZ_HOME_REGISTRY')) {
+    return;
+}
 
 $requestedCategory = trim((string)($_GET['category'] ?? ''));
 $categorySlug = static function (string $value): string {
@@ -70,21 +91,24 @@ $categorySlug = static function (string $value): string {
     return trim(strtolower((string)$slug), '-');
 };
 
-/* Build the category index independently so every registered category is visible. */
 $categories = [];
 foreach ($tools as $tool) {
     $category = trim((string)($tool['category'] ?? 'Other'));
-    if ($category === '') $category = 'Other';
-    if (!isset($categories[$category])) $categories[$category] = 0;
-    $categories[$category]++;
+    if ($category === '') {
+        $category = 'Other';
+    }
+    $categories[$category] = ($categories[$category] ?? 0) + 1;
 }
 ksort($categories, SORT_NATURAL | SORT_FLAG_CASE);
 
 $visibleTools = $tools;
 if ($requestedCategory !== '') {
-    $visibleTools = array_values(array_filter($tools, static function (array $tool) use ($categorySlug, $requestedCategory): bool {
-        return $categorySlug((string)($tool['category'] ?? 'Other')) === $requestedCategory;
-    }));
+    $visibleTools = [];
+    foreach ($tools as $tool) {
+        if ($categorySlug((string)($tool['category'] ?? 'Other')) === $requestedCategory) {
+            $visibleTools[] = $tool;
+        }
+    }
 }
 
 require_once __DIR__ . '/header.php';
@@ -97,18 +121,6 @@ require_once __DIR__ . '/header.php';
 <title>All Tools — SmartToolz</title>
 <meta name="description" content="Browse all SmartToolz free online tools.">
 <link rel="canonical" href="https://smarttoolz.in/tool.php">
-<style>
-/* All Tools page layout: explicit rules prevent global/theme styles from hiding the registry. */
-.tools-page .layout{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:22px!important;align-items:start!important}
-.tools-page .filters{display:block!important;visibility:visible!important}
-.tools-page .filter{display:flex!important;visibility:visible!important}
-.tools-page .content{display:block!important;visibility:visible!important;min-width:0!important}
-.tools-page .grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
-.tools-page .card{display:flex!important;visibility:visible!important;min-width:0!important}
-@media(max-width:1050px){.tools-page .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:800px){.tools-page .layout{grid-template-columns:1fr!important}.tools-page .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:560px){.tools-page .grid{grid-template-columns:1fr!important}}
-</style>
 </head>
 <body>
 <main class="tools-page">
@@ -117,27 +129,23 @@ require_once __DIR__ . '/header.php';
 <h1>All Tools</h1>
 <p><?=count($tools)?> free online tools — find exactly what you need.</p>
 </section>
-
 <div class="layout">
 <aside class="filters" aria-label="Tool categories">
 <h3>Categories</h3>
 <a class="filter <?=$requestedCategory===''?'active':''?>" href="/tool.php">All Tools <span class="count"><?=count($tools)?></span></a>
-<?php foreach ($categories as $cat=>$num):
-    $cs = $categorySlug((string)$cat);
-?>
+<?php foreach ($categories as $cat=>$num): $cs=$categorySlug((string)$cat); ?>
 <a class="filter <?=$requestedCategory===$cs?'active':''?>" href="/category/<?=htmlspecialchars($cs,ENT_QUOTES,'UTF-8')?>/"><?=htmlspecialchars((string)$cat,ENT_QUOTES,'UTF-8')?> <span class="count"><?=$num?></span></a>
 <?php endforeach; ?>
 </aside>
-
 <section class="content">
 <input class="search" id="toolSearch" type="search" placeholder="Search tools by name or description…" autocomplete="off" aria-label="Search tools">
 <div class="grid" id="toolGrid">
 <?php foreach ($visibleTools as $tool):
-    $name = (string)($tool['name'] ?? 'Tool');
-    $description = (string)($tool['description'] ?? '');
-    $category = (string)($tool['category'] ?? 'Other');
-    $icon = (string)($tool['icon'] ?? 'build');
-    $url = (string)($tool['url'] ?? '#');
+    $name=(string)($tool['name']??'Tool');
+    $description=(string)($tool['description']??'');
+    $category=(string)($tool['category']??'Other');
+    $icon=(string)($tool['icon']??'build');
+    $url=(string)($tool['url']??'#');
 ?>
 <a class="card" data-search="<?=htmlspecialchars(strtolower($name.' '.$description.' '.$category),ENT_QUOTES,'UTF-8')?>" href="<?=htmlspecialchars($url,ENT_QUOTES,'UTF-8')?>">
 <span class="icon"><?=st_icon($icon)?></span>
@@ -151,22 +159,22 @@ require_once __DIR__ . '/header.php';
 </section>
 </div>
 </main>
-
+<?php require_once __DIR__ . '/footer.php'; ?>
 <script>
 (() => {
-    const input = document.getElementById('toolSearch');
-    const cards = [...document.querySelectorAll('#toolGrid .card')];
-    const empty = document.getElementById('empty');
-    if (!input) return;
-    input.addEventListener('input', () => {
-        const value = input.value.toLowerCase().trim();
-        let visible = 0;
-        cards.forEach(card => {
-            const match = !value || (card.dataset.search || '').includes(value);
-            card.hidden = !match;
-            if (match) visible++;
+    const input=document.getElementById('toolSearch');
+    const cards=[...document.querySelectorAll('#toolGrid .card')];
+    const empty=document.getElementById('empty');
+    if(!input)return;
+    input.addEventListener('input',()=>{
+        const value=input.value.toLowerCase().trim();
+        let visible=0;
+        cards.forEach(card=>{
+            const match=!value||(card.dataset.search||'').includes(value);
+            card.hidden=!match;
+            if(match)visible++;
         });
-        if (empty) empty.hidden = visible !== 0;
+        if(empty)empty.hidden=visible!==0;
     });
 })();
 </script>

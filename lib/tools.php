@@ -1,6 +1,14 @@
 <?php
 declare(strict_types=1);
 
+function smarttoolz_slug(string $value): string
+{
+    $value = trim($value);
+    $value = strtolower($value);
+    $value = preg_replace('/[^a-z0-9]+/i', '-', $value) ?? '';
+    return trim($value, '-');
+}
+
 function smarttoolz_tools(): array
 {
     return [
@@ -18,10 +26,13 @@ function smarttoolz_tools(): array
         ['name'=>'PDF to JPG','category'=>'PDF Tools','description'=>'Convert PDF pages into JPG images directly in your browser.','url'=>'/tools/pdf-to-jpg/','icon'=>'PDF'],
     ];
 }
+
 function smarttoolz_categories(): array
 {
     $out=[];
-    foreach(smarttoolz_tools() as $tool){$out[$tool['category']]=($out[$tool['category']]??0)+1;}
+    foreach(smarttoolz_tools() as $tool){
+        $out[$tool['category']]=($out[$tool['category']]??0)+1;
+    }
     ksort($out,SORT_NATURAL|SORT_FLAG_CASE);
     return $out;
 }

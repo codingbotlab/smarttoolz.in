@@ -1,32 +1,27 @@
 # SmartToolz Repository Structure
 
-This is the canonical developer map for the active SmartToolz monorepo.
+Active SmartToolz monorepo map.
 
 ```text
 smarttoolz.in/
-├── index.php                  # Public SmartToolz front door
-├── assets/                    # Global browser assets
+├── index.php
+├── assets/
 │   ├── css/
 │   ├── js/
 │   └── img/
-├── smart-toolz/               # Core online-tools application
-│   ├── tools/                 # Individual public tools
-│   ├── api/                   # Tool APIs / JSON endpoints
-│   ├── admin/                 # Administration
-│   ├── lib/                   # Libraries/helpers
-│   └── saas/                  # Plans, usage and account features
-├── learning-hub/              # Courses, lessons and practice
-├── knowledge-base/            # Guides and reference content
-├── ai-social-media/           # Social/world application
-├── analytics/                 # Tracking and analytics
-├── keddy-bot/                 # Bot application
-├── auth/                      # Shared authentication integration
-├── config/                    # Environment/configuration helpers
-├── core/                      # Repository-wide shared backend
-├── scripts/                   # Maintenance/migrations/patches
-├── developer/                 # Developer navigation and documentation
-├── docs/                      # Engineering documentation
-└── .github/workflows/         # Active CI/CD automation
+├── smart-toolz/          # Core tools, APIs, admin and SaaS
+├── knowledge-base/       # Guides and reference content
+├── learning-hub/         # Courses, lessons and curriculum
+├── ai-social-media/      # Social/world application
+├── analytics/            # Analytics and tracking
+├── keddy-bot/            # Bot application
+├── auth/                 # Authentication integration
+├── config/               # Configuration helpers
+├── core/                 # Shared backend foundation
+├── scripts/              # Maintenance and migrations
+├── developer/            # Developer entry point
+├── docs/                 # Engineering documentation
+└── .github/workflows/    # Active CI/CD automation
 ```
 
 ## File placement
@@ -41,8 +36,4 @@ smarttoolz.in/
 
 ## Routing
 
-Public URLs are treated as an API. The root `/index.php` is the public front door and `/developer/` is the developer entry point.
-
-## Refactor rule
-
-Before moving active code, find references, create the canonical destination, update imports/includes, verify the route, then remove the obsolete implementation. Retired products should not remain linked from the public site or developer navigation.
+`/index.php` is the public SmartToolz front door. `/developer/` is the developer entry point. Retired products are not kept in public navigation or active automation.

@@ -1,12 +1,11 @@
 <?php
 declare(strict_types=1);
 
-/* SmartToolz application bootstrap: database, runtime settings and safe schema upgrades. */
 require_once __DIR__ . '/lib/settings.php';
 
-$smartToolzTimezone = smarttoolz_setting_string('timezone', 'Asia/Kolkata');
-if ($smartToolzTimezone !== '' && in_array($smartToolzTimezone, timezone_identifiers_list(), true)) {
-    date_default_timezone_set($smartToolzTimezone);
+$tz = smarttoolz_setting_string('timezone', 'Asia/Kolkata');
+if ($tz !== '' && in_array($tz, timezone_identifiers_list(), true)) {
+    date_default_timezone_set($tz);
 }
 
 const SMARTTOOLZ_DB_HOST = 'localhost';
@@ -14,36 +13,19 @@ const SMARTTOOLZ_DB_NAME = 'u969897784_assetsbox';
 const SMARTTOOLZ_DB_USER = 'u969897784_maya';
 
 function smarttoolz_db(): PDO {
-    static $pdo;
+    static $pdo = null;
     if ($pdo instanceof PDO) return $pdo;
     $pass = getenv('SMARTTOOLZ_DB_PASS') ?: '';
-    if ($pass === '') throw new RuntimeException('Database password is not configured. Set SMARTTOOLZ_DB_PASS on the server.');
-    $pdo = new PDO('mysql:host='.SMARTTOOLZ_DB_HOST.';dbname='.SMARTTOOLZ_DB_NAME.';charset=utf8mb4', SMARTTOOLZ_DB_USER, $pass, [
-        PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES=>false,
-    ]);
-    smarttoolz_install_schema($pdo);
+    if ($pass === '') throw new RuntimeException('Database password is not configured.');
+    $pdo = new PDO(
+        'mysql:host='.SMARTTOOLZ_DB_HOST.';dbname='.SMARTTOOLZ_DB_NAME.';charset=utf8mb4',
+        SMARTTOOLZ_DB_USER,
+        $pass,
+        [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]
+    );
     return $pdo;
 }
 
-function smarttoolz_install_schema(PDO $pdo): void {
-    static $done=false;
-    if ($done) return;
-    $done=true;
-    $queries=[
-        "CREATE TABLE IF NOT EXISTS tool_usage (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NULL,tool_slug VARCHAR(150) NOT NULL,ip_hash CHAR(64) NULL,created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,INDEX idx_tool_user(user_id),INDEX idx_tool_slug(tool_slug),INDEX idx_tool_created(created_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-        "CREATE TABLE IF NOT EXISTS tool_issue_reports (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NULL,name VARCHAR(120) NULL,email VARCHAR(190) NULL,tool_name VARCHAR(160) NOT NULL,tool_slug VARCHAR(160) NOT NULL,tool_url VARCHAR(500) NULL,issue_type VARCHAR(80) NOT NULL,description TEXT NOT NULL,steps TEXT NULL,environment VARCHAR(500) NULL,ip_hash CHAR(64) NULL,status VARCHAR(30) NOT NULL DEFAULT 'new',created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,INDEX idx_issue_status(status),INDEX idx_issue_tool(tool_slug),INDEX idx_issue_created(created_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-        "CREATE TABLE IF NOT EXISTS tool_requests (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(120) NULL,email VARCHAR(190) NULL,tool_name VARCHAR(180) NOT NULL,description TEXT NOT NULL,use_case TEXT NULL,source VARCHAR(80) NOT NULL DEFAULT 'website',ip_hash CHAR(64) NULL,status VARCHAR(30) NOT NULL DEFAULT 'new',created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,INDEX idx_request_status(status),INDEX idx_request_created(created_at),INDEX idx_request_name(tool_name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-    ];
-    foreach($queries as $sql){try{$pdo->exec($sql);}catch(Throwable $e){error_log('SmartToolz schema: '.$e->getMessage());}}
-}
-
-function smarttoolz_h(string $v): string { return htmlspecialchars($v,ENT_QUOTES,'UTF-8'); }
-function smarttoolz_track(string $slug): void {
-    if (!smarttoolz_setting_bool('analytics_enabled',true)) return;
-    try {
-        $ip=$_SERVER['REMOTE_ADDR']??'';
-        smarttoolz_db()->prepare('INSERT INTO tool_usage(user_id,tool_slug,ip_hash) VALUES(NULL,?,?)')->execute([$slug,$ip?hash('sha256',$ip):null]);
-    } catch(Throwable $e){ error_log('SmartToolz tracking: '.$e->getMessage()); }
+function smarttoolz_h(string $v): string {
+    return htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 }

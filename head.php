@@ -10,3 +10,4 @@ $assetVersion = '20260907';
 <link rel="stylesheet" href="/assets/css/smarttoolz.css?v=<?= $assetVersion ?>">
 <link rel="stylesheet" href="/assets/css/site-polish.css?v=<?= $assetVersion ?>">
 <link rel="stylesheet" href="/assets/css/tool-pages.css?v=<?= $assetVersion ?>">
+<link rel="stylesheet" href="/assets/css/tools-library.css?v=<?= $assetVersion ?>">

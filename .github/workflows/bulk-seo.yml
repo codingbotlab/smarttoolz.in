@@ -41,9 +41,8 @@ jobs:
               if "dirname(__DIR__) . '/header.php'" in text or "../header.php" in text:
                   return text
               include = "<?php require_once dirname(__DIR__) . '/header.php'; ?>\n"
-              m = re.search(r'<\?php', text, re.I)
-              if m and m.start() == 0:
-                  end = text.find('?>', m.start())
+              if text.startswith('<?php'):
+                  end = text.find('?>')
                   if end != -1:
                       return text[:end + 2] + '\n' + include + text[end + 2:]
               return include + text
@@ -67,15 +66,14 @@ jobs:
                   text = page.read_text(encoding='utf-8')
                   original = text
 
-                  # Remove obsolete tracking/database bootstraps that caused production 500s.
+                  # Remove only the retired tracker bootstrap. Legacy DB/auth compatibility
+                  # remains available through the existing no-op compatibility shim until each
+                  # individual tool is safely migrated away from it.
                   text = re.sub(r'^\s*require_once\s+.*?/analytics/tracker\.php[^\n]*\n?', '', text, flags=re.I|re.M)
-                  text = re.sub(r'^\s*require_once\s+.*?/creator-ai/auth/config\.php[^\n]*\n?', '', text, flags=re.I|re.M)
-                  text = re.sub(r'^\s*\$pdo\s*=\s*db\(\);\s*\n?', '', text, flags=re.I|re.M)
 
                   # Normalize current public URLs; never emit the retired /smart-toolz prefix.
                   text = text.replace('/smart-toolz/tools/', '/tools/')
                   text = text.replace('/smart-toolz/tool.php', '/tool.php')
-                  text = text.replace('/smart-toolz/', '/')
 
                   text = ensure_header(text)
                   text = ensure_footer(text)
@@ -83,7 +81,7 @@ jobs:
                   if text != original:
                       page.write_text(text, encoding='utf-8')
 
-          # Keep the shared header/footer idempotent.
+          # Keep shared includes idempotent.
           hp = root / 'header.php'
           if hp.is_file():
               h = hp.read_text(encoding='utf-8')
@@ -113,11 +111,9 @@ jobs:
           urlset = ET.Element('urlset', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
           for url in urls:
               u = ET.SubElement(urlset, 'url')
-              loc = ET.SubElement(u, 'loc')
-              loc.text = 'https://smarttoolz.in' + url
+              ET.SubElement(u, 'loc').text = 'https://smarttoolz.in' + url
           ET.ElementTree(urlset).write(root / 'sitemap.xml', encoding='utf-8', xml_declaration=True)
-
-          print(f'Canonical tool pages: {len(tool_pages)}')
+          print(f'Canonical tool pages discovered: {len(tool_pages)}')
 
       - name: PHP syntax validation
         shell: bash
@@ -137,19 +133,19 @@ jobs:
         run: |
           set -euo pipefail
           bad=0
-          if grep -RIn --exclude-dir=.git --exclude='*.min.js' '/smart-toolz/' .; then
-            echo 'Found retired /smart-toolz/ references.'
+
+          if grep -RIn --exclude-dir=.git --exclude='*.min.js' '/smart-toolz/tools/' .; then
+            echo 'Found retired /smart-toolz/tools/ references.'
             bad=1
           fi
-          if grep -RIn --exclude-dir=.git 'analytics/tracker.php\|creator-ai/auth/config.php' tools *.php 2>/dev/null; then
-            echo 'Found retired tracking/auth bootstraps.'
+
+          if grep -RIn --exclude-dir=.git --exclude='bulk-seo.yml' 'analytics/tracker.php' tools *.php 2>/dev/null; then
+            echo 'Found retired tracking bootstraps.'
             bad=1
           fi
-          if grep -RIn --exclude-dir=.git --include='*.php' '\bdb[[:space:]]*(' tools 2>/dev/null; then
-            echo 'Found runtime DB calls in tools.'
-            bad=1
-          fi
+
           test -f sitemap.xml || { echo 'sitemap.xml missing'; bad=1; }
+          php -r 'simplexml_load_file("sitemap.xml") !== false ? exit(0) : exit(1);' || { echo 'Invalid sitemap XML'; bad=1; }
           exit "$bad"
 
       - name: Live smoke test

@@ -2,31 +2,99 @@
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/lib/tools.php';
+
 $tools = smarttoolz_tools();
-?><!doctype html>
+$categories = smarttoolz_categories();
+$query = trim((string)($_GET['q'] ?? ''));
+$category = trim((string)($_GET['category'] ?? ''));
+$filtered = array_values(array_filter($tools, static function (array $tool) use ($query, $category): bool {
+    $haystack = $tool['name'].' '.$tool['description'].' '.$tool['category'];
+    return ($query === '' || stripos($haystack, $query) !== false)
+        && ($category === '' || smarttoolz_slug($tool['category']) === $category);
+}));
+?>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>All Online Tools — Free Tools for Everyday Tasks | SmartToolz</title>
-<meta name="description" content="Explore free SmartToolz online tools for images, text, developer tasks, calculators, generators, security and PDFs. Fast, simple and browser-based.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All Online Tools — Free Tools for Images, PDF, Text & More | SmartToolz</title>
+<meta name="description" content="Browse SmartToolz free online tools for images, PDF, text, developer tasks, calculators, generators, security and everyday work. Search or filter by category.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="canonical" href="https://smarttoolz.in/tools/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SmartToolz">
+<meta property="og:title" content="All Online Tools — SmartToolz">
+<meta property="og:description" content="Find free browser-based tools for common image, PDF, text, developer and everyday tasks.">
+<meta property="og:url" content="https://smarttoolz.in/tools/">
 <?php require __DIR__ . '/head.php'; ?>
-</head><body>
+<script type="application/ld+json">
+<?= json_encode(['@context'=>'https://schema.org','@type'=>'CollectionPage','name'=>'SmartToolz All Tools','url'=>'https://smarttoolz.in/tools/','description'=>'Free browser-based tools for common digital tasks.','isPartOf'=>['@type'=>'WebSite','name'=>'SmartToolz','url'=>'https://smarttoolz.in/']], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+</script>
+</head>
+<body>
 <?php require __DIR__ . '/header.php'; ?>
-<main class="page">
-<section class="page-hero"><span class="eyebrow">SMARTTOOLZ • FREE ONLINE TOOLS</span><h1>All Tools</h1><p>Useful browser-based tools for common image, text, PDF, developer and everyday tasks. Choose a tool and get started instantly.</p></section>
-<section aria-label="Tool categories">
-<div class="mb-4"><input id="toolSearch" class="form-control form-control-lg" type="search" placeholder="Search tools..." aria-label="Search tools"></div>
-<div class="tool-grid" id="toolGrid">
-<?php foreach($tools as $tool): ?>
-<article class="tool-card" data-tool data-name="<?= htmlspecialchars(strtolower($tool['name'].' '.$tool['category'])) ?>">
-<div class="tool-icon"><?= htmlspecialchars($tool['icon']) ?></div><h2><?= htmlspecialchars($tool['name']) ?></h2><p><?= htmlspecialchars($tool['description']) ?></p><a class="tool-link" href="<?= htmlspecialchars($tool['url']) ?>">Open tool →</a>
-</article>
-<?php endforeach; ?>
-</div>
+<main>
+<section class="tools-hero">
+  <div class="page">
+    <span class="eyebrow">SMARTTOOLZ • TOOL LIBRARY</span>
+    <h1>All the tools. One simple place.</h1>
+    <p>Search the collection or choose a category to find a focused utility for images, PDFs, text, development, calculations and more.</p>
+    <form class="tools-search-panel" method="get" action="/tools/" role="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <label class="visually-hidden" for="toolSearch">Search all tools</label>
+      <input id="toolSearch" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" type="search" placeholder="Search image compressor, JSON formatter, QR code..." autocomplete="off">
+      <button type="submit">Search</button>
+    </form>
+    <div class="tool-count"><strong><?= count($filtered) ?></strong> of <?= count($tools) ?> tools shown</div>
+  </div>
 </section>
-<section class="seo-section"><h2>Free Online Tools in One Place</h2><p>SmartToolz brings focused online utilities together so you can complete everyday tasks without installing desktop software for every small job. Tools are designed around one clear task and run directly in the browser whenever practical.</p><div class="row g-3"><div class="col-md-6"><h3>Image and file tools</h3><p>Compress, resize and convert common image formats, or work with PDF files through simple web interfaces.</p></div><div class="col-md-6"><h3>Text and developer tools</h3><p>Format JSON, transform text, generate QR codes and handle common coding or content workflows quickly.</p></div></div></section>
+<section class="page py-4">
+  <div class="category-filter" aria-label="Tool categories">
+    <a class="category-pill<?= $category === '' ? ' active' : '' ?>" href="/tools/">All <span><?= count($tools) ?></span></a>
+    <?php foreach ($categories as $name => $count): ?>
+      <a class="category-pill<?= $category === smarttoolz_slug($name) ? ' active' : '' ?>" href="/tools/?category=<?= rawurlencode(smarttoolz_slug($name)) ?><?= $query !== '' ? '&q='.rawurlencode($query) : '' ?>"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?> <span><?= (int)$count ?></span></a>
+    <?php endforeach; ?>
+  </div>
+</section>
+<section class="page pb-5">
+  <?php if (!$filtered): ?>
+    <div class="empty-tools"><div class="tool-icon">?</div><h2>No matching tools yet</h2><p>Try a broader search or clear the category filter to see the complete collection.</p><a class="tool-btn" href="/tools/">Show all tools</a></div>
+  <?php else: ?>
+    <div class="tool-grid tool-grid-library">
+      <?php foreach ($filtered as $tool): ?>
+        <article class="tool-card" data-tool>
+          <div class="tool-card-top"><div class="tool-icon" aria-hidden="true"><?= htmlspecialchars((string)$tool['icon'], ENT_QUOTES, 'UTF-8') ?></div><span><?= htmlspecialchars((string)$tool['category'], ENT_QUOTES, 'UTF-8') ?></span></div>
+          <h2><?= htmlspecialchars((string)$tool['name'], ENT_QUOTES, 'UTF-8') ?></h2>
+          <p><?= htmlspecialchars((string)$tool['description'], ENT_QUOTES, 'UTF-8') ?></p>
+          <a class="tool-link" href="<?= htmlspecialchars((string)$tool['url'], ENT_QUOTES, 'UTF-8') ?>">Open tool <span aria-hidden="true">→</span></a>
+        </article>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+</section>
+<section class="section section-alt">
+  <div class="page">
+    <div class="section-head"><div><span class="eyebrow">HOW TO CHOOSE</span><h2 class="mt-2">Start with the task, not the software.</h2><p>Pick the utility that matches the job you need to finish right now.</p></div></div>
+    <div class="reason-grid">
+      <article><b>01</b><h3>Need an image changed?</h3><p>Start with compression, resizing or format conversion depending on the result you need.</p></article>
+      <article><b>02</b><h3>Working with text or code?</h3><p>Use text and developer utilities for formatting, cleaning, counting, encoding and structured data tasks.</p></article>
+      <article><b>03</b><h3>Need a quick calculation?</h3><p>Choose a calculator or utility for common values without opening a larger application for a small task.</p></article>
+    </div>
+  </div>
+</section>
+<section class="page py-5">
+  <div class="seo-section">
+    <h2>Free online tools for everyday digital work</h2>
+    <p>SmartToolz organizes practical web utilities around the jobs people actually need to complete. A dedicated page makes each tool easier to understand, while the library above helps you discover related tools without leaving the site.</p>
+    <div class="row g-4 mt-1">
+      <?php foreach (array_slice($categories, 0, 6, true) as $name => $count): ?>
+        <div class="col-md-4"><h3><?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?></h3><p><?= (int)$count ?> tools available for common <?= htmlspecialchars(strtolower((string)$name), ENT_QUOTES, 'UTF-8') ?> tasks.</p></div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
 </main>
-<script>document.getElementById('toolSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('[data-tool]').forEach(c=>{c.hidden=q!==''&&!c.dataset.name.includes(q)})});</script>
 <?php require __DIR__ . '/footer.php'; ?>
-</body></html>
+</body>
+</html>

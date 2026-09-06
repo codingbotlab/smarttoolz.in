@@ -1,43 +1,15 @@
 <?php
 declare(strict_types=1);
-
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-require_once $_SERVER['DOCUMENT_ROOT'] . '/creator-ai/auth/config.php';
-
-$pdo = db();
-$smartToozAds = [];
-try {
-    $stmt = $pdo->query("SELECT ad_key, enabled, ad_code FROM ads_settings");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $smartToozAds[(string)$row['ad_key']] = [
-            'enabled' => (int)($row['enabled'] ?? 0),
-            'ad_code' => (string)($row['ad_code'] ?? '')
-        ];
-    }
-} catch (Throwable $e) {
-    $smartToozAds = [];
-}
-
-function smartToozAd(string $adKey): void {
-    global $smartToozAds;
-    if (!isset($smartToozAds[$adKey]) || (int)$smartToozAds[$adKey]['enabled'] !== 1) return;
-    $code = trim((string)$smartToozAds[$adKey]['ad_code']);
-    if ($code !== '') echo $code;
-}
-
-smartToozAd('popunder');
-smartToozAd('socialbar');
+function smartToolzAd(string $key): void {}
+function smartToolzMemeAd(string $key): void {}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JPG to WebP Converter - Smart-Tooz</title>
-<meta name="description" content="Convert JPG and JPEG images to WebP online for free with Smart-Tooz. Fast browser-based image conversion with quality control.">
+<title>JPG to WebP Converter - SmartToolz</title>
+<meta name="description" content="Convert JPG and JPEG images to WebP online for free with SmartToolz. Fast browser-based image conversion with quality control.">
 <meta name="robots" content="index, follow">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f6f8fc;color:#172033;line-height:1.5}a{text-decoration:none;color:inherit}button,input{font-family:inherit}.site-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid #e5e9f0}.navbar{width:calc(100% - 20px);max-width:1400px;min-height:72px;margin:auto;display:flex;align-items:center;justify-content:space-between}.logo{display:flex;align-items:center;gap:10px;color:#172033;font-size:21px;font-weight:800}.logo-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:white;background:linear-gradient(135deg,#635bff,#916cff);box-shadow:0 8px 22px rgba(99,91,255,.18)}.nav-links{display:flex;align-items:center;gap:28px}.nav-links a{color:#596477;font-size:14px;font-weight:600}.nav-links a:hover{color:#635bff}.menu-button{display:none;border:0;background:transparent;font-size:27px;cursor:pointer}.page-layout{width:min(1400px,calc(100% - 30px));margin:28px auto 60px;display:flex;flex-direction:row;align-items:flex-start;gap:24px}.tool-content{min-width:0;flex:1;order:1}.page-layout>.tools-sidebar{order:2}.ad-slot{width:100%;min-height:10px;margin:0 auto 24px;padding:5px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}.ad-slot iframe{display:block;max-width:100%!important;border:0}.ad-slot img{max-width:100%;height:auto}.desktop-ad{display:flex;width:100%;justify-content:center;align-items:center}.mobile-ad{display:none;width:100%;justify-content:center;align-items:center}.tool-header{margin-bottom:22px;padding:34px 25px;background:#fff;border:1px solid #e5e9f0;border-radius:22px;text-align:center;box-shadow:0 8px 30px rgba(30,35,80,.035)}.tool-badge{display:inline-block;margin-bottom:12px;padding:7px 13px;border-radius:50px;background:#eeedff;color:#635bff;font-size:12px;font-weight:800}.tool-header h1{font-size:clamp(32px,5vw,48px);line-height:1.08;letter-spacing:-1.8px}.tool-header h1 span{color:#635bff}.tool-header p{max-width:680px;margin:13px auto 0;color:#707b8e;font-size:14px}.converter-card{padding:28px;background:#fff;border:1px solid #e5e9f0;border-radius:22px;box-shadow:0 15px 45px rgba(30,35,80,.06)}.upload-area{width:100%;padding:55px 20px;border:2px dashed #d7dbea;border-radius:19px;background:#fafbff;text-align:center;cursor:pointer;transition:border-color .2s,background .2s,transform .2s}.upload-area:hover,.upload-area.dragover{border-color:#635bff;background:#f5f3ff;transform:translateY(-1px)}.upload-icon{width:66px;height:66px;display:grid;place-items:center;margin:0 auto 15px;border-radius:18px;background:#eeedff;color:#635bff;font-size:30px}.upload-area h2{margin-bottom:6px;font-size:20px}.upload-area p{color:#707b8e;font-size:13px}.file-info{margin-top:10px;color:#635bff!important;font-weight:700}#fileInput{display:none}.settings{display:none;margin-top:22px;padding:21px;background:#fafbff;border:1px solid #e5e9f0;border-radius:17px}.settings-title{margin-bottom:17px;font-size:16px;font-weight:800}.quality-top{display:flex;align-items:center;justify-content:space-between}.quality-top label{color:#4d5768;font-size:12px;font-weight:700}.quality-value{color:#635bff;font-size:15px;font-weight:800}#quality{width:100%;margin-top:12px;accent-color:#635bff}.actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin-top:21px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:11px 19px;border:0;border-radius:12px;cursor:pointer;font-size:13px;font-weight:800;transition:background .2s,transform .2s,opacity .2s}.btn-primary{background:#635bff;color:#fff}.btn-primary:hover{background:#5148e8;transform:translateY(-1px)}.btn-secondary{background:#eef0f5;color:#3f4858}.btn-secondary:hover{background:#e4e7ed}.btn:disabled{opacity:.6;cursor:not-allowed}.error{display:none;margin-top:15px;padding:12px 14px;border-radius:11px;background:#fff0f0;color:#c33;font-size:13px;text-align:center}.result{display:none;margin-top:28px}.preview-box{padding:15px;background:#fafbff;border:1px solid #e5e9f0;border-radius:17px;text-align:center}.preview-box h3{margin-bottom:12px;font-size:14px}.preview-box img{display:block;width:100%;max-height:500px;object-fit:contain;border-radius:11px;background:white}.result-info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.result-stat{padding:15px;border-radius:13px;background:#f6f7fb;text-align:center}.result-stat strong{display:block;color:#635bff;font-size:18px}.result-stat span{color:#707b8e;font-size:11px}.info-box{margin-top:24px;padding:25px;background:#fff;border:1px solid #e5e9f0;border-radius:19px}.info-box h2{margin-bottom:9px;font-size:21px}.info-box h3{margin:18px 0 7px;font-size:16px}.info-box p,.info-box li{color:#707b8e;font-size:13px;line-height:1.7}.info-box ul{padding-left:20px}.tool-footer{margin-top:24px;text-align:center;color:#707b8e;font-size:12px}footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer p{margin-top:6px;color:#aeb5c5;font-size:12px}@media(max-width:700px){.navbar{min-height:64px}.nav-links{display:none;position:absolute;top:64px;left:0;right:0;padding:16px;flex-direction:column;background:#fff;border-bottom:1px solid #e5e9f0}.nav-links.open{display:flex}.menu-button{display:block}.page-layout{width:calc(100% - 20px);margin:15px auto 40px;flex-direction:column;gap:18px}.tool-content{width:100%}.mobile-ad{display:flex}.desktop-ad{display:none}.tool-header{padding:28px 18px}.tool-header h1{font-size:36px}.converter-card{padding:15px;border-radius:18px}.upload-area{padding:42px 15px}.result-info{grid-template-columns:1fr}.tools-sidebar{width:100%!important;position:relative!important;top:auto!important;max-height:none!important}}
@@ -85,7 +57,7 @@ smartToozAd('socialbar');
 
 <section class="info-box">
 <h2>JPG to WebP Converter</h2>
-<p>WebP is a modern image format that can provide smaller files while maintaining good visual quality. This Smart-Tooz converter processes your image in your browser, so the image does not need to be uploaded to a conversion server.</p>
+<p>WebP is a modern image format that can provide smaller files while maintaining good visual quality. This SmartToolz converter processes your image in your browser, so the image does not need to be uploaded to a conversion server.</p>
 <h3>How to convert JPG to WebP</h3>
 <ul><li>Select or drag a JPG/JPEG image into the upload box.</li><li>Choose your preferred WebP quality.</li><li>Click Convert to WebP.</li><li>Preview the result and download your WebP image.</li></ul>
 <h3>Why use WebP?</h3>
@@ -95,7 +67,7 @@ smartToozAd('socialbar');
 
 <?php require_once __DIR__ . '/tool-sidebar.php'; ?>
 </div>
-<footer><strong>Smart-Tooz</strong><p>Free online tools for everyday tasks.</p></footer>
+
 
 <script>
 const uploadArea=document.getElementById('uploadArea');

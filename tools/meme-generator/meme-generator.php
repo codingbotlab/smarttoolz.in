@@ -1,71 +1,14 @@
 <?php
 declare(strict_types=1);
-
-ini_set('display_errors', '0');
-ini_set('display_startup_errors', '0');
-error_reporting(E_ALL);
-
-/* ------------------------------------------------------------
-   Optional analytics / database bootstrap
-   Keep this page usable even if an optional service is unavailable.
------------------------------------------------------------- */
-$smartToozAds = [];
-
-$config  = $_SERVER['DOCUMENT_ROOT'] . '/creator-ai/auth/config.php';
-
-try {
-    if (is_file($tracker)) {
-        require_once $tracker;
-    }
-} catch (Throwable $e) {
-    // Analytics must never break the tool.
-}
-
-try {
-    if (is_file($config)) {
-        require_once $config;
-        if (function_exists('db')) {
-            $pdo = db();
-            $stmt = $pdo->query('SELECT ad_key, enabled, ad_code FROM ads_settings');
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $smartToozAds[(string)($row['ad_key'] ?? '')] = [
-                    'enabled' => (int)($row['enabled'] ?? 0),
-                    'ad_code' => (string)($row['ad_code'] ?? '')
-                ];
-            }
-        }
-    }
-} catch (Throwable $e) {
-    $smartToozAds = [];
-}
-
-function smartToozMemeAd(string $key): void
-{
-    global $smartToozAds;
-
-    if (!isset($smartToozAds[$key])) {
-        return;
-    }
-
-    if ((int)($smartToozAds[$key]['enabled'] ?? 0) !== 1) {
-        return;
-    }
-
-    $code = trim((string)($smartToozAds[$key]['ad_code'] ?? ''));
-    if ($code !== '') {
-        echo $code;
-    }
-}
-
-smartToozMemeAd('popunder');
-smartToozMemeAd('socialbar');
+function smartToolzAd(string $key): void {}
+function smartToolzMemeAd(string $key): void {}
 ?>
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Meme Generator - Create Memes Online | Smart-Tooz</title>
+<title>Meme Generator - Create Memes Online | SmartToolz</title>
 <meta name="description" content="Create custom memes online for free. Upload an image, add top and bottom text, customize the style and download your meme.">
 <meta name="robots" content="index,follow">
 <style>
@@ -108,7 +51,7 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
 
 <div class="page-layout">
 <main class="tool-content">
-<div class="desktop-ad ad-slot"><?php smartToozMemeAd('top_desktop'); ?></div><div class="mobile-ad ad-slot"><?php smartToozMemeAd('top_mobile'); ?></div>
+<div class="desktop-ad ad-slot"><?php smartToolzMemeAd('top_desktop'); ?></div><div class="mobile-ad ad-slot"><?php smartToolzMemeAd('top_mobile'); ?></div>
 <section class="tool-header"><span class="badge">MEME GENERATOR</span><h1>Create Your <span>Meme</span></h1><p>Upload an image, add custom text and create a share-ready meme directly in your browser.</p></section>
 <section class="meme-card">
 <div class="upload" id="upload"><div class="upload-icon">😂</div><h2>Upload Meme Image</h2><p>Click here or drag &amp; drop JPG, PNG or WebP</p><small id="fileName">No image selected</small><input id="file" type="file" accept="image/jpeg,image/png,image/webp"></div>
@@ -126,7 +69,7 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
 </div></div></div><div class="error" id="error"></div>
 </section>
 <section class="info"><h2>Free Meme Generator</h2><p>Make a custom meme from your own image without uploading it to a server. The meme is rendered locally in your browser and can be downloaded as a PNG.</p><h3>How to make a meme</h3><ul><li>Upload a JPG, PNG or WebP image.</li><li>Enter top and bottom text.</li><li>Adjust font size, outline, colors and font.</li><li>Click Download Meme to save the finished image.</li></ul><h3>Privacy</h3><p>Your selected image stays in your browser while you create the meme. No server-side image upload is required.</p></section>
-<div class="desktop-ad ad-slot"><?php smartToozMemeAd('bottom_desktop'); ?></div><div class="mobile-ad ad-slot"><?php smartToozMemeAd('bottom_mobile'); ?></div>
+<div class="desktop-ad ad-slot"><?php smartToolzMemeAd('bottom_desktop'); ?></div><div class="mobile-ad ad-slot"><?php smartToolzMemeAd('bottom_mobile'); ?></div>
 </main>
 <?php
 $sidebarFile = __DIR__ . '/tool-sidebar.php';
@@ -135,7 +78,7 @@ if (is_file($sidebarFile)) {
 }
 ?>
 </div>
-<footer><strong>Smart-Tooz</strong><p>Free online tools for everyday tasks.</p></footer>
+
 <script>
 (function(){
 'use strict';

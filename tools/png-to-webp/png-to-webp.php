@@ -1,52 +1,14 @@
 <?php
 declare(strict_types=1);
-
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-/* ============================================================
-   ANALYTICS TRACKER
-============================================================ */
-
-/* ============================================================
-   DATABASE / ADS
-============================================================ */
-require_once $_SERVER['DOCUMENT_ROOT'] . '/creator-ai/auth/config.php';
-
-$pdo = db();
-$smartToozAds = [];
-
-try {
-    $stmt = $pdo->query("SELECT ad_key, enabled, ad_code FROM ads_settings");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $smartToozAds[(string)$row['ad_key']] = [
-            'enabled' => (int)($row['enabled'] ?? 0),
-            'ad_code' => (string)($row['ad_code'] ?? '')
-        ];
-    }
-} catch (Throwable $e) {
-    $smartToozAds = [];
-}
-
-function smartToozAd(string $adKey): void
-{
-    global $smartToozAds;
-    if (!isset($smartToozAds[$adKey])) return;
-    if ((int)$smartToozAds[$adKey]['enabled'] !== 1) return;
-    $code = trim((string)$smartToozAds[$adKey]['ad_code']);
-    if ($code !== '') echo $code;
-}
-
-smartToozAd('popunder');
-smartToozAd('socialbar');
+function smartToolzAd(string $key): void {}
+function smartToolzMemeAd(string $key): void {}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PNG to WebP Converter - Smart-Tooz</title>
+<title>PNG to WebP Converter - SmartToolz</title>
 <meta name="description" content="Convert PNG images to WebP online for free. Fast browser-based PNG to WebP converter with quality control and instant download.">
 <meta name="robots" content="index, follow">
 
@@ -90,10 +52,10 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
     <section class="tool-content">
 
         <div class="ad-slot desktop-ad">
-            <?php smartToozAd('top_banner'); ?>
+            <?php smartToolzAd('top_banner'); ?>
         </div>
         <div class="ad-slot mobile-ad">
-            <?php smartToozAd('mobile_banner'); ?>
+            <?php smartToolzAd('mobile_banner'); ?>
         </div>
 
         <section class="tool-header">
@@ -137,15 +99,15 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
         </section>
 
         <div class="ad-slot desktop-ad">
-            <?php smartToozAd('in_content'); ?>
+            <?php smartToolzAd('in_content'); ?>
         </div>
         <div class="ad-slot mobile-ad">
-            <?php smartToozAd('mobile_in_content'); ?>
+            <?php smartToolzAd('mobile_in_content'); ?>
         </div>
 
         <section class="info-box">
             <h2>How to Convert PNG to WebP</h2>
-            <p>Smart-Tooz converts your PNG image directly in your browser using the Canvas API. Your original image does not need to be uploaded to a server for conversion.</p>
+            <p>SmartToolz converts your PNG image directly in your browser using the Canvas API. Your original image does not need to be uploaded to a server for conversion.</p>
             <ul>
                 <li>Choose a PNG image or drag it into the upload area.</li>
                 <li>Adjust the WebP quality using the quality slider.</li>
@@ -162,10 +124,7 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
     <?php require_once __DIR__ . '/tool-sidebar.php'; ?>
 </main>
 
-<footer>
-    <strong>Smart-Tooz</strong>
-    <p>Free online tools made simple, fast and useful.</p>
-</footer>
+
 
 <script>
 const fileInput = document.getElementById('fileInput');

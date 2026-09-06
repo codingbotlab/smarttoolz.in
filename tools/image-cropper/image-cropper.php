@@ -1,91 +1,7 @@
 <?php
 declare(strict_types=1);
-
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-
-/* ============================================================
-   ANALYTICS TRACKER
-============================================================ */
-
-
-
-
-/* ============================================================
-   DATABASE
-============================================================ */
-
-require_once $_SERVER['DOCUMENT_ROOT'] . '/creator-ai/auth/config.php';
-
-$pdo = db();
-
-
-/* ============================================================
-   LOAD ADS FROM DATABASE
-============================================================ */
-
-$smartToozAds = [];
-
-try {
-
-    $stmt = $pdo->query("
-        SELECT ad_key, enabled, ad_code
-        FROM ads_settings
-    ");
-
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-
-        $smartToozAds[(string)$row['ad_key']] = [
-            'enabled' => (int)($row['enabled'] ?? 0),
-            'ad_code' => (string)($row['ad_code'] ?? '')
-        ];
-
-    }
-
-} catch (Throwable $e) {
-
-    $smartToozAds = [];
-
-}
-
-
-/* ============================================================
-   AD FUNCTION
-============================================================ */
-
-function smartToozAd(string $adKey): void
-{
-    global $smartToozAds;
-
-    if (!isset($smartToozAds[$adKey])) {
-        return;
-    }
-
-    if ((int)$smartToozAds[$adKey]['enabled'] !== 1) {
-        return;
-    }
-
-    $code = trim(
-        (string)$smartToozAds[$adKey]['ad_code']
-    );
-
-    if ($code === '') {
-        return;
-    }
-
-    echo $code;
-}
-
-
-/* ============================================================
-   GLOBAL ADS
-============================================================ */
-
-smartToozAd('popunder');
-smartToozAd('socialbar');
-
+function smartToolzAd(string $key): void {}
+function smartToolzMemeAd(string $key): void {}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +15,7 @@ smartToozAd('socialbar');
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>Image Cropper Online - Smart-Tooz</title>
+<title>Image Cropper Online - SmartToolz</title>
 
 <meta
     name="description"
@@ -1108,7 +1024,7 @@ footer p {
             <div class="desktop-ad">
 
                 <?php
-                smartToozAd('728x90');
+                smartToolzAd('728x90');
                 ?>
 
             </div>
@@ -1117,7 +1033,7 @@ footer p {
             <div class="mobile-ad">
 
                 <?php
-                smartToozAd('320x50');
+                smartToolzAd('320x50');
                 ?>
 
             </div>
@@ -1432,7 +1348,7 @@ footer p {
         <div class="ad-slot">
 
             <?php
-            smartToozAd('native');
+            smartToolzAd('native');
             ?>
 
         </div>
@@ -1445,7 +1361,7 @@ footer p {
         <div class="ad-slot">
 
             <?php
-            smartToozAd('300x250');
+            smartToolzAd('300x250');
             ?>
 
         </div>
@@ -1487,7 +1403,7 @@ footer p {
             <div class="desktop-ad">
 
                 <?php
-                smartToozAd('468x60');
+                smartToolzAd('468x60');
                 ?>
 
             </div>
@@ -1496,7 +1412,7 @@ footer p {
             <div class="mobile-ad">
 
                 <?php
-                smartToozAd('320x50');
+                smartToolzAd('320x50');
                 ?>
 
             </div>
@@ -1533,18 +1449,7 @@ footer p {
      FOOTER
 ============================================================ -->
 
-<footer>
 
-    <strong>
-        Smart-Tooz
-    </strong>
-
-
-    <p>
-        Free, fast and simple online tools.
-    </p>
-
-</footer>
 
 
 <script>
@@ -2216,7 +2121,7 @@ function cropImage() {
 
 
             link.download =
-                'smart-tooz-cropped.' +
+                'SmartToolz-cropped.' +
                 extension;
 
 

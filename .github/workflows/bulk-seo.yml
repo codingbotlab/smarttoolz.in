@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   maintain:
-    if: ${{ !contains(github.event.head_commit.message, '[skip-site-automation]') }}
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip-site-automation]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,7 +24,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: composer
           coverage: none
 
       - name: Normalize tool pages and generate sitemap
@@ -62,21 +61,24 @@ jobs:
                   page = directory / f'{slug}.php'
                   if not page.is_file():
                       continue
+
                   tool_pages.append(slug)
                   text = page.read_text(encoding='utf-8')
                   original = text
 
-                  # Remove only the retired tracker bootstrap. Legacy DB/auth compatibility
-                  # remains available through the existing no-op compatibility shim until each
-                  # individual tool is safely migrated away from it.
+                  # Remove retired tracker bootstrap safely.
                   text = re.sub(r'^\s*require_once\s+.*?/analytics/tracker\.php[^\n]*\n?', '', text, flags=re.I|re.M)
 
-                  # Normalize current public URLs; never emit the retired /smart-toolz prefix.
+                  # Normalize retired public URLs only.
                   text = text.replace('/smart-toolz/tools/', '/tools/')
                   text = text.replace('/smart-toolz/tool.php', '/tool.php')
 
-                  text = ensure_header(text)
-                  text = ensure_footer(text)
+                  # Bootstrap/wrapper files are include-only PHP entry points. Never inject
+                  # a second PHP block into them; this prevents accidental parse errors.
+                  is_bootstrap = not bool(re.search(r'<!doctype\s+html|<html\b', text, flags=re.I))
+                  if not is_bootstrap:
+                      text = ensure_header(text)
+                      text = ensure_footer(text)
 
                   if text != original:
                       page.write_text(text, encoding='utf-8')
@@ -96,7 +98,7 @@ jobs:
                   f = f.replace('<?php', "<?php\nif (defined('SMARTTOOLZ_FOOTER_LOADED')) { return; }\ndefine('SMARTTOOLZ_FOOTER_LOADED', true);", 1)
                   fp.write_text(f, encoding='utf-8')
 
-          # Generate sitemap from actual canonical tool folders so new tools are picked up automatically.
+          # Generate sitemap from actual canonical tool folders.
           static_urls = [
               '/', '/tool.php', '/about.php', '/contact.php', '/privacy-policy.php',
               '/cookie-policy.php', '/terms.php', '/disclaimer.php'
@@ -139,13 +141,13 @@ jobs:
             bad=1
           fi
 
-          if grep -RIn --exclude-dir=.git --exclude='bulk-seo.yml' 'analytics/tracker.php' tools *.php 2>/dev/null; then
+          if grep -RIn --exclude-dir=.git --exclude='*.yml' 'analytics/tracker.php' tools *.php 2>/dev/null; then
             echo 'Found retired tracking bootstraps.'
             bad=1
           fi
 
           test -f sitemap.xml || { echo 'sitemap.xml missing'; bad=1; }
-          php -r 'simplexml_load_file("sitemap.xml") !== false ? exit(0) : exit(1);' || { echo 'Invalid sitemap XML'; bad=1; }
+          php -r 'exit(simplexml_load_file("sitemap.xml") !== false ? 0 : 1);' || { echo 'Invalid sitemap XML'; bad=1; }
           exit "$bad"
 
       - name: Live smoke test

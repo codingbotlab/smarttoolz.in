@@ -35,7 +35,7 @@ jobs:
           tools_root = root / 'tools'
 
           def ensure_header(text: str) -> str:
-              if "dirname(__DIR__) . '/header.php'" in text or "../header.php" in text or ("require_once dirname(__DIR__)" in text and "header.php" in text):
+              if "dirname(__DIR__) . '/header.php'" in text or "../header.php" in text or ('require_once dirname(__DIR__)' in text and 'header.php' in text):
                   return text
               include = "<?php require_once dirname(__DIR__) . '/header.php'; ?>\n"
               if text.startswith('<?php'):
@@ -45,7 +45,7 @@ jobs:
               return include + text
 
           def ensure_footer(text: str) -> str:
-              if "dirname(__DIR__) . '/footer.php'" in text or "../footer.php" in text or ("require_once dirname(__DIR__)" in text and "footer.php" in text):
+              if "dirname(__DIR__) . '/footer.php'" in text or "../footer.php" in text or ('require_once dirname(__DIR__)' in text and 'footer.php' in text):
                   return text
               footer = "\n<?php require_once dirname(__DIR__) . '/footer.php'; ?>\n"
               if re.search(r'</body>', text, re.I):
@@ -64,16 +64,17 @@ jobs:
                   text = page.read_text(encoding='utf-8')
                   original = text
 
-                  # Remove retired tracker bootstrap only.
-                  text = re.sub(r'^\s*require_once\s+.*?/analytics/tracker\.php[^\n]*\n?', '', text, flags=re.I | re.M)
+                  # Remove every retired tracker reference from tool source, including
+                  # assignments such as $tracker = .../analytics/tracker.php.
+                  text = re.sub(r'^.*analytics/tracker\\.php.*(?:\\r?\\n|$)', '', text, flags=re.I | re.M)
 
                   # Normalize retired public URLs.
                   text = text.replace('/smart-toolz/tools/', '/tools/')
                   text = text.replace('/smart-toolz/tool.php', '/tool.php')
 
                   # Only real HTML pages receive shared header/footer injection.
-                  # Tiny PHP wrappers/bootstraps must never receive extra PHP blocks.
-                  is_html_page = bool(re.search(r'<!doctype\s+html|<html\b', text, flags=re.I))
+                  # Tiny wrappers/bootstraps must never receive extra PHP blocks.
+                  is_html_page = bool(re.search(r'<!doctype\\s+html|<html\\b', text, flags=re.I))
                   if is_html_page:
                       text = ensure_header(text)
                       text = ensure_footer(text)
@@ -134,13 +135,13 @@ jobs:
           set -euo pipefail
           bad=0
 
-          if grep -RIn --exclude-dir=.git --exclude='*.min.js' '/smart-toolz/tools/' .; then
+          if grep -RIn --exclude-dir=.git --exclude-dir=.github --exclude='*.min.js' '/smart-toolz/tools/' .; then
             echo 'Found retired /smart-toolz/tools/ references.'
             bad=1
           fi
 
-          if grep -RIn --exclude-dir=.git --exclude='*.yml' 'analytics/tracker.php' tools *.php 2>/dev/null; then
-            echo 'Found retired tracking bootstraps.'
+          if grep -RIn --include='*.php' 'analytics/tracker.php' tools 2>/dev/null; then
+            echo 'Found retired tracking references in tool source.'
             bad=1
           fi
 
@@ -150,9 +151,9 @@ jobs:
 
       - name: Live smoke test
         shell: bash
-        continue-on-error: true
         run: |
           set -u
+          bad=0
           urls=(
             'https://smarttoolz.in/'
             'https://smarttoolz.in/tool.php'
@@ -164,7 +165,12 @@ jobs:
           for url in "${urls[@]}"; do
             code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)
             printf '%s %s\n' "$code" "$url"
+            case "$code" in
+              2*|3*) ;;
+              *) bad=1 ;;
+            esac
           done
+          exit "$bad"
 
       - name: Commit automation fixes
         shell: bash

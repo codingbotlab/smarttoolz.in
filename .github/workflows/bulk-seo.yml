@@ -27,6 +27,18 @@ jobs:
           php-version: '8.2'
           coverage: none
 
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Compile Less to CSS
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes less@4.9.0 assets/less/smarttoolz.less assets/css/smarttoolz.css --clean-css
+          test -s assets/css/smarttoolz.css
+
       - name: Normalize tool document shells and generate sitemap
         shell: python
         run: |
@@ -151,10 +163,10 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tools head.php header.php sitemap.xml
+          git add assets/css/smarttoolz.css assets/less/smarttoolz.less tools head.php header.php sitemap.xml
           if git diff --cached --quiet; then
             echo 'No automation changes required.'
             exit 0
           fi
-          git commit -m 'Normalize SmartToolz tool document shells [skip-site-automation]'
+          git commit -m 'Build SmartToolz styles and normalize site shells [skip-site-automation]'
           git push

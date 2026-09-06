@@ -1,6 +1,2 @@
-<?php
-// Shared SmartToolz footer dependencies.
-if (is_file(__DIR__ . '/tutorial-embed.php')) require __DIR__ . '/tutorial-embed.php';
-?>
-<link rel="stylesheet" href="/core/ui/app.css">
-<script defer src="/core/ui/app.js"></script>
+<footer class="site-footer"><div class="footer-inner"><div><span class="footer-brand">SmartToolz</span><span> — free tools for everyday work.</span></div><nav class="footer-links" aria-label="Footer"><a href="/">Home</a><a href="/tool.php">All Tools</a><a href="/privacy-policy.php">Privacy</a><a href="/terms.php">Terms</a></nav></div></footer>
+<script defer src="/assets/js/smarttoolz.js"></script>

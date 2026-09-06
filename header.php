@@ -8,6 +8,8 @@ function smarttoolz_render_header(): void
     $active = rtrim($currentPath, '/') === '' ? 'home' : ($currentPath === '/tool.php' || str_starts_with($currentPath, '/category/') ? 'all-tools' : (str_starts_with($currentPath, '/tools/') ? 'tools' : ''));
     $is = static fn(string $key): string => $active === $key ? ' aria-current="page"' : '';
     ?>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="/assets/css/smarttoolz.css">
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="/" aria-label="SmartToolz home"><span class="brand-mark" aria-hidden="true">✦</span><span>SmartToolz</span></a>
@@ -21,6 +23,4 @@ function smarttoolz_render_header(): void
     <?php
 }
 
-if (defined('SMARTTOOLZ_RENDER_SHELL')) {
-    smarttoolz_render_header();
-}
+smarttoolz_render_header();

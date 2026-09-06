@@ -25,35 +25,38 @@ jobs:
           from pathlib import Path
           import re
 
-          targets = {
-              'tools/gif-maker/gif-maker.php': re.compile(r"<\?php\s*declare\(strict_types=1\);.*?smartToozAd\('socialbar'\);\s*\?>", re.I | re.S),
-              'tools/meme-generator/meme-generator.php': re.compile(r"<\?php\s*declare\(strict_types=1\);.*?smartToozMemeAd\('socialbar'\);\s*\?>", re.I | re.S),
-              'tools/color-picker/color-picker.php': re.compile(r"<\?php\s*declare\(strict_types=1\);\s*\?>", re.I | re.S),
-          }
+          tools_root = Path('tools')
+          legacy_re = re.compile(r'creator-ai/auth/config\.php|analytics/tracker\.php|ads_settings|smartTooz|Smart-Tooz|Smart Tooz', re.I)
 
-          for path, pattern in targets.items():
-              file = Path(path)
-              if not file.is_file():
+          def clean_initial_php(text: str) -> str:
+              match = re.match(r'\s*<\?php.*?\?>', text, re.I | re.S)
+              if not match or not legacy_re.search(match.group(0)):
+                  return text
+              block = match.group(0)
+              keep = "<?php\ndeclare(strict_types=1);\n"
+              needs_ad = bool(re.search(r'\bsmart(?:Tooz|Toolz)\w*Ad\s*\(', text, re.I))
+              if needs_ad:
+                  keep += "function smartToolzAd(string $key): void {}\nfunction smartToolzMemeAd(string $key): void {}\n"
+              keep += "?>"
+              return keep + text[match.end():]
+
+          changed=[]
+          for page in sorted(tools_root.rglob('*.php')) if tools_root.is_dir() else []:
+              if page.name in {'header.php','footer.php','bootstrap.php','tool-sidebar.php','head.php'}:
                   continue
-              text = file.read_text(encoding='utf-8')
-              if path.endswith('gif-maker.php'):
-                  replacement = "<?php\ndeclare(strict_types=1);\nfunction smartToolzAd(string $key): void {}\n?>"
-                  text = pattern.sub(replacement, text, count=1)
-                  text = text.replace('smartToozAd', 'smartToolzAd')
-              elif path.endswith('meme-generator.php'):
-                  replacement = "<?php\ndeclare(strict_types=1);\nfunction smartToolzMemeAd(string $key): void {}\n?>"
-                  text = pattern.sub(replacement, text, count=1)
-                  text = text.replace('smartToozMemeAd', 'smartToolzMemeAd')
-              elif path.endswith('color-picker.php'):
-                  # Color Picker was fully rebuilt; do not replace its page-level bootstrap.
-                  text = re.sub(r'\bif \(is_file\(\$tracker\)\) \{\s*require_once \$tracker;\s*\}', '', text, flags=re.I)
-                  text = re.sub(r'function colorPickerAd\([^)]*\):void\s*\{.*?\}', 'function colorPickerAd(string $key): void {}', text, flags=re.I | re.S)
-
-              text = text.replace('Smart-Tooz', 'SmartToolz').replace('Smart Tooz', 'SmartToolz')
-              text = re.sub(r'/tools/([a-z0-9-]+)\.php(?=["\'?#\s>])', r'/tools/\1/', text, flags=re.I)
-              text = re.sub(r'<footer[^>]*>\s*<strong>\s*SmartToolz\s*</strong>.*?</footer>', '', text, flags=re.I | re.S)
-              file.write_text(text, encoding='utf-8')
-              print(f'Cleaned {path}')
+              text=page.read_text(encoding='utf-8')
+              original=text
+              text=clean_initial_php(text)
+              text=text.replace('Smart-Tooz','SmartToolz').replace('Smart Tooz','SmartToolz')
+              text=text.replace('smartToozAd','smartToolzAd').replace('smartToozMemeAd','smartToolzMemeAd')
+              text=re.sub(r'/tools/([a-z0-9-]+)\.php(?=["\'?#\s>])',r'/tools/\1/',text,flags=re.I)
+              text=re.sub(r'<footer[^>]*>\s*<strong>\s*SmartToolz\s*</strong>.*?</footer>','',text,flags=re.I|re.S)
+              if text!=original:
+                  page.write_text(text,encoding='utf-8')
+                  changed.append(str(page))
+          print(f'Legacy cleanup changed {len(changed)} tool pages')
+          for path in changed:
+              print(path)
 
       - name: Audit all canonical tool pages
         shell: bash
@@ -63,15 +66,15 @@ jobs:
           pages=0
           while IFS= read -r -d '' file; do
             pages=$((pages+1))
-            if grep -Eqi 'Smart-Tooz|smartTooz' "$file"; then
-              echo "Legacy Smart-Tooz branding found: $file"
+            if grep -Eqi 'Smart-Tooz|smartTooz|Smart Tooz' "$file"; then
+              echo "Legacy branding found: $file"
               failed=1
             fi
             if grep -Eqi "/tools/[A-Za-z0-9-]+\.php(\"|\?|#|[[:space:]]|>|$)" "$file"; then
               echo "Legacy .php tool link found: $file"
               failed=1
             fi
-            if grep -Eqi 'creator-ai/auth/config\.php|analytics/tracker\.php' "$file"; then
+            if grep -Eqi 'creator-ai/auth/config\.php|analytics/tracker\.php|ads_settings' "$file"; then
               echo "Legacy application integration found: $file"
               failed=1
             fi

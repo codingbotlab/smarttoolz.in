@@ -1,101 +1,184 @@
-name: Bulk SEO Tool Cleanup
+name: SmartToolz Site Automation
 
 on:
   push:
     branches: [main]
     paths-ignore:
       - '.github/workflows/bulk-seo.yml'
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  cleanup:
-    if: ${{ !contains(github.event.head_commit.message, '[skip-bulk-seo]') }}
+  maintain:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-site-automation]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Normalize remaining tool pages
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+          coverage: none
+
+      - name: Normalize tool pages and generate sitemap
         shell: python
         run: |
           from pathlib import Path
           import re
+          from xml.etree import ElementTree as ET
 
           root = Path('.')
-          skip = {
-              'image-compressor', 'image-resizer', 'image-background-remover',
-              'jpg-to-png', 'png-to-jpg', 'word-counter', 'case-converter',
-              'qr-generator', 'password-generator'
-          }
+          tools_root = root / 'tools'
 
-          for path in sorted((root / 'tools').glob('*/*.php')):
-              slug = path.parent.name
-              if slug in skip or path.name != f'{slug}.php':
-                  continue
+          def ensure_header(text: str) -> str:
+              if "dirname(__DIR__) . '/header.php'" in text or "../header.php" in text:
+                  return text
+              include = "<?php require_once dirname(__DIR__) . '/header.php'; ?>\n"
+              m = re.search(r'<\?php', text, re.I)
+              if m and m.start() == 0:
+                  end = text.find('?>', m.start())
+                  if end != -1:
+                      return text[:end + 2] + '\n' + include + text[end + 2:]
+              return include + text
 
-              text = path.read_text(encoding='utf-8')
-              original = text
+          def ensure_footer(text: str) -> str:
+              if "dirname(__DIR__) . '/footer.php'" in text or "../footer.php" in text:
+                  return text
+              footer = "\n<?php require_once dirname(__DIR__) . '/footer.php'; ?>\n"
+              if re.search(r'</body>', text, re.I):
+                  return re.sub(r'</body>', footer + '</body>', text, count=1, flags=re.I)
+              return text.rstrip() + footer
 
-              # Remove legacy tracking/database bootstraps from the PHP preamble.
-              text = re.sub(r"^.*require_once\\s+\\$_SERVER\['DOCUMENT_ROOT'\].*?/analytics/tracker\\.php';?\\s*\\n?", '', text, flags=re.M)
-              text = re.sub(r"^.*require_once\\s+\\$_SERVER\['DOCUMENT_ROOT'\].*?/creator-ai/auth/config\\.php';?\\s*\\n?", '', text, flags=re.M)
-              text = re.sub(r"^.*\\$pdo\\s*=\\s*db\(\);.*\\n?", '', text, flags=re.M)
-              text = re.sub(r"\\n?\\$smartToozAds\\s*=\\s*\[\];.*?(?=\\?>|<!doctype|<\\!DOCTYPE|<html)", '\n', text, flags=re.S|re.I)
-              text = re.sub(r"function\\s+smartToozAd\\s*\\([^)]*\\)\\s*\\{.*?^\\}\\s*", '', text, flags=re.S|re.M)
-              text = re.sub(r"^\\s*smartToozAd\([^;]+\);\\s*\\n?", '', text, flags=re.M)
+          tool_pages = []
+          if tools_root.is_dir():
+              for directory in sorted(p for p in tools_root.iterdir() if p.is_dir()):
+                  slug = directory.name
+                  page = directory / f'{slug}.php'
+                  if not page.is_file():
+                      continue
+                  tool_pages.append(slug)
+                  text = page.read_text(encoding='utf-8')
+                  original = text
 
-              # Fix legacy absolute tool links.
-              text = text.replace('/smart-toolz/tools/', '/tools/')
-              text = text.replace('/smart-toolz/tool.php', '/tool.php')
+                  # Remove obsolete tracking/database bootstraps that caused production 500s.
+                  text = re.sub(r'^\s*require_once\s+.*?/analytics/tracker\.php[^\n]*\n?', '', text, flags=re.I|re.M)
+                  text = re.sub(r'^\s*require_once\s+.*?/creator-ai/auth/config\.php[^\n]*\n?', '', text, flags=re.I|re.M)
+                  text = re.sub(r'^\s*\$pdo\s*=\s*db\(\);\s*\n?', '', text, flags=re.I|re.M)
 
-              # Ensure the root shared header is referenced at least once.
-              if 'header.php' not in text:
-                  marker = text.find('?>')
-                  include = "<?php require_once dirname(__DIR__) . '/header.php'; ?>\n"
-                  if marker >= 0:
-                      text = text[:marker+2] + '\n' + include + text[marker+2:]
-                  else:
-                      text = include + text
+                  # Normalize current public URLs; never emit the retired /smart-toolz prefix.
+                  text = text.replace('/smart-toolz/tools/', '/tools/')
+                  text = text.replace('/smart-toolz/tool.php', '/tool.php')
+                  text = text.replace('/smart-toolz/', '/')
 
-              # Ensure every tool has the shared footer include.
-              if 'footer.php' not in text:
-                  footer = "\n<?php require_once dirname(__DIR__) . '/footer.php'; ?>\n"
-                  if re.search(r'</body>', text, flags=re.I):
-                      text = re.sub(r'</body>', footer + '</body>', text, count=1, flags=re.I)
-                  else:
-                      text += footer
+                  text = ensure_header(text)
+                  text = ensure_footer(text)
 
-              if text != original:
-                  path.write_text(text, encoding='utf-8')
+                  if text != original:
+                      page.write_text(text, encoding='utf-8')
 
-          # Make the shared header/footer idempotent so legacy duplicate includes are harmless.
+          # Keep the shared header/footer idempotent.
           hp = root / 'header.php'
-          h = hp.read_text(encoding='utf-8')
-          guard = "<?php\nif (defined('SMARTTOOLZ_HEADER_LOADED')) { return; }\ndefine('SMARTTOOLZ_HEADER_LOADED', true);\n"
-          if "SMARTTOOLZ_HEADER_LOADED" not in h:
-              if h.startswith('<?php'):
-                  h = guard + h[len('<?php'):]
-              else:
-                  h = guard + '?>\n' + h
-              hp.write_text(h, encoding='utf-8')
+          if hp.is_file():
+              h = hp.read_text(encoding='utf-8')
+              if 'SMARTTOOLZ_HEADER_LOADED' not in h:
+                  h = h.replace('<?php', "<?php\nif (defined('SMARTTOOLZ_HEADER_LOADED')) { return; }\ndefine('SMARTTOOLZ_HEADER_LOADED', true);", 1)
+                  hp.write_text(h, encoding='utf-8')
 
           fp = root / 'footer.php'
-          f = fp.read_text(encoding='utf-8')
-          fguard = "<?php\nif (defined('SMARTTOOLZ_FOOTER_LOADED')) { return; }\ndefine('SMARTTOOLZ_FOOTER_LOADED', true);\n?>\n"
-          if "SMARTTOOLZ_FOOTER_LOADED" not in f:
-              fp.write_text(fguard + f, encoding='utf-8')
+          if fp.is_file():
+              f = fp.read_text(encoding='utf-8')
+              if 'SMARTTOOLZ_FOOTER_LOADED' not in f:
+                  f = f.replace('<?php', "<?php\nif (defined('SMARTTOOLZ_FOOTER_LOADED')) { return; }\ndefine('SMARTTOOLZ_FOOTER_LOADED', true);", 1)
+                  fp.write_text(f, encoding='utf-8')
 
-      - name: Commit normalized pages
+          # Generate sitemap from actual canonical tool folders so new tools are picked up automatically.
+          static_urls = [
+              '/', '/tool.php', '/about.php', '/contact.php', '/privacy-policy.php',
+              '/cookie-policy.php', '/terms.php', '/disclaimer.php'
+          ]
+          categories = [
+              'calculators', 'design-tools', 'developer-tools', 'generators',
+              'image-tools', 'pdf-tools', 'security', 'text-tools', 'utilities'
+          ]
+          urls = static_urls + [f'/category/{c}/' for c in categories]
+          urls += [f'/tools/{slug}/' for slug in tool_pages]
+
+          urlset = ET.Element('urlset', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
+          for url in urls:
+              u = ET.SubElement(urlset, 'url')
+              loc = ET.SubElement(u, 'loc')
+              loc.text = 'https://smarttoolz.in' + url
+          ET.ElementTree(urlset).write(root / 'sitemap.xml', encoding='utf-8', xml_declaration=True)
+
+          print(f'Canonical tool pages: {len(tool_pages)}')
+
+      - name: PHP syntax validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+          while IFS= read -r -d '' file; do
+            if ! php -l "$file" >/tmp/php-lint.txt 2>&1; then
+              cat /tmp/php-lint.txt
+              failed=1
+            fi
+          done < <(find . -type f -name '*.php' -not -path './.git/*' -print0)
+          exit "$failed"
+
+      - name: Legacy and broken-reference audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=0
+          if grep -RIn --exclude-dir=.git --exclude='*.min.js' '/smart-toolz/' .; then
+            echo 'Found retired /smart-toolz/ references.'
+            bad=1
+          fi
+          if grep -RIn --exclude-dir=.git 'analytics/tracker.php\|creator-ai/auth/config.php' tools *.php 2>/dev/null; then
+            echo 'Found retired tracking/auth bootstraps.'
+            bad=1
+          fi
+          if grep -RIn --exclude-dir=.git --include='*.php' '\bdb[[:space:]]*(' tools 2>/dev/null; then
+            echo 'Found runtime DB calls in tools.'
+            bad=1
+          fi
+          test -f sitemap.xml || { echo 'sitemap.xml missing'; bad=1; }
+          exit "$bad"
+
+      - name: Live smoke test
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -u
+          urls=(
+            'https://smarttoolz.in/'
+            'https://smarttoolz.in/tool.php'
+            'https://smarttoolz.in/tools/image-compressor/'
+            'https://smarttoolz.in/tools/image-resizer/'
+            'https://smarttoolz.in/tools/image-background-remover/'
+            'https://smarttoolz.in/tools/json-formatter/'
+          )
+          for url in "${urls[@]}"; do
+            code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)
+            printf '%s %s\n' "$code" "$url"
+          done
+
+      - name: Commit automation fixes
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tools header.php footer.php
+          git add tools header.php footer.php sitemap.xml
           if git diff --cached --quiet; then
-            echo 'No bulk changes required.'
+            echo 'No automation changes required.'
             exit 0
           fi
-          git commit -m 'Normalize remaining tool pages for SEO and AdSense [skip-bulk-seo]'
+          git commit -m 'Automate SmartToolz site maintenance [skip-site-automation]'
           git push

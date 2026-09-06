@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /lib/
-Disallow: /analytics/
-Disallow: /creator-ai/
-
-Sitemap: https://smarttoolz.in/sitemap.xml

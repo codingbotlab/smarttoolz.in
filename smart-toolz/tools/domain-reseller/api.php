@@ -66,20 +66,15 @@ if (!is_array($data)) {
     json_error('Invalid response from domain provider', 502);
 }
 
-// Provider responses can be returned as an array or wrapped in a result/data field.
 $rows = $data;
 if (isset($data['data']) && is_array($data['data'])) $rows = $data['data'];
 if (isset($data['result']) && is_array($data['result'])) $rows = $data['result'];
-if (isset($rows[0]) && is_array($rows[0])) {
-    $row = $rows[0];
-} else {
-    $row = $rows;
-}
+$row = (isset($rows[0]) && is_array($rows[0])) ? $rows[0] : $rows;
 
 $statusValue = strtolower((string)($row['Status'] ?? $row['status'] ?? ''));
 $available = in_array($statusValue, ['available', 'ok', 'success'], true);
-
-$priceValue = $row['Price'] ?? $row['price'] ?? null;\$currency = $row['Currency'] ?? $row['currency'] ?? '';
+$priceValue = $row['Price'] ?? $row['price'] ?? null;
+$currency = $row['Currency'] ?? $row['currency'] ?? '';
 $price = $priceValue !== null ? (string)$priceValue . ($currency !== '' ? ' ' . $currency : '') : '—';
 
 if ($status >= 400) {

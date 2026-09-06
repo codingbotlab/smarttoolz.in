@@ -22,18 +22,22 @@ if ($domain === '' || !preg_match('/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-
     json_error('Invalid domain');
 }
 
-// Keep credentials on the server. Never put them in GitHub or browser JavaScript.
-$resellerId = getenv('DOMAINNAMEAPI_RESELLER_ID');
-$apiKey     = getenv('DOMAINNAMEAPI_API_KEY');
-$baseUrl    = getenv('DOMAINNAMEAPI_BASE_URL') ?: 'https://ote.domainresellerapi.com';
+// Keep credentials OUT of GitHub and browser JavaScript.
+// Set these as server environment variables on Hostinger:
+// DOMAINNAMEAPI_RESELLER_ID=your reseller UUID
+// DOMAINNAMEAPI_API_KEY=your API key
+// DOMAINNAMEAPI_BASE_URL=https://ote.domainresellerapi.com
+$username = getenv('DOMAINNAMEAPI_RESELLER_ID') ?: '';
+$apiToken = getenv('DOMAINNAMEAPI_API_KEY') ?: '';
+$baseUrl  = getenv('DOMAINNAMEAPI_BASE_URL') ?: 'https://ote.domainresellerapi.com';
 
-if (!$resellerId || !$apiKey) {
+if ($username === '' || $apiToken === '') {
     json_error('Domain API credentials are not configured on the server', 503);
 }
 
-$lastDot = strrpos($domain, '.');
-$name = substr($domain, 0, $lastDot);
-$tld  = substr($domain, $lastDot + 1);
+$parts = explode('.', $domain, 2);
+$name = $parts[0];
+$tld  = $parts[1];
 
 $url = rtrim($baseUrl, '/') . '/api/domain/check?' . http_build_query([
     'domainNames' => $name,
@@ -48,7 +52,7 @@ curl_setopt_array($ch, [
     CURLOPT_TIMEOUT => 15,
     CURLOPT_CONNECTTIMEOUT => 8,
     CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-    CURLOPT_USERPWD => $resellerId . ':' . $apiKey,
+    CURLOPT_USERPWD => $username . ':' . $apiToken,
     CURLOPT_HTTPHEADER => ['Accept: application/json'],
 ]);
 

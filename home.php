@@ -15,7 +15,22 @@ $categoryMeta = [
     'Developer Tools' => ['icon' => '</>', 'class' => 'purple', 'copy' => 'Encode, decode, format and generate.'],
     'Generators' => ['icon' => '⚙', 'class' => 'orange', 'copy' => 'Create useful random data and outputs.'],
 ];
-$heroCategories = array_values(array_filter(array_keys($categoryMeta), static fn(string $name): bool => array_key_exists($name, $categories)));
+$categoryFallbacks = [
+    'Security' => ['icon' => 'KEY', 'class' => 'purple', 'copy' => 'Protect, generate and work with secure data.'],
+    'Design Tools' => ['icon' => 'CLR', 'class' => 'pink', 'copy' => 'Pick, inspect and work with design values.'],
+    'Other Tools' => ['icon' => 'TOOL', 'class' => 'blue', 'copy' => 'Useful browser-based utilities for everyday tasks.'],
+];
+$genericClasses = ['pink','red','blue','green','purple','orange'];
+foreach (array_keys($categories) as $i => $category) {
+    if (!isset($categoryMeta[$category])) {
+        $categoryMeta[$category] = $categoryFallbacks[$category] ?? [
+            'icon' => 'TOOL',
+            'class' => $genericClasses[$i % count($genericClasses)],
+            'copy' => 'Useful free online tools for '.strtolower($category).' tasks.'
+        ];
+    }
+}
+$heroCategories = array_keys($categories);
 ?>
 <!doctype html>
 <html lang="en">

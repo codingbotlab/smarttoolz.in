@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 define('SMARTTOOLZ_HOME_REGISTRY', true);
-require __DIR__ . '/tool.php';
-require __DIR__ . '/lib/icons.php';
-require __DIR__ . '/header.php';
+require_once __DIR__ . '/tool.php';
+require_once __DIR__ . '/lib/icons.php';
+require_once __DIR__ . '/header.php';
 
 $tools = is_array($tools ?? null) ? $tools : [];
 $popularNames = ['Image Compressor','Image Resizer','JPG to PNG','PNG to JPG','PDF to JPG','Image Cropper','GIF Maker','Meme Generator','Color Picker','JSON Formatter','QR Code Generator','Word Counter'];
@@ -108,6 +108,6 @@ function st_slug(string $value): string { return trim(strtolower((string)(preg_r
 <section class="section" style="padding-top:0">
   <div class="page-wrap"><div class="cta-box"><h2>Find a tool and finish the task.</h2><p>Browse the complete SmartToolz collection and get straight to the utility you need.</p><a class="btn btn-primary" href="/tool.php"><?=st_icon('apps')?> Browse all tools</a></div></div>
 </section>
-<?php require __DIR__ . '/footer.php'; ?>
+<?php require_once __DIR__ . '/footer.php'; ?>
 </body>
 </html>

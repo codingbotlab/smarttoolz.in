@@ -26,8 +26,8 @@ jobs:
           import re
 
           tools_root = Path('tools')
-          legacy_markers = re.compile(r'creator-ai/auth/config\.php|analytics/tracker\.php|ads_settings|smartTooz|Smart-Tooz|Smart Tooz', re.I)
-          ad_call = re.compile(r'\bsmartTooz(?:Ad|MemeAd)\s*\(', re.I)
+          legacy_markers = re.compile(r'creator-ai/auth/config\.php|analytics/tracker\.php|ads_settings|smarttooz|smart-tooz', re.I)
+          ad_call = re.compile(r'\bsmarttooz(?:Ad|MemeAd)\s*\(', re.I)
 
           changed=[]
           for page in sorted(tools_root.rglob('*.php')) if tools_root.is_dir() else []:
@@ -38,18 +38,15 @@ jobs:
 
               first=re.match(r'\s*<\?php.*?\?>', text, flags=re.I|re.S)
               if first and legacy_markers.search(first.group(0)):
-                  # Legacy tool files kept only presentation/tool logic in HTML/JS; their opening PHP
-                  # block was predominantly database, ads and tracker bootstrap. Replace that block
-                  # with harmless browser-only compatibility functions so tool logic stays available.
-                  calls=ad_call.findall(text)
                   replacement="<?php\ndeclare(strict_types=1);\n"
-                  if calls:
+                  if ad_call.search(text):
                       replacement += "function smartToolzAd(string $key): void {}\nfunction smartToolzMemeAd(string $key): void {}\n"
                   replacement += "?>"
                   text=text[:first.start()]+replacement+text[first.end():]
 
-              text=text.replace('Smart-Tooz','SmartToolz').replace('Smart Tooz','SmartToolz')
-              text=text.replace('smartToozAd','smartToolzAd').replace('smartToozMemeAd','smartToolzMemeAd')
+              text=re.sub(r'Smart[- ]Tooz', 'SmartToolz', text, flags=re.I)
+              text=re.sub(r'\bsmartToozAd\b','smartToolzAd',text,flags=re.I)
+              text=re.sub(r'\bsmartToozMemeAd\b','smartToolzMemeAd',text,flags=re.I)
               text=re.sub(r'/tools/([a-z0-9-]+)\.php(?=["\'?#\s>])',r'/tools/\1/',text,flags=re.I)
               text=re.sub(r'<footer[^>]*>\s*<strong>\s*SmartToolz\s*</strong>.*?</footer>','',text,flags=re.I|re.S)
 

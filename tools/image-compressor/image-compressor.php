@@ -6,42 +6,221 @@ require_once dirname(__DIR__) . '/header.php';
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Free Image Compressor Online — SmartToolz</title>
-<meta name="description" content="Compress JPG, PNG and WebP images online for free. Choose quality, compare the result and download a smaller image directly in your browser with SmartToolz.">
-<meta name="robots" content="index,follow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Image Compressor Online — JPG, PNG & WebP | SmartToolz</title>
+<meta name="description" content="Compress JPG, PNG and WebP images online for free. Adjust quality, compare file sizes and download a smaller image directly in your browser with SmartToolz.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://smarttoolz.in/tools/image-compressor/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SmartToolz">
+<meta property="og:title" content="Free Image Compressor Online — JPG, PNG & WebP">
+<meta property="og:description" content="Reduce image file size online for free. Compress JPG, PNG and WebP images in your browser, compare the result and download it.">
+<meta property="og:url" content="https://smarttoolz.in/tools/image-compressor/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Free Image Compressor Online — SmartToolz">
+<meta name="twitter:description" content="Free browser-based image compression for JPG, PNG and WebP files.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebApplication",
+  "name":"SmartToolz Image Compressor",
+  "url":"https://smarttoolz.in/tools/image-compressor/",
+  "description":"A free browser-based tool for reducing the file size of JPG, PNG and WebP images.",
+  "applicationCategory":"UtilitiesApplication",
+  "operatingSystem":"Any",
+  "browserRequirements":"Requires a modern web browser with JavaScript enabled",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Is the SmartToolz image compressor free?","acceptedAnswer":{"@type":"Answer","text":"Yes. The SmartToolz Image Compressor is available to use for free without creating an account."}},
+    {"@type":"Question","name":"Which image formats are supported?","acceptedAnswer":{"@type":"Answer","text":"The tool accepts JPG, PNG and WebP images."}},
+    {"@type":"Question","name":"How does image compression work?","acceptedAnswer":{"@type":"Answer","text":"The tool decodes the selected image in the browser, draws it to a canvas and creates a compressed image using the quality setting you choose."}},
+    {"@type":"Question","name":"Are my images uploaded to SmartToolz?","acceptedAnswer":{"@type":"Answer","text":"This compressor performs the image processing in your browser. The selected file is not intentionally uploaded to SmartToolz by the compressor itself."}},
+    {"@type":"Question","name":"Can I download the compressed image?","acceptedAnswer":{"@type":"Answer","text":"Yes. After compression finishes, use the Download Compressed Image button to save the result to your device."}}
+  ]
+}
+</script>
 <style>
-:root{--brand:#635bff;--ink:#172033;--muted:#6f7a8d;--line:#e4e8f0;--soft:#f7f8fc;--green:#087443}
-*{box-sizing:border-box}body{margin:0;background:#f6f8fc;color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.compressor-page{width:min(1080px,calc(100% - 24px));margin:28px auto 64px}.hero{text-align:center;padding:28px 12px 24px}.eyebrow{display:inline-flex;padding:7px 12px;border:1px solid #dedbff;border-radius:999px;background:#efedff;color:var(--brand);font-size:10px;font-weight:900;letter-spacing:1px}.hero h1{margin:14px 0 9px;font-size:clamp(32px,6vw,50px);line-height:1.08;letter-spacing:-2px}.hero p{max-width:650px;margin:0 auto;color:var(--muted);font-size:14px;line-height:1.7}.tool-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 16px 45px rgba(25,35,70,.06)}.drop-zone{min-height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:35px 20px;border:2px dashed #cfd4e3;border-radius:18px;background:#fafbff;text-align:center;cursor:pointer;transition:.2s}.drop-zone:hover,.drop-zone.dragover{border-color:var(--brand);background:#f5f3ff;transform:translateY(-1px)}.upload-icon{width:62px;height:62px;display:grid;place-items:center;border-radius:18px;background:#eeedff;color:var(--brand);font-size:28px;margin-bottom:14px}.drop-zone h2{margin:0 0 7px;font-size:20px}.drop-zone p{margin:0;color:var(--muted);font-size:13px}.choose-btn{display:inline-flex;margin-top:17px;padding:11px 18px;border:0;border-radius:11px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer}.formats{margin-top:11px;font-size:11px;color:#8992a3}#fileInput{display:none}.work-area{display:none;margin-top:18px}.file-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:var(--soft);border:1px solid var(--line);border-radius:13px}.file-name{min-width:0;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file-size{font-size:11px;color:var(--muted);white-space:nowrap}.settings{margin-top:14px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:15px}.setting-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;font-weight:800}.quality{color:var(--brand)}input[type=range]{width:100%;accent-color:var(--brand);cursor:pointer}.quality-help{display:flex;justify-content:space-between;color:#9299a8;font-size:10px;margin-top:4px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:11px;padding:12px 17px;font-weight:800;cursor:pointer;text-decoration:none;font-size:13px}.primary{background:var(--brand);color:#fff}.secondary{background:#edf0f5;color:#344054}.btn:disabled{opacity:.5;cursor:not-allowed}.progress{display:none;margin-top:15px}.progress-text{font-size:12px;color:var(--brand);font-weight:800}.bar{height:7px;margin-top:8px;background:#eceef5;border-radius:999px;overflow:hidden}.bar span{display:block;width:0;height:100%;background:var(--brand);transition:width .25s}.error{display:none;margin-top:14px;padding:12px 14px;border-radius:11px;background:#fff1f1;color:#b4232d;font-size:12px}.result{display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}.result-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.result-title h2{margin:0;font-size:17px}.saved{font-size:11px;font-weight:900;color:var(--green);background:#eaf8f0;padding:6px 9px;border-radius:999px}.previews{display:grid;grid-template-columns:1fr 1fr;gap:14px}.preview{border:1px solid var(--line);border-radius:15px;padding:12px;background:#fafbff}.preview h3{margin:0 0 9px;font-size:12px}.preview-box{min-height:210px;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden;background:#fff}.preview-box.checker{background-color:#fff;background-image:linear-gradient(45deg,#eef0f5 25%,transparent 25%),linear-gradient(-45deg,#eef0f5 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eef0f5 75%),linear-gradient(-45deg,transparent 75%,#eef0f5 75%);background-size:22px 22px;background-position:0 0,0 11px,11px -11px,-11px 0}.preview-box img{display:block;max-width:100%;max-height:360px;object-fit:contain}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:13px}.stat{padding:12px;text-align:center;background:var(--soft);border-radius:11px}.stat strong{display:block;font-size:13px;color:var(--brand)}.stat span{font-size:10px;color:var(--muted)}.result-actions{justify-content:center}.download-btn{display:inline-flex!important;align-items:center;justify-content:center;min-width:220px!important;min-height:46px!important;padding:13px 20px!important;border-radius:12px!important;background:#635bff!important;color:#fff!important;border:0!important;text-decoration:none!important;font-weight:900!important;font-size:14px!important;line-height:1.2!important;box-shadow:0 8px 20px rgba(99,91,255,.22)!important;visibility:visible!important;opacity:1!important}.download-btn:hover{background:#5148ee!important;transform:translateY(-1px)}.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.info{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px}.info-icon{font-size:20px}.info h3{margin:9px 0 5px;font-size:14px}.info p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.content{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}.content h2{margin:0 0 8px;font-size:20px}.content p,.content li{color:var(--muted);font-size:13px;line-height:1.75}.content ol{padding-left:20px;margin-bottom:0}@media(max-width:700px){.compressor-page{width:calc(100% - 16px)}.tool-card{padding:14px}.drop-zone{min-height:230px}.previews,.info-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}.file-row{align-items:flex-start;flex-direction:column;gap:4px}.hero h1{letter-spacing:-1.2px}.download-btn{width:100%!important}}
+:root{--brand:#635bff;--ink:#172033;--muted:#667085;--line:#e4e8f0;--soft:#f7f8fc;--green:#087443}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#f6f8fc;color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.compressor-page{width:min(1080px,calc(100% - 24px));margin:0 auto 64px}
+.hero{text-align:center;padding:38px 12px 25px}
+.eyebrow{display:inline-flex;padding:7px 12px;border:1px solid #dedbff;border-radius:999px;background:#efedff;color:var(--brand);font-size:10px;font-weight:900;letter-spacing:1px}
+.hero h1{margin:14px 0 10px;font-size:clamp(32px,6vw,50px);line-height:1.08;letter-spacing:-2px}
+.hero p{max-width:720px;margin:0 auto;color:var(--muted);font-size:14px;line-height:1.75}
+.tool-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 16px 45px rgba(25,35,70,.06)}
+.drop-zone{min-height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:35px 20px;border:2px dashed #cfd4e3;border-radius:18px;background:#fafbff;text-align:center;cursor:pointer;transition:.2s}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--brand);background:#f5f3ff;transform:translateY(-1px)}
+.upload-icon{width:62px;height:62px;display:grid;place-items:center;border-radius:18px;background:#eeedff;color:var(--brand);font-size:28px;margin-bottom:14px}
+.drop-zone h2{margin:0 0 7px;font-size:20px}
+.drop-zone p{margin:0;color:var(--muted);font-size:13px}
+.choose-btn{display:inline-flex;margin-top:17px;padding:11px 18px;border:0;border-radius:11px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer}
+.formats{margin-top:11px;font-size:11px;color:#8992a3}
+#fileInput{display:none}
+.work-area{display:none;margin-top:18px}
+.file-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:var(--soft);border:1px solid var(--line);border-radius:13px}
+.file-name{min-width:0;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-size{font-size:11px;color:var(--muted);white-space:nowrap}
+.settings{margin-top:14px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:15px}
+.setting-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;font-weight:800}
+.quality{color:var(--brand)}
+input[type=range]{width:100%;accent-color:var(--brand);cursor:pointer}
+.quality-help{display:flex;justify-content:space-between;color:#9299a8;font-size:10px;margin-top:4px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:0;border-radius:11px;padding:12px 17px;font-weight:800;cursor:pointer;text-decoration:none;font-size:13px}
+.primary{background:var(--brand);color:#fff}
+.secondary{background:#edf0f5;color:#344054}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.progress{display:none;margin-top:15px}
+.progress-text{font-size:12px;color:var(--brand);font-weight:800}
+.bar{height:7px;margin-top:8px;background:#eceef5;border-radius:999px;overflow:hidden}
+.bar span{display:block;width:0;height:100%;background:var(--brand);transition:width .25s}
+.error{display:none;margin-top:14px;padding:12px 14px;border-radius:11px;background:#fff1f1;color:#b4232d;font-size:12px}
+.result{display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
+.result-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+.result-title h2{margin:0;font-size:17px}
+.saved{font-size:11px;font-weight:900;color:var(--green);background:#eaf8f0;padding:6px 9px;border-radius:999px}
+.previews{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.preview{border:1px solid var(--line);border-radius:15px;padding:12px;background:#fafbff}
+.preview h3{margin:0 0 9px;font-size:12px}
+.preview-box{min-height:210px;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden;background:#fff}
+.preview-box.checker{background-color:#fff;background-image:linear-gradient(45deg,#eef0f5 25%,transparent 25%),linear-gradient(-45deg,#eef0f5 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eef0f5 75%),linear-gradient(-45deg,transparent 75%,#eef0f5 75%);background-size:22px 22px;background-position:0 0,0 11px,11px -11px,-11px 0}
+.preview-box img{display:block;max-width:100%;max-height:360px;object-fit:contain}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:13px}
+.stat{padding:12px;text-align:center;background:var(--soft);border-radius:11px}
+.stat strong{display:block;font-size:13px;color:var(--brand)}
+.stat span{font-size:10px;color:var(--muted)}
+.result-actions{justify-content:center}
+.download-btn{display:inline-flex!important;align-items:center;justify-content:center;min-width:240px!important;min-height:48px!important;padding:13px 20px!important;border-radius:12px!important;background:#635bff!important;color:#fff!important;border:0!important;text-decoration:none!important;font-weight:900!important;font-size:14px!important;line-height:1.2!important;box-shadow:0 8px 20px rgba(99,91,255,.22)!important;visibility:visible!important;opacity:1!important}
+.download-btn:hover{background:#5148ee!important;transform:translateY(-1px)}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.info{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px}
+.info-icon{font-size:20px}
+.info h3{margin:9px 0 5px;font-size:14px}
+.info p{margin:0;color:var(--muted);font-size:12px;line-height:1.65}
+.content{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+.content h2{margin:0 0 9px;font-size:20px}
+.content h3{margin:22px 0 7px;font-size:16px}
+.content p,.content li{color:var(--muted);font-size:13px;line-height:1.75}
+.content p{margin:0 0 10px}
+.content ol,.content ul{padding-left:20px;margin:8px 0 0}
+.content li+li{margin-top:4px}
+.faq{margin-top:18px}
+.faq details{border-top:1px solid var(--line);padding:13px 0}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;font-size:13px;font-weight:800;list-style-position:outside}
+.faq details p{margin:9px 0 0}
+.note{margin-top:18px;padding:14px 16px;background:#f8f8ff;border-left:3px solid var(--brand);border-radius:10px;color:var(--muted);font-size:12px;line-height:1.65}
+.note a{color:var(--brand);font-weight:700}
+@media(max-width:700px){.compressor-page{width:calc(100% - 16px)}.tool-card{padding:14px}.drop-zone{min-height:230px}.previews,.info-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}.file-row{align-items:flex-start;flex-direction:column;gap:4px}.hero h1{letter-spacing:-1.2px}.download-btn{width:100%!important}}
 </style>
 </head>
 <body>
 <main class="compressor-page">
-<section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE ONLINE TOOL</span><h1>Image Compressor</h1><p>Make JPG, PNG and WebP images smaller in seconds. Adjust quality, compare the result and download it — all directly in your browser.</p></section>
-<section class="tool-card" aria-label="Image compressor">
-<div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Choose an image to compress"><div class="upload-icon" aria-hidden="true">↕</div><h2>Drop your image here</h2><p>Drag & drop or choose a file from your device</p><button class="choose-btn" id="chooseBtn" type="button">Choose Image</button><div class="formats">JPG • PNG • WebP</div><input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp"></div>
+<section class="hero">
+<span class="eyebrow">SMARTTOOLZ • FREE ONLINE TOOL</span>
+<h1>Free Image Compressor Online</h1>
+<p>Reduce JPG, PNG and WebP image file sizes quickly. Choose your compression quality, compare the original with the result, and download the smaller image without creating an account.</p>
+</section>
+
+<section class="tool-card" aria-label="Free image compressor tool">
+<div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Choose an image to compress">
+<div class="upload-icon" aria-hidden="true">↕</div>
+<h2>Drop your image here</h2>
+<p>Drag and drop an image, or choose a file from your device.</p>
+<button class="choose-btn" id="chooseBtn" type="button">Choose Image</button>
+<div class="formats">Supported formats: JPG • PNG • WebP</div>
+<input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp">
+</div>
+
 <div class="work-area" id="workArea">
 <div class="file-row"><span class="file-name" id="fileName">Image</span><span class="file-size" id="fileSize">—</span></div>
-<div class="settings"><div class="setting-top"><span>Compression quality</span><span class="quality" id="qualityValue">80%</span></div><input id="quality" type="range" min="10" max="100" value="80"><div class="quality-help"><span>Smaller file</span><span>Better quality</span></div><div class="actions"><button class="btn primary" id="compressBtn" type="button">Compress Image</button><button class="btn secondary" id="resetBtn" type="button">Choose Another</button></div></div>
-<div class="progress" id="progress"><div class="progress-text" id="progressText">Compressing…</div><div class="bar"><span id="barFill"></span></div></div>
+<div class="settings">
+<div class="setting-top"><span>Compression quality</span><span class="quality" id="qualityValue">80%</span></div>
+<label for="quality" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Image compression quality</label>
+<input id="quality" type="range" min="10" max="100" value="80">
+<div class="quality-help"><span>Smaller file</span><span>Better quality</span></div>
+<div class="actions"><button class="btn primary" id="compressBtn" type="button">Compress Image</button><button class="btn secondary" id="resetBtn" type="button">Choose Another</button></div>
+</div>
+<div class="progress" id="progress" aria-live="polite"><div class="progress-text" id="progressText">Compressing…</div><div class="bar"><span id="barFill"></span></div></div>
 <div class="error" id="error" role="alert"></div>
-<div class="result" id="result"><div class="result-title"><h2>Your compressed image</h2><span class="saved" id="savedBadge">Saved 0%</span></div><div class="previews"><div class="preview"><h3>Original</h3><div class="preview-box"><img id="originalPreview" alt="Original image preview"></div></div><div class="preview"><h3>Compressed</h3><div class="preview-box"><img id="compressedPreview" alt="Compressed image preview"></div></div></div><div class="stats"><div class="stat"><strong id="originalSize">—</strong><span>Original size</span></div><div class="stat"><strong id="compressedSize">—</strong><span>New size</span></div><div class="stat"><strong id="savedSize">—</strong><span>Space saved</span></div></div><div class="actions result-actions"><a class="download-btn" id="downloadBtn" href="#" download="smarttoolz-compressed-image.jpg" aria-label="Download compressed image">⬇ Download Compressed Image</a></div></div>
+
+<div class="result" id="result">
+<div class="result-title"><h2>Your compressed image</h2><span class="saved" id="savedBadge">Saved 0%</span></div>
+<div class="previews">
+<div class="preview"><h3>Original image</h3><div class="preview-box"><img id="originalPreview" alt="Original image preview before compression"></div></div>
+<div class="preview"><h3>Compressed image</h3><div class="preview-box"><img id="compressedPreview" alt="Compressed image preview after compression"></div></div>
+</div>
+<div class="stats"><div class="stat"><strong id="originalSize">—</strong><span>Original size</span></div><div class="stat"><strong id="compressedSize">—</strong><span>New size</span></div><div class="stat"><strong id="savedSize">—</strong><span>Space saved</span></div></div>
+<div class="actions result-actions"><a class="download-btn" id="downloadBtn" href="#" download="smarttoolz-compressed-image.jpg" aria-label="Download compressed image">⬇ Download Compressed Image</a></div>
+</div>
 </div>
 </section>
-<section class="info-grid"><div class="info"><div class="info-icon">⚡</div><h3>Fast & simple</h3><p>Choose an image, set quality and compress. No complicated settings.</p></div><div class="info"><div class="info-icon">🔒</div><h3>Browser-based</h3><p>Your image is processed locally in your browser for this tool.</p></div><div class="info"><div class="info-icon">📦</div><h3>Easy download</h3><p>Compare file sizes and download the compressed result instantly.</p></div></section>
-<section class="content"><h2>How to compress an image</h2><p>Use SmartToolz Image Compressor to reduce image file size before uploading images to websites, sharing them or storing them.</p><ol><li>Click <strong>Choose Image</strong> or drag a JPG, PNG or WebP file into the upload area.</li><li>Move the quality slider to balance image quality and file size.</li><li>Click <strong>Compress Image</strong>, compare the original and compressed versions, then download the result.</li></ol></section>
+
+<section class="info-grid" aria-label="Image compressor features">
+<div class="info"><div class="info-icon" aria-hidden="true">⚡</div><h3>Fast and simple</h3><p>Upload an image, choose a quality level and start compression with one clear action.</p></div>
+<div class="info"><div class="info-icon" aria-hidden="true">🔒</div><h3>Browser-based processing</h3><p>The compressor processes the selected image locally in your browser rather than requiring an account.</p></div>
+<div class="info"><div class="info-icon" aria-hidden="true">📦</div><h3>Easy download</h3><p>Compare the original and compressed sizes, then save the finished image to your device.</p></div>
+</section>
+
+<section class="content">
+<h2>How to compress an image online</h2>
+<p>SmartToolz Image Compressor helps reduce image file size for websites, documents, email attachments, social sharing and storage. It is designed to keep the process straightforward: select an image, adjust quality, compress it and download the result.</p>
+<ol>
+<li>Click <strong>Choose Image</strong> or drag a JPG, PNG or WebP file into the upload area.</li>
+<li>Use the <strong>Compression quality</strong> slider to balance file size and visual quality.</li>
+<li>Click <strong>Compress Image</strong> and wait for the browser to finish processing.</li>
+<li>Compare the original and compressed previews and check the size saved.</li>
+<li>Click <strong>Download Compressed Image</strong> to save the result.</li>
+</ol>
+
+<h3>What is image compression?</h3>
+<p>Image compression reduces the amount of data needed to store an image. A smaller image file can be easier to upload, share and store. The amount of savings depends on the original format, image dimensions, content and selected quality.</p>
+
+<h3>JPG, PNG and WebP compression</h3>
+<p><strong>JPG</strong> is commonly used for photographs and other images with many colors. <strong>PNG</strong> is useful when lossless image data or transparency is important. <strong>WebP</strong> can provide compact files for many modern web images. The best format depends on how the image will be used and whether transparency needs to be preserved.</p>
+
+<h3>When should you compress an image?</h3>
+<ul>
+<li>Before uploading images to a website to reduce page asset size.</li>
+<li>Before attaching large images to email or messages.</li>
+<li>When preparing images for online forms with file-size limits.</li>
+<li>When organizing a photo or design collection to save storage space.</li>
+<li>When sharing images where a smaller file is more convenient.</li>
+</ul>
+
+<div class="note"><strong>Privacy note:</strong> This compressor is designed for browser-based processing. Because files can contain private information, only select images you are comfortable processing with an online tool. For details about SmartToolz privacy practices, see the site's <a href="/privacy-policy.php">Privacy Policy</a>.</div>
+</section>
+
+<section class="content faq" aria-labelledby="faq-heading">
+<h2 id="faq-heading">Frequently Asked Questions</h2>
+<details><summary>Is the SmartToolz image compressor free?</summary><p>Yes. You can use the image compressor for free without creating an account.</p></details>
+<details><summary>Which image formats are supported?</summary><p>The tool accepts JPG, PNG and WebP images.</p></details>
+<details><summary>How much can an image be compressed?</summary><p>There is no single compression percentage for every image. The final size depends on the source image, format and quality setting. The tool shows the actual size reduction after processing.</p></details>
+<details><summary>Does image compression reduce quality?</summary><p>It can. Lower quality settings generally produce smaller files but may introduce more visible changes. Use the preview to choose a balance that works for your image.</p></details>
+<details><summary>Are my images uploaded to SmartToolz?</summary><p>The compressor performs its main image processing in your browser. The compressor itself is not designed to intentionally upload your selected image to SmartToolz.</p></details>
+<details><summary>Can I download the compressed image?</summary><p>Yes. Once processing is complete, the Download Compressed Image button saves the generated result to your device.</p></details>
+</section>
 </main>
+
 <script>
 (function(){
 const $=id=>document.getElementById(id);const drop=$('dropZone'),input=$('fileInput'),choose=$('chooseBtn'),work=$('workArea'),name=$('fileName'),size=$('fileSize'),quality=$('quality'),qualityValue=$('qualityValue'),compress=$('compressBtn'),reset=$('resetBtn'),progress=$('progress'),progressText=$('progressText'),bar=$('barFill'),error=$('error'),result=$('result'),original=$('originalPreview'),compressed=$('compressedPreview'),originalSize=$('originalSize'),compressedSize=$('compressedSize'),savedSize=$('savedSize'),savedBadge=$('savedBadge'),download=$('downloadBtn');let file=null,originalUrl='',resultUrl='';
 function fmt(bytes){if(bytes<1024)return bytes+' B';if(bytes<1048576)return (bytes/1024).toFixed(1)+' KB';return (bytes/1048576).toFixed(2)+' MB'}
 function pick(f){if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)){showError('Please choose a JPG, PNG or WebP image.');return}file=f;error.style.display='none';drop.style.display='none';work.style.display='block';name.textContent=f.name;size.textContent=fmt(f.size);originalSize.textContent=fmt(f.size);if(originalUrl)URL.revokeObjectURL(originalUrl);originalUrl=URL.createObjectURL(f);original.src=originalUrl;result.style.display='none';download.removeAttribute('href')}
 function showError(msg){error.textContent=msg;error.style.display='block';progress.style.display='none';compress.disabled=false}
-async function compressImage(){if(!file)return;error.style.display='none';result.style.display='none';progress.style.display='block';compress.disabled=true;bar.style.width='20%';progressText.textContent='Reading image…';try{const bitmap=await createImageBitmap(file);bar.style.width='45%';progressText.textContent='Compressing image…';const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable');ctx.drawImage(bitmap,0,0);bitmap.close();let mime=file.type==='image/png'?'image/png':'image/jpeg';let q=Number(quality.value)/100;let blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Compression failed')),mime,q));if(mime==='image/png'&&blob.size>=file.size){mime='image/jpeg';blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Compression failed')),'image/jpeg',q))}if(blob.size>=file.size&&q>.35){const lower=Math.max(.25,q-.2);blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Compression failed')),mime,lower))}bar.style.width='100%';progressText.textContent='Compression complete';if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=URL.createObjectURL(blob);compressed.src=resultUrl;compressedSize.textContent=fmt(blob.size);const saved=Math.max(0,(1-blob.size/file.size)*100);savedSize.textContent=saved.toFixed(1)+'%';savedBadge.textContent='Saved '+saved.toFixed(1)+'%';download.href=resultUrl;download.download='smarttoolz-compressed-image.'+(mime==='image/png'?'png':'jpg');download.style.display='inline-flex';result.style.display='block';}catch(e){console.error(e);showError('We could not compress this image. Please try another image.')}finally{compress.disabled=false;setTimeout(()=>progress.style.display='none',700)}}
+function makeBlob(canvas,mime,q){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Compression failed')),mime,q))}
+async function compressImage(){if(!file)return;error.style.display='none';result.style.display='none';progress.style.display='block';compress.disabled=true;bar.style.width='20%';progressText.textContent='Reading image…';try{const bitmap=await createImageBitmap(file);bar.style.width='45%';progressText.textContent='Compressing image…';const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable');ctx.drawImage(bitmap,0,0);bitmap.close();let mime=file.type==='image/png'?'image/png':'image/jpeg';let q=Number(quality.value)/100;let blob=await makeBlob(canvas,mime,q);if(mime==='image/png'&&blob.size>=file.size){mime='image/jpeg';blob=await makeBlob(canvas,mime,q)}if(blob.size>=file.size&&q>.35){const lower=Math.max(.25,q-.2);blob=await makeBlob(canvas,mime,lower)}bar.style.width='100%';progressText.textContent='Compression complete';if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=URL.createObjectURL(blob);compressed.src=resultUrl;compressedSize.textContent=fmt(blob.size);const saved=Math.max(0,(1-blob.size/file.size)*100);savedSize.textContent=saved.toFixed(1)+'%';savedBadge.textContent='Saved '+saved.toFixed(1)+'%';download.href=resultUrl;download.download='smarttoolz-compressed-image.'+(mime==='image/png'?'png':'jpg');download.style.display='inline-flex';result.style.display='block';}catch(e){console.error(e);showError('We could not compress this image. Please try another image.')}finally{compress.disabled=false;setTimeout(()=>progress.style.display='none',700)}}
 function resetAll(){if(originalUrl)URL.revokeObjectURL(originalUrl);if(resultUrl)URL.revokeObjectURL(resultUrl);file=null;input.value='';work.style.display='none';drop.style.display='flex';result.style.display='none';error.style.display='none';bar.style.width='0';download.removeAttribute('href')}
-choose.addEventListener('click',e=>{e.stopPropagation();input.click()});drop.addEventListener('click',e=>{if(e.target!==choose)input.click()});drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}});input.addEventListener('change',()=>pick(input.files&&input.files[0]));drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('dragover')});drop.addEventListener('dragleave',()=>drop.classList.remove('dragover'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('dragover');pick(e.dataTransfer.files&&e.dataTransfer.files[0])});quality.addEventListener('input',()=>qualityValue.textContent=quality.value+'%');compress.addEventListener('click',compressImage);reset.addEventListener('click',resetAll);window.addEventListener('beforeunload',()=>{if(originalUrl)URL.revokeObjectURL(originalUrl);if(resultUrl)URL.revokeObjectURL(resultUrl)});
+quality.addEventListener('input',()=>{qualityValue.textContent=quality.value+'%'});choose.addEventListener('click',e=>{e.stopPropagation();input.click()});drop.addEventListener('click',e=>{if(e.target!==choose)input.click()});drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}});input.addEventListener('change',()=>pick(input.files&&input.files[0]));drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('dragover')});drop.addEventListener('dragleave',()=>drop.classList.remove('dragover'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('dragover');pick(e.dataTransfer.files&&e.dataTransfer.files[0])});compress.addEventListener('click',compressImage);reset.addEventListener('click',resetAll);download.addEventListener('click',e=>{if(!resultUrl){e.preventDefault();showError('Compress an image first, then download the result.')}});
 })();
 </script>
-<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

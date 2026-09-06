@@ -40,8 +40,12 @@ body{margin:0;background:#f7f8fc;color:var(--ink);font-family:Inter,ui-sans-seri
 .status-row{display:flex;align-items:center;justify-content:center;gap:10px;min-height:45px;margin-top:10px;color:var(--brand);font-size:13px;font-weight:750}
 .spinner{width:17px;height:17px;border:2px solid #ddd9ff;border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:8px}
-.btn{border:0;border-radius:11px;padding:12px 20px;background:var(--brand);color:#fff;font-weight:850;font-size:13px;cursor:pointer;transition:.2s}.btn:hover:not(:disabled){background:var(--brand-dark);transform:translateY(-1px)}.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.download-btn,.again-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-width:170px!important;min-height:46px!important;border-radius:11px!important;padding:12px 20px!important;font-family:inherit!important;font-size:13px!important;font-weight:850!important;cursor:pointer!important;transition:.2s!important}
+.download-btn{border:0!important;background:var(--brand)!important;color:#fff!important;box-shadow:0 10px 24px rgba(99,91,255,.22)!important}
+.download-btn:hover:not(:disabled){background:var(--brand-dark)!important;transform:translateY(-1px)}
+.download-btn:disabled{opacity:.55!important;cursor:not-allowed!important}
+.again-btn{background:#fff!important;color:var(--ink)!important;border:1px solid var(--line)!important}
+.again-btn:hover{border-color:#c9c5ff!important;background:#faf9ff!important}
 .error{color:#c0392b!important}
 .benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
 .benefit{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff}.benefit strong{display:block;font-size:12px;margin-bottom:4px}.benefit span{font-size:11px;color:var(--muted);line-height:1.5}
@@ -49,7 +53,7 @@ body{margin:0;background:#f7f8fc;color:var(--ink);font-family:Inter,ui-sans-seri
 .info-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.info-card h2{margin:0 0 12px;font-size:17px;letter-spacing:-.3px}.info-card p,.info-card li{font-size:12px;line-height:1.7;color:var(--muted)}.info-card ol{margin:0;padding-left:20px}.info-card li+li{margin-top:5px}
 .faq{margin-top:16px}.faq details{border-top:1px solid var(--line);padding:13px 0}.faq details:last-child{border-bottom:1px solid var(--line)}.faq summary{cursor:pointer;font-size:12px;font-weight:800}.faq p{margin:9px 0 0;font-size:12px;color:var(--muted);line-height:1.7}
 @media(max-width:720px){.workspace{padding:15px}.tool-card-head{padding:15px 16px}.privacy-note{display:none}.dropzone{min-height:300px}.benefits,.info-grid{grid-template-columns:1fr}.tool-page{margin-top:20px}}
-@media(max-width:430px){.tool-hero h1{font-size:31px}.tool-hero p{font-size:13px}.drop-content{padding:25px 10px}.preview-wrap{min-height:220px}}
+@media(max-width:430px){.tool-hero h1{font-size:31px}.tool-hero p{font-size:13px}.drop-content{padding:25px 10px}.preview-wrap{min-height:220px}.download-btn,.again-btn{width:100%!important}}
 </style>
 </head>
 <body>
@@ -59,7 +63,6 @@ body{margin:0;background:#f7f8fc;color:var(--ink);font-family:Inter,ui-sans-seri
 <h1>Remove Image Background Online</h1>
 <p>Upload your image and SmartToolz will remove the background in your browser. Get a clean transparent PNG without creating an account.</p>
 </section>
-
 <section class="tool-card" aria-label="Background remover tool">
 <header class="tool-card-head">
 <div class="tool-title"><span class="tool-icon" aria-hidden="true">✂</span>Image Background Remover</div>
@@ -75,28 +78,24 @@ body{margin:0;background:#f7f8fc;color:var(--ink);font-family:Inter,ui-sans-seri
 <input class="picker" id="picker" type="file" accept="image/png,image/jpeg,image/webp">
 </div>
 </div>
-
 <div class="result" id="result" aria-live="polite">
 <div class="result-panel">
 <div class="preview-wrap" id="previewWrap"><img id="preview" alt="Background removed transparent PNG preview"></div>
 <div class="status-row"><span class="spinner" id="spinner" aria-hidden="true"></span><span id="status">Preparing image…</span></div>
-<div class="actions"><button class="btn" id="download" type="button" disabled>Download PNG</button><button class="btn secondary" id="again" type="button">Choose another image</button></div>
+<div class="actions"><button class="download-btn" id="download" type="button" disabled>⬇ Download PNG</button><button class="again-btn" id="again" type="button">Choose another image</button></div>
 </div>
 </div>
 </div>
 </section>
-
 <section class="benefits" aria-label="Tool benefits">
 <div class="benefit"><strong>⚡ Fast & Simple</strong><span>Upload, wait for processing, then download your transparent PNG.</span></div>
 <div class="benefit"><strong>🔒 Browser Processing</strong><span>Your selected image is processed locally in your browser.</span></div>
 <div class="benefit"><strong>📥 PNG Output</strong><span>Download the result with transparency preserved.</span></div>
 </section>
-
 <section class="info-grid">
 <article class="info-card"><h2>How to remove an image background</h2><ol><li>Click the upload area and choose a PNG, JPG or WebP image.</li><li>Wait while the background removal model processes the image.</li><li>Preview the transparent result and click <strong>Download PNG</strong>.</li></ol></article>
 <article class="info-card"><h2>About this background remover</h2><p>SmartToolz provides a simple image background remover for everyday editing tasks. It is designed to be easy to use on desktop and mobile browsers, with no login required.</p><p>For best results, use a clear image with the main subject separated from the background.</p></article>
 </section>
-
 <section class="info-card faq" aria-labelledby="faq-title">
 <h2 id="faq-title">Frequently Asked Questions</h2>
 <details><summary>Is the background remover free?</summary><p>Yes. The tool is available to use for free without signing up.</p></details>
@@ -105,7 +104,6 @@ body{margin:0;background:#f7f8fc;color:var(--ink);font-family:Inter,ui-sans-seri
 <details><summary>Do I need to create an account?</summary><p>No account or login is required to use this tool.</p></details>
 </section>
 </main>
-
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 <script type="module">
 const drop=document.getElementById('drop');
@@ -122,7 +120,7 @@ let removeBackground=null;
 
 async function loadEngine(){
   if(removeBackground)return removeBackground;
-  status.textContent='Loading background remover…';
+  status.textContent='Loading background remover model…';
   const mod=await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm');
   removeBackground=mod.removeBackground;
   return removeBackground;
@@ -137,16 +135,18 @@ async function run(file){
   try{
     const remove=await loadEngine();
     status.textContent='Removing background…';
-    const blob=await remove(file,{model:'isnet_quint8',device:'cpu',proxyToWorker:true,output:{format:'image/png',quality:1,type:'foreground'}});
+    const blob=await remove(file,{model:'isnet_quint8',device:'cpu',proxyToWorker:false,progress:(key,current,total)=>{
+      if(total>0){const pct=Math.round((current/total)*100);status.textContent=`Processing… ${pct}%`;}
+    },output:{format:'image/png',quality:1}});
     if(!(blob instanceof Blob)||blob.size===0)throw new Error('Empty result');
     if(resultUrl)URL.revokeObjectURL(resultUrl);
     resultUrl=URL.createObjectURL(blob);
-    preview.onload=()=>{previewWrap.style.display='flex';spinner.style.display='none';download.disabled=false;status.textContent='Background removed successfully.'};
+    preview.onload=()=>{previewWrap.style.display='flex';spinner.style.display='none';download.disabled=false;status.textContent='Background removed successfully — ready to download.'};
+    preview.onerror=()=>{throw new Error('Preview failed to load')};
     preview.src=resultUrl;
-    download.onclick=()=>{if(!resultUrl)return;const a=document.createElement('a');a.href=resultUrl;a.download='smarttoolz-background-removed.png';document.body.appendChild(a);a.click();a.remove()};
-  }catch(error){console.error(error);spinner.style.display='none';status.className='error';status.textContent='Could not remove the background. Please try again with another image.';download.disabled=true;}
+  }catch(error){console.error('Background removal error:',error);spinner.style.display='none';status.className='error';status.textContent='Could not remove the background. Please try again with another image.';download.disabled=true;}
 }
-function reset(){if(resultUrl){URL.revokeObjectURL(resultUrl);resultUrl=''};picker.value='';result.style.display='none';drop.style.display='flex';status.className='';status.textContent='Preparing image…';download.disabled=true;preview.removeAttribute('src')}
+function reset(){if(resultUrl){URL.revokeObjectURL(resultUrl);resultUrl=''};picker.value='';result.style.display='none';drop.style.display='flex';status.className='';status.textContent='Preparing image…';download.disabled=true;preview.removeAttribute('src');previewWrap.style.display='none';spinner.style.display='inline-block'}
 drop.onclick=()=>picker.click();
 drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();picker.click()}};
 picker.onchange=()=>run(picker.files?.[0]);
@@ -154,6 +154,7 @@ drop.ondragover=e=>{e.preventDefault();drop.classList.add('dragging')};
 drop.ondragleave=()=>drop.classList.remove('dragging');
 drop.ondrop=e=>{e.preventDefault();drop.classList.remove('dragging');run(e.dataTransfer.files?.[0])};
 again.onclick=reset;
+download.onclick=()=>{if(!resultUrl)return;const a=document.createElement('a');a.href=resultUrl;a.download='smarttoolz-background-removed.png';document.body.appendChild(a);a.click();a.remove()};
 window.addEventListener('beforeunload',()=>{if(resultUrl)URL.revokeObjectURL(resultUrl)});
 </script>
 </body>

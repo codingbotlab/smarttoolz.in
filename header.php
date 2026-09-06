@@ -26,6 +26,8 @@ function smarttoolz_render_header(): void
   </div>
 </header>
 <?php
+    require_once __DIR__ . '/lib/tool-seo.php';
+    smarttoolz_render_tool_seo();
 }
 
 smarttoolz_render_header();

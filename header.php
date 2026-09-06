@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
+$currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/');
+if ($currentPath === '') $currentPath = '/';
 ?>
 <header class="site-header">
   <div class="header-inner">
@@ -9,12 +11,22 @@ require_once __DIR__ . '/bootstrap.php';
       <span class="brand-tagline">Many Tools. A Smarter You.</span>
     </a>
     <nav class="main-nav" aria-label="Primary navigation">
-      <a class="active" href="/">Home</a>
-      <a href="/tools/">All Tools</a>
-      <a href="/#categories">Categories</a>
-      <a href="/#popular">Popular</a>
-      <a href="/about.php">About</a>
-      <a href="/contact.php">Contact</a>
+      <?php
+      $links = [
+        ['Home', '/'],
+        ['All Tools', '/tools/'],
+        ['Categories', '/#categories'],
+        ['Popular', '/#popular'],
+        ['About', '/about.php'],
+        ['Contact', '/contact.php'],
+      ];
+      foreach ($links as [$label, $href]):
+        $linkPath = rtrim(parse_url($href, PHP_URL_PATH) ?: '/', '/');
+        if ($linkPath === '') $linkPath = '/';
+        $active = ($linkPath === '/') ? ($currentPath === '/') : ($currentPath === $linkPath || str_starts_with($currentPath, $linkPath . '/'));
+      ?>
+        <a href="<?= htmlspecialchars($href, ENT_QUOTES, 'UTF-8') ?>" class="<?= $active ? 'active' : '' ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+      <?php endforeach; ?>
     </nav>
     <div class="header-actions">
       <form class="header-search" action="/tools/" method="get" role="search">
@@ -22,16 +34,15 @@ require_once __DIR__ . '/bootstrap.php';
         <label class="visually-hidden" for="headerToolSearch">Search tools</label>
         <input id="headerToolSearch" name="q" type="search" placeholder="Search tools..." autocomplete="off">
       </form>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 14.3A8.7 8.7 0 0 1 9.7 3.2a8.7 8.7 0 1 0 11.1 11.1Z" fill="currentColor"/></svg>
-      </button>
-      <button class="mobile-menu" id="mobileMenu" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Open navigation">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 14.3A8.7 8.7 0 0 1 9.7 3.2a8.7 8.7 0 1 0 11.1 11.1Z" fill="currentColor"/></svg></button>
+      <button class="mobile-menu" id="mobileMenu" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Open navigation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     </div>
   </div>
   <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
-    <a href="/">Home</a><a href="/tools/">All Tools</a><a href="/#categories">Categories</a><a href="/#popular">Popular</a><a href="/about.php">About</a><a href="/contact.php">Contact</a>
+    <?php foreach ($links as [$label, $href]): ?>
+      <?php $linkPath = rtrim(parse_url($href, PHP_URL_PATH) ?: '/', '/'); if ($linkPath === '') $linkPath = '/'; $active = ($linkPath === '/') ? ($currentPath === '/') : ($currentPath === $linkPath || str_starts_with($currentPath, $linkPath . '/')); ?>
+      <a href="<?= htmlspecialchars($href, ENT_QUOTES, 'UTF-8') ?>"<?= $active ? ' class="active" aria-current="page"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+    <?php endforeach; ?>
     <form class="mobile-search" action="/tools/" method="get" role="search"><input name="q" type="search" placeholder="Search tools..." aria-label="Search tools"></form>
   </nav>
 </header>

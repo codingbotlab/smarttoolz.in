@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# Legacy SmartToolz path: serve the current homepage directly.
+# This is an internal rewrite, so /smart-toolz/ never redirects back to itself.
+RewriteRule ^smart-toolz/?$ home.php [L,QSA,NC]
+
 # Keep private application internals out of public navigation.
 RewriteRule ^(?:api|lib)(?:/|$) - [F,L]
 
@@ -8,10 +12,10 @@ RewriteCond %{THE_REQUEST} \s/+tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
 RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]
 
 # Canonical clean tool URL -> its own implementation.
-RewriteRule ^tools/([A-Za-z0-9-]+)/?$ tools/$1/$1.php [END,QSA,NC]
+RewriteRule ^tools/([A-Za-z0-9-]+)/?$ tools/$1/$1.php [L,QSA,NC]
 
 # Canonical category URLs.
-RewriteRule ^category/([A-Za-z0-9-]+)/?$ /tool.php?category=$1 [END,QSA,NC]
+RewriteRule ^category/([A-Za-z0-9-]+)/?$ /tool.php?category=$1 [L,QSA,NC]
 
 # Friendly 404 page.
 ErrorDocument 404 /404.php

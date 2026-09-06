@@ -22,18 +22,18 @@ if ($domain === '' || !preg_match('/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-
     json_error('Invalid domain');
 }
 
-// Credentials MUST be configured on the server, never in browser JS or Git.
-$username = getenv('DOMAINNAMEAPI_USERNAME');
-$apiToken = getenv('DOMAINNAMEAPI_TOKEN');
-$baseUrl  = getenv('DOMAINNAMEAPI_BASE_URL') ?: 'https://ote.domainresellerapi.com';
+// Keep credentials on the server. Never put them in GitHub or browser JavaScript.
+$resellerId = getenv('DOMAINNAMEAPI_RESELLER_ID');
+$apiKey     = getenv('DOMAINNAMEAPI_API_KEY');
+$baseUrl    = getenv('DOMAINNAMEAPI_BASE_URL') ?: 'https://ote.domainresellerapi.com';
 
-if (!$username || !$apiToken) {
+if (!$resellerId || !$apiKey) {
     json_error('Domain API credentials are not configured on the server', 503);
 }
 
-$parts = explode('.', $domain, 2);
-$name = $parts[0];
-$tld  = $parts[1];
+$lastDot = strrpos($domain, '.');
+$name = substr($domain, 0, $lastDot);
+$tld  = substr($domain, $lastDot + 1);
 
 $url = rtrim($baseUrl, '/') . '/api/domain/check?' . http_build_query([
     'domainNames' => $name,
@@ -48,7 +48,7 @@ curl_setopt_array($ch, [
     CURLOPT_TIMEOUT => 15,
     CURLOPT_CONNECTTIMEOUT => 8,
     CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-    CURLOPT_USERPWD => $username . ':' . $apiToken,
+    CURLOPT_USERPWD => $resellerId . ':' . $apiKey,
     CURLOPT_HTTPHEADER => ['Accept: application/json'],
 ]);
 

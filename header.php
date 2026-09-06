@@ -12,9 +12,9 @@ require_once __DIR__ . '/bootstrap.php';
       <a class="active" href="/">Home</a>
       <a href="/tools/">All Tools</a>
       <a href="/#categories">Categories</a>
-      <a href="/blog/">Blog</a>
+      <a href="/#popular">Popular</a>
       <a href="/about.php">About</a>
-      <a href="/contact/">Contact</a>
+      <a href="/contact.php">Contact</a>
     </nav>
     <div class="header-actions">
       <form class="header-search" action="/tools/" method="get" role="search">
@@ -25,15 +25,20 @@ require_once __DIR__ . '/bootstrap.php';
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 14.3A8.7 8.7 0 0 1 9.7 3.2a8.7 8.7 0 1 0 11.1 11.1Z" fill="currentColor"/></svg>
       </button>
-      <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Open menu" aria-expanded="false">
+      <button class="mobile-menu" id="mobileMenu" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Open navigation">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
   </div>
-  <div class="mobile-nav" id="mobileNav">
-    <a href="/">Home</a><a href="/tools/">All Tools</a><a href="/#categories">Categories</a><a href="/blog/">Blog</a><a href="/about.php">About</a><a href="/contact/">Contact</a>
-  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+    <a href="/">Home</a><a href="/tools/">All Tools</a><a href="/#categories">Categories</a><a href="/#popular">Popular</a><a href="/about.php">About</a><a href="/contact.php">Contact</a>
+    <form class="mobile-search" action="/tools/" method="get" role="search"><input name="q" type="search" placeholder="Search tools..." aria-label="Search tools"></form>
+  </nav>
 </header>
 <script>
-(()=>{const root=document.documentElement,theme=document.getElementById('themeToggle'),menu=document.getElementById('mobileMenu'),nav=document.getElementById('mobileNav');if(theme){const key='smarttoolz-theme';const apply=t=>{root.dataset.theme=t;theme.setAttribute('aria-label',t==='dark'?'Use light mode':'Use dark mode')};const saved=localStorage.getItem(key);if(saved)apply(saved);theme.addEventListener('click',()=>{const next=root.dataset.theme==='dark'?'light':'dark';apply(next);localStorage.setItem(key,next)})}if(menu&&nav){menu.addEventListener('click',()=>{const open=nav.classList.toggle('show');menu.setAttribute('aria-expanded',String(open))});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('show');menu.setAttribute('aria-expanded','false')}))}})();
+(()=>{
+ const theme=document.getElementById('themeToggle'),menu=document.getElementById('mobileMenu'),nav=document.getElementById('mobileNav');
+ if(theme){const k='smarttoolz-theme';const apply=t=>{document.documentElement.dataset.theme=t;theme.setAttribute('aria-label',t==='dark'?'Use light mode':'Use dark mode')};const saved=localStorage.getItem(k);if(saved)apply(saved);theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';apply(t);localStorage.setItem(k,t)})}
+ if(menu&&nav){menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation')});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false')}))}
+})();
 </script>

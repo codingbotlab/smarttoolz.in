@@ -31,39 +31,18 @@ smarttoolz.in/
 
 ## File placement
 
-**HTML/CSS/JS**
-
 - Global CSS/JS → `/assets/css/` and `/assets/js/`.
-- Module-only CSS/JS → the owning module's `assets/` directory.
-- Avoid random CSS/JS files at the repository root.
-
-**PHP**
-
-- Public page/controller → the owning module.
-- Shared module PHP → `<module>/core/` or `<module>/includes/`.
-- JSON/API endpoint → `<module>/api/`.
-- Admin-only code → `<module>/admin/`.
-- Database migrations/seeds → the owning module's database/migrations/seed area.
-
-**Python / Node / automation**
-
-- Workflow-owned scripts → the owning module.
+- Module frontend assets → the owning module's `assets/` directory.
+- Public PHP → the owning module.
+- Shared PHP → `<module>/core/` or `<module>/includes/`.
+- JSON/API endpoints → `<module>/api/`.
+- Admin code → `<module>/admin/`.
 - Repository-wide maintenance → `/scripts/`.
 
-## Routing rule
+## Routing
 
-Public URLs are treated as an API. Keep the root entry and active module routes stable while reorganising implementation.
-
-The root `/index.php` is the public front door and `/developer/` is the developer entry point.
+Public URLs are treated as an API. The root `/index.php` is the public front door and `/developer/` is the developer entry point.
 
 ## Refactor rule
 
-Before moving active code:
-
-1. Find includes/imports/references.
-2. Create the canonical destination.
-3. Update internal references.
-4. Verify the route and dependent code.
-5. Remove obsolete implementations only after their replacement is live.
-
-Retired products should not remain linked from the public site or developer navigation.
+Before moving active code, find references, create the canonical destination, update imports/includes, verify the route, then remove the obsolete implementation. Retired products should not remain linked from the public site or developer navigation.

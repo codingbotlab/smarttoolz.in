@@ -2,29 +2,94 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
 
-// Keep provider credentials in environment variables or a server-side config.
-// Example: DOMAIN_API_TOKEN=...
 $action = $_GET['action'] ?? '';
 $domain = trim(strtolower($_GET['domain'] ?? ''));
 
-if ($action === 'check') {
-    if ($domain === '' || !preg_match('/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/', $domain)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid domain']);
-        exit;
-    }
-
-    // TODO: connect this server endpoint to Domain Name API (or another registrar).
-    // Do not call the registrar directly from browser JavaScript.
-    echo json_encode([
-        'domain' => $domain,
-        'available' => null,
-        'price' => '—',
-        'connected' => false
-    ]);
+function json_error(string $message, int $status = 400): never
+{
+    http_response_code($status);
+    echo json_encode(['error' => $message], JSON_UNESCAPED_SLASHES);
     exit;
 }
 
-http_response_code(404);
-echo json_encode(['error' => 'Unknown action']);
+if ($action !== 'check') {
+    json_error('Unknown action', 404);
+}
+
+if ($domain === '' || !preg_match('/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/', $domain)) {
+    json_error('Invalid domain');
+}
+
+// Credentials MUST be configured on the server, never in browser JS or Git.
+$username = getenv('DOMAINNAMEAPI_USERNAME');
+$apiToken = getenv('DOMAINNAMEAPI_TOKEN');
+$baseUrl  = getenv('DOMAINNAMEAPI_BASE_URL') ?: 'https://ote.domainresellerapi.com';
+
+if (!$username || !$apiToken) {
+    json_error('Domain API credentials are not configured on the server', 503);
+}
+
+$parts = explode('.', $domain, 2);
+$name = $parts[0];
+$tld  = $parts[1];
+
+$url = rtrim($baseUrl, '/') . '/api/domain/check?' . http_build_query([
+    'domainNames' => $name,
+    'tlds' => $tld,
+    'period' => 1,
+    'command' => 'create',
+]);
+
+$ch = curl_init($url);
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 15,
+    CURLOPT_CONNECTTIMEOUT => 8,
+    CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+    CURLOPT_USERPWD => $username . ':' . $apiToken,
+    CURLOPT_HTTPHEADER => ['Accept: application/json'],
+]);
+
+$body = curl_exec($ch);
+$curlError = curl_error($ch);
+$status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($body === false || $curlError !== '') {
+    json_error('Unable to reach domain provider', 502);
+}
+
+$data = json_decode($body, true);
+if (!is_array($data)) {
+    json_error('Invalid response from domain provider', 502);
+}
+
+// Provider responses can be returned as an array or wrapped in a result/data field.
+$rows = $data;
+if (isset($data['data']) && is_array($data['data'])) $rows = $data['data'];
+if (isset($data['result']) && is_array($data['result'])) $rows = $data['result'];
+if (isset($rows[0]) && is_array($rows[0])) {
+    $row = $rows[0];
+} else {
+    $row = $rows;
+}
+
+$statusValue = strtolower((string)($row['Status'] ?? $row['status'] ?? ''));
+$available = in_array($statusValue, ['available', 'ok', 'success'], true);
+
+$priceValue = $row['Price'] ?? $row['price'] ?? null;\$currency = $row['Currency'] ?? $row['currency'] ?? '';
+$price = $priceValue !== null ? (string)$priceValue . ($currency !== '' ? ' ' . $currency : '') : '—';
+
+if ($status >= 400) {
+    json_error((string)($row['Message'] ?? $row['message'] ?? 'Domain provider returned an error'), 502);
+}
+
+echo json_encode([
+    'domain' => $domain,
+    'available' => $available,
+    'status' => $statusValue ?: 'unknown',
+    'price' => $price,
+    'connected' => true,
+], JSON_UNESCAPED_SLASHES);

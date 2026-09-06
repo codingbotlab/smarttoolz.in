@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/header.php';
 
 // QR Generator is fully client-side. No analytics, database, login, upload, or external service.
 ?><!doctype html>

@@ -139,5 +139,7 @@ downloadBtn.addEventListener('click',()=>{if(!convertedUrl)return;const a=docume
 document.getElementById('menuButton').addEventListener('click',()=>document.getElementById('navLinks').classList.toggle('open'));
 </script>
 
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

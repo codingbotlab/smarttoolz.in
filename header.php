@@ -1,4 +1,7 @@
 <?php
+if (defined('SMARTTOOLZ_HEADER_LOADED')) { return; }
+define('SMARTTOOLZ_HEADER_LOADED', true);
+
 declare(strict_types=1);
 
 $siteName = 'SmartToolz';

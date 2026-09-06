@@ -86,5 +86,7 @@ convert.addEventListener('click',()=>{if(!file)return;clearError();const reader=
 download.addEventListener('click',()=>{if(!outputUrl)return;const a=document.createElement('a');a.href=outputUrl;a.download=(file?.name.replace(/\.gif$/i,'')||'converted')+'.jpg';document.body.appendChild(a);a.click();a.remove()});reset.addEventListener('click',()=>{if(outputUrl)URL.revokeObjectURL(outputUrl);file=null;outputBlob=null;outputUrl=null;input.value='';info.textContent='GIF files only';settings.style.display='none';result.style.display='none';convert.disabled=true;download.disabled=true;clearError()});
 </script>
 
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

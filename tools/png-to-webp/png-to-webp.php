@@ -292,5 +292,7 @@ resetButton.addEventListener('click', () => {
 menuButton.addEventListener('click', () => navLinks.classList.toggle('open'));
 </script>
 
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

@@ -165,5 +165,7 @@ const menu=$('menuButton'),nav=$('navLinks');if(menu&&nav)menu.addEventListener(
 })();
 </script>
 
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>
 </html>

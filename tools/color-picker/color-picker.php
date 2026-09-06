@@ -51,4 +51,6 @@ function hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,
 function update(hex){const[r,g,b]=hexRgb(hex),a=hsl(r,g,b),v=hsv(r,g,b),up=hex.toUpperCase();preview.style.background=up;picker.value=up;document.getElementById('hex').value=up;document.getElementById('rgb').value=`rgb(${r}, ${g}, ${b})`;document.getElementById('hsl').value=`hsl(${a[0]}, ${a[1]}%, ${a[2]}%)`;document.getElementById('hsv').value=`hsv(${v[0]}, ${v[1]}%, ${v[2]}%)`;document.getElementById('css').value=`color: ${up};`}
 picker.addEventListener('input',e=>update(e.target.value));document.getElementById('random').onclick=()=>update('#'+Math.floor(Math.random()*16777216).toString(16).padStart(6,'0'));document.getElementById('reset').onclick=()=>update('#635BFF');document.querySelectorAll('.copy').forEach(b=>b.onclick=async()=>{const el=document.getElementById(b.dataset.copy);try{await navigator.clipboard.writeText(el.value)}catch(e){el.select();document.execCommand('copy')}b.textContent='COPIED';setTimeout(()=>b.textContent='COPY',900)});update('#635BFF');
 </script>
+
+<?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body></html>

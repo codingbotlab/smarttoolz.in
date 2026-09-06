@@ -1,23 +1,23 @@
 RewriteEngine On
 
-# SmartToolz SEO URLs: use clean, extensionless trailing-slash URLs.
-RewriteCond %{THE_REQUEST} \s/+smart-toolz/tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
-RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /smart-toolz/tools/$1/ [R=301,L,NE]
+# SmartToolz SEO URLs: clean, extensionless trailing-slash URLs.
+RewriteCond %{THE_REQUEST} \s/+tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
+RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]
 
 # Canonical clean URL -> existing PHP implementation.
 RewriteRule ^tools/([A-Za-z0-9-]+)/$ tools/$1.php [END,QSA,NC]
 
 # Lightweight utility tools.
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^tools/(timestamp-converter|unix-timestamp|stopwatch-timer)\.php$ /smart-toolz/tool-extras.php?tool=$1 [L,QSA]
+RewriteRule ^tools/(timestamp-converter|unix-timestamp|stopwatch-timer)\.php$ /tool-extras.php?tool=$1 [L,QSA]
 
 # Missing tool pages use the universal engine.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /smart-toolz/tool-engine.php?tool=$1 [L,QSA]
+RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tool-engine.php?tool=$1 [L,QSA]
 
 # Canonical category URLs.
-RewriteRule ^category/([A-Za-z0-9-]+)/?$ /smart-toolz/tool.php?category=$1 [END,QSA,NC]
+RewriteRule ^category/([A-Za-z0-9-]+)/?$ /tool.php?category=$1 [END,QSA,NC]
 
 # Canonical all-tools route.
-RewriteRule ^all-tools/?$ /smart-toolz/ [R=301,L]
+RewriteRule ^all-tools/?$ / [R=301,L]

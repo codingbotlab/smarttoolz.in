@@ -1,2 +1,0 @@
-<?php
-declare(strict_types=1);require_once __DIR__.'/bootstrap.php';$uid=saas_user_id();if(!$uid){http_response_code(204);exit;}$code=trim((string)($_COOKIE['smarttoolz_ref']??''));if($code===''){http_response_code(204);exit;}$db=saas_db();$s=$db->prepare('SELECT user_id FROM saas_referral_codes WHERE code=? LIMIT 1');$s->execute([$code]);$ref=(int)$s->fetchColumn();if($ref&&$ref!==$uid){$db->prepare('INSERT IGNORE INTO saas_referrals(referrer_id,referred_id,code) VALUES(?,?,?)')->execute([$ref,$uid,$code]);}http_response_code(204);

@@ -7,6 +7,9 @@ require_once dirname(__DIR__) . '/header.php';
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Case Converter Online | Uppercase, Lowercase & Title Case | SmartToolz</title>
@@ -55,6 +58,9 @@ require_once dirname(__DIR__) . '/header.php';
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
 
+
+
+
 <main class="case-page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE TEXT TOOL</span><h1>Free <span>Case Converter</span> Online</h1><p>Change capitalization instantly with uppercase, lowercase, title case, sentence case, alternating case and inverse case tools. Everything runs directly in your browser.</p></section>
 <section class="tool-card" aria-label="Case converter tool">
@@ -92,6 +98,9 @@ require_once dirname(__DIR__) . '/header.php';
   update();
 })();
 </script>
+
+
+
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>

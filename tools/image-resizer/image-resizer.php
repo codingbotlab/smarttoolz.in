@@ -7,6 +7,9 @@ require_once dirname(__DIR__) . '/header.php';
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Image Resizer Online — Resize JPG, PNG & WebP | SmartToolz</title>
@@ -70,6 +73,9 @@ body{margin:0;background:var(--soft);color:var(--ink);font-family:Inter,system-u
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 <main class="resizer-page">
 <section class="hero">
@@ -159,6 +165,9 @@ function reset(){if(originalUrl)URL.revokeObjectURL(originalUrl);if(resizedUrl)U
 dropzone.addEventListener('click',()=>input.click());dropzone.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}});dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('dragover')});dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('dragover'));dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('dragover');chooseFile(e.dataTransfer.files&&e.dataTransfer.files[0])});input.addEventListener('change',()=>chooseFile(input.files&&input.files[0]));width.addEventListener('input',syncHeight);height.addEventListener('input',syncWidth);resizeBtn.addEventListener('click',resize);resetBtn.addEventListener('click',reset);window.addEventListener('beforeunload',()=>{if(originalUrl)URL.revokeObjectURL(originalUrl);if(resizedUrl)URL.revokeObjectURL(resizedUrl)});
 })();
 </script>
+
+
+
 
 
 

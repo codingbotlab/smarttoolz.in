@@ -8,6 +8,9 @@ function smartToolzMemeAd(string $key): void {}
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PNG to WebP Converter - SmartToolz</title>
@@ -47,6 +50,9 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 
 
@@ -254,6 +260,9 @@ resetButton.addEventListener('click', () => {
 
 menuButton.addEventListener('click', () => navLinks.classList.toggle('open'));
 </script>
+
+
+
 
 
 

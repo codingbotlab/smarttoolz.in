@@ -7,6 +7,9 @@ require_once dirname(__DIR__) . '/header.php';
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PNG to JPG Converter Online Free | SmartToolz</title>
@@ -55,6 +58,9 @@ require_once dirname(__DIR__) . '/header.php';
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 <main class="page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • FREE ONLINE TOOL</span><h1>PNG to <span>JPG Converter</span></h1><p>Convert PNG images to JPG online for free. Choose your preferred quality, preview the converted image, and download the JPG directly from your browser.</p></section>
@@ -106,6 +112,9 @@ convert.addEventListener('click',()=>{if(!file)return;clearError();convert.disab
 reset.addEventListener('click',()=>{input.value='';file=null;work.style.display='none';result.style.display='none';clearError();if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(resultUrl)URL.revokeObjectURL(resultUrl);sourceUrl='';resultUrl='';download.removeAttribute('href');});
 })();
 </script>
+
+
+
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body></html>

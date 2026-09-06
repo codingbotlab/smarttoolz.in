@@ -6,6 +6,9 @@ declare(strict_types=1);
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Free Color Picker Online — HEX, RGB, HSL &amp; HSV | SmartToolz</title>
@@ -28,6 +31,9 @@ declare(strict_types=1);
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 
 
@@ -65,6 +71,9 @@ declare(strict_types=1);
   update('#635BFF');
 })();
 </script>
+
+
+
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>

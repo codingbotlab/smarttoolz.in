@@ -8,6 +8,9 @@ require_once dirname(__DIR__) . '/header.php';
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Free QR Code Generator Online | Text & URL QR | SmartToolz</title>
@@ -54,6 +57,9 @@ require_once dirname(__DIR__) . '/header.php';
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 <?php require_once dirname(__DIR__,2).'/header.php'; ?>
 <main class="page">
@@ -103,6 +109,9 @@ require_once dirname(__DIR__) . '/header.php';
   document.getElementById('download').addEventListener('click',()=>{if(!currentValue)return;const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='smarttoolz-qr-code.png';a.click()});
 })();
 </script>
+
+
+
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>

@@ -8,6 +8,9 @@ function smartToolzMemeAd(string $key): void {}
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JPG to WebP Converter - SmartToolz</title>
@@ -19,6 +22,9 @@ function smartToolzMemeAd(string $key): void {}
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 
 
@@ -114,6 +120,9 @@ downloadBtn.addEventListener('click',()=>{if(!convertedUrl)return;const a=docume
 
 document.getElementById('menuButton').addEventListener('click',()=>document.getElementById('navLinks').classList.toggle('open'));
 </script>
+
+
+
 
 
 

@@ -8,6 +8,9 @@ require_once dirname(__DIR__) . '/header.php';
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Password Generator Online | Strong Random Passwords | SmartToolz</title>
@@ -55,6 +58,9 @@ require_once dirname(__DIR__) . '/header.php';
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
 
+
+
+
 <main class="password-page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • SECURITY TOOL</span><h1>Free Password Generator</h1><p>Create strong random passwords with a custom length and the character types you choose. Password generation happens directly in your browser.</p></section>
 <section class="card" aria-label="Password generator">
@@ -92,6 +98,9 @@ function updateStrength(){const value=password.value;if(!value){strengthText.tex
 lengthInput.addEventListener('input',()=>{lengthValue.textContent=lengthInput.value;generatePassword()});[uppercase,lowercase,numbers,symbols].forEach(el=>el.addEventListener('change',generatePassword));generateBtn.addEventListener('click',generatePassword);copyBtn.addEventListener('click',async()=>{if(!password.value)return;try{await navigator.clipboard.writeText(password.value)}catch(e){password.select();document.execCommand('copy')}copyBtn.textContent='Copied!';setTimeout(()=>copyBtn.textContent='Copy',1400)});generatePassword();
 })();
 </script>
+
+
+
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>

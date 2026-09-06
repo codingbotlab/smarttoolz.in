@@ -8,6 +8,9 @@ function smartToolzMemeAd(string $key): void {}
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meme Generator - Create Memes Online | SmartToolz</title>
@@ -50,6 +53,9 @@ footer{padding:35px 20px;background:#151827;color:#fff;text-align:center}footer 
 </head>
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
+
+
+
 
 
 
@@ -111,6 +117,9 @@ $('reset').onclick=()=>{img=null;file.value='';fileName.textContent='No image se
 const menu=$('menuButton'),nav=$('navLinks');if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
 })();
 </script>
+
+
+
 
 
 

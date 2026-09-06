@@ -10,6 +10,9 @@ function smartToolzMemeAd(string $key): void {}
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
 
+
+
+
 <meta charset="UTF-8">
 
 <meta
@@ -791,6 +794,9 @@ footer p {
 
 
 
+
+
+
 <!-- ============================================================
      HEADER
 ============================================================ -->
@@ -1476,6 +1482,9 @@ function toggleMenu() {
 }
 
 </script>
+
+
+
 
 
 

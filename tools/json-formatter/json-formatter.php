@@ -7,6 +7,9 @@ require_once dirname(__DIR__) . '/header.php';
 <head>
 <?php require_once dirname(__DIR__) . '/head.php'; ?>
 
+
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Free JSON Formatter & Validator Online | SmartToolz</title>
@@ -54,6 +57,9 @@ require_once dirname(__DIR__) . '/header.php';
 <body>
 <?php require_once dirname(__DIR__) . '/header.php'; ?>
 
+
+
+
 <main class="page">
 <section class="hero"><span class="eyebrow">SMARTTOOLZ • DEVELOPER TOOL</span><h1>Free JSON Formatter &amp; Validator</h1><p>Format, validate, beautify and minify JSON instantly in your browser. Your JSON stays in the page while you work.</p></section>
 <section class="card" aria-label="JSON formatter and validator">
@@ -88,6 +94,9 @@ input.addEventListener('input',()=>{clearError();setStatus('Ready')});
 input.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const start=input.selectionStart,end=input.selectionEnd,tab=indentValue();input.value=input.value.slice(0,start)+tab+input.value.slice(end);input.selectionStart=input.selectionEnd=start+String(tab).length}if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();format()}});
 })();
 </script>
+
+
+
 
 <?php require_once dirname(__DIR__) . '/footer.php'; ?>
 </body>

@@ -1,4 +1,0 @@
-# Keddy Brain server-side LLM settings.
-# Apache/mod_env or compatible PHP hosting will expose these through getenv().
-SetEnv KEDDY_AI_URL http://127.0.0.1:11434/api/chat
-SetEnv KEDDY_AI_MODEL qwen3:4b-instruct

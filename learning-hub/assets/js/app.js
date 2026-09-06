@@ -1,1 +1,0 @@
-document.addEventListener('click',e=>{const b=e.target.closest('[data-copy-code]');if(!b)return;const code=document.querySelector(b.dataset.copyCode);if(!code)return;navigator.clipboard?.writeText(code.textContent||'').then(()=>{const old=b.innerHTML;b.innerHTML='<i class="bi bi-check2"></i> Copied';setTimeout(()=>b.innerHTML=old,1200)})});

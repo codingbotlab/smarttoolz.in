@@ -64,6 +64,10 @@ Tool-specific JavaScript, CSS, images and other assets should stay inside that t
 - Public pages should have unique titles, descriptions and useful explanatory content.
 - Keep navigation clear and make every public tool reachable from the All Tools page.
 
+## Automated site maintenance
+
+GitHub Actions automatically maintains the public tool structure, normalizes retired tool URLs, removes obsolete tracker bootstraps, regenerates `sitemap.xml`, validates PHP syntax, audits broken legacy references and performs a live smoke check against key public URLs. The maintenance workflow also runs on a daily schedule and can be started manually with `workflow_dispatch`.
+
 ## AdSense readiness
 
 SmartToolz is structured to support a clear, user-first publishing experience: useful tool pages, straightforward navigation, accessible informational pages and transparent privacy/terms documentation. AdSense approval is determined by Google's review and policies; this repository does not claim or guarantee approval.

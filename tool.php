@@ -17,7 +17,8 @@ define('SMARTTOOLZ_RENDER_SHELL', true);
 <title><?= smarttoolz_escape($heading . ' — Free Online Tools | SmartToolz') ?></title>
 <meta name="description" content="<?= smarttoolz_escape($description) ?>">
 <meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="<?= smarttoolz_escape($canonical) ?>">
-<meta property="og:type" content="website"><meta property="og:site_name" content="SmartToolz"><meta property="og:title" content="<?= smarttoolz_escape($heading . ' — Free Online Tools | SmartToolz') ?>"><meta property="og:description" content="<?= smarttoolz_escape($description) ?>"><meta property="og:url" content="<?= smarttoolz_escape($canonical) ?>"><meta name="twitter:card" content="summary"><meta name="theme-color" content="#635bff"><link rel="stylesheet" href="/assets/css/smarttoolz.css">
+<meta property="og:type" content="website"><meta property="og:site_name" content="SmartToolz"><meta property="og:title" content="<?= smarttoolz_escape($heading . ' — Free Online Tools | SmartToolz') ?>"><meta property="og:description" content="<?= smarttoolz_escape($description) ?>"><meta property="og:url" content="<?= smarttoolz_escape($canonical) ?>"><meta name="twitter:card" content="summary"><meta name="theme-color" content="#635bff">
+<?php require __DIR__ . '/head.php'; ?>
 </head><body>
 <?php require __DIR__ . '/header.php'; ?>
 <main class="tools-page"><div class="container"><section class="tools-hero"><span class="tag">SMARTTOOLZ COLLECTION</span><h1><?= smarttoolz_escape($heading) ?></h1><p><?= count($visible) ?> free tools ready to use — search, filter and get to work.</p></section>

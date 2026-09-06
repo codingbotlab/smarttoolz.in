@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes less@4.9.0 assets/less/smarttoolz.less assets/css/smarttoolz.css --clean-css
+          npx --yes less@4.9.0 assets/less/smarttoolz.less assets/css/smarttoolz.css
           test -s assets/css/smarttoolz.css
 
       - name: Normalize tool document shells and generate sitemap

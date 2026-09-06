@@ -61,17 +61,6 @@ smarttoolz.in/
 └── .github/workflows/         # Active CI/CD automation
 ```
 
-## Technology
-
-| Area | Technology |
-|---|---|
-| Application | PHP |
-| Database | MySQL / MariaDB-compatible |
-| Frontend | HTML + CSS + JavaScript |
-| APIs | PHP HTTP/JSON endpoints |
-| Automation | GitHub Actions + maintenance scripts |
-| Media processing | Browser-side and server-side processing where required |
-
 ## Developer rules
 
 1. Keep each active module self-contained.
@@ -82,7 +71,7 @@ smarttoolz.in/
 6. Put repository-wide maintenance in `/scripts/`.
 7. Keep secrets out of Git and use protected server/environment configuration.
 8. Preserve working public routes when reorganising active code.
-9. Remove retired products from navigation, registries and active automation.
+9. Remove retired products from navigation, registries and automation.
 10. Update `docs/REPOSITORY-STRUCTURE.md` when architecture changes.
 
 ## Local development

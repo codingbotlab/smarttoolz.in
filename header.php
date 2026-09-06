@@ -11,7 +11,7 @@ $slug = basename($script, '.php');
 $toolTitle = ucwords(str_replace(['-','_'], ' ', strtolower($slug ?: 'Online Tool')));
 $toolReportUrl = '/report-tool.php?tool=' . rawurlencode($slug) . '&name=' . rawurlencode($toolTitle) . '&url=' . rawurlencode('/tools/' . $slug . '.php');
 ?>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,0,0&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/css/smarttoolz.css">
+<link rel="stylesheet" href="/assets/css/smarttoolz.css">
 <header class="site-header"><nav class="navbar" aria-label="Primary navigation">
 <a class="logo" href="/" aria-label="SmartToolz home"><span class="logo-icon"><span class="material-symbols-rounded">build</span></span><span><?=htmlspecialchars($siteName,ENT_QUOTES,'UTF-8')?></span></a>
 <div class="nav-links"><a href="/" <?=$isHome?'aria-current="page"':''?>><span class="material-symbols-rounded">home</span> Home</a><a href="/tool.php" <?=$isAllTools?'aria-current="page"':''?>><span class="material-symbols-rounded">apps</span> All Tools</a><a href="/tool.php#categories"><span class="material-symbols-rounded">category</span> Categories</a></div>

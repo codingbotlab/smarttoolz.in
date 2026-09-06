@@ -18,7 +18,7 @@ define('SMARTTOOLZ_FOOTER_RENDERED', true);
       <a href="/about.php">About</a>
       <a href="/contact.php">Contact</a>
       <a href="/privacy-policy.php">Privacy</a>
-      <a href="/cookies.php">Cookies</a>
+      <a href="/cookie-policy.php">Cookies</a>
       <a href="/terms.php">Terms</a>
       <a href="/disclaimer.php">Disclaimer</a>
     </nav>

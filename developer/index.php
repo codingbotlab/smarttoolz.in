@@ -15,25 +15,23 @@ declare(strict_types=1);
 <body>
 <header class="site-header">
 <a class="brand" href="/" aria-label="SmartToolz home"><span class="brand-mark">S</span><span>SmartToolz</span></a>
-<nav class="top-nav" aria-label="Primary navigation"><a href="/smart-toolz/">Tools</a><a href="/knowledge-base/">Knowledge</a><a href="/learning-hub/">Learning</a><a href="/creator-ai/">Creator AI</a><a href="/Reddott-films/blogs/">Reddott Films</a></nav>
-<a class="nav-cta" href="/site-wire-map.php">Live Wire Map <span>→</span></a>
+<nav class="top-nav" aria-label="Primary navigation"><a href="/smart-toolz/">Tools</a><a href="/knowledge-base/">Knowledge</a><a href="/learning-hub/">Learning</a><a href="/ai-social-media/">AI Social</a><a href="/analytics/">Analytics</a></nav>
+<a class="nav-cta" href="/smart-toolz/tool.php">Open Tools <span>→</span></a>
 </header>
 <main class="dev">
-<section class="dev-hero"><span class="eyebrow">SMARTTOOLZ / DEVELOPERS</span><h1>One map for the whole codebase.</h1><p class="muted">Use this page as the developer starting point. Each module owns its application code, assets, APIs and operational files. Public URLs stay stable while internals are cleaned up.</p></section>
+<section class="dev-hero"><span class="eyebrow">SMARTTOOLZ / DEVELOPERS</span><h1>One clean map for the active codebase.</h1><p class="muted">This is the developer starting point. Each active module owns its application code, assets and APIs. Shared infrastructure stays predictable, and retired products are removed rather than left as dead routes.</p></section>
 <section class="dev-grid">
 <a class="dev-card" href="/smart-toolz/"><code>/smart-toolz/</code><h2>Core Tools</h2><p>Tool pages, registry, router, shared UI, APIs, admin and SaaS.</p><span>Open module →</span></a>
-<a class="dev-card" href="/creator-ai/"><code>/creator-ai/</code><h2>Creator AI</h2><p>AI chat, sessions, authentication, learning integration and live services.</p><span>Open module →</span></a>
-<a class="dev-card" href="/learning-hub/"><code>/learning-hub/</code><h2>Learning Hub</h2><p>Courses, lessons, practice, dashboard, APIs, components and seed data.</p><span>Open module →</span></a>
+<a class="dev-card" href="/learning-hub/"><code>/learning-hub/</code><h2>Learning Hub</h2><p>Courses, lessons, practice, dashboard, APIs, components and curriculum.</p><span>Open module →</span></a>
 <a class="dev-card" href="/knowledge-base/"><code>/knowledge-base/</code><h2>Knowledge Base</h2><p>Articles, guides, visuals and the knowledge presentation layer.</p><span>Open module →</span></a>
 <a class="dev-card" href="/analytics/"><code>/analytics/</code><h2>Analytics</h2><p>Tracking, events, realtime views, geo resolution and analytics UI.</p><span>Open module →</span></a>
-<a class="dev-card" href="/Reddott-films/blogs/"><code>/Reddott-films/</code><h2>Reddott Films</h2><p>Blogs, knowledge videos, YouTube publishing and creator workflows.</p><span>Open module →</span></a>
-<a class="dev-card" href="/video-automation/"><code>/video-automation/</code><h2>Video Automation</h2><p>Remotion projects and configuration for automated video generation.</p><span>Open module →</span></a>
-<a class="dev-card" href="/monitor/"><code>/monitor/</code><h2>Monitoring</h2><p>Live crawler, fixer and health reports for the running site.</p><span>Open module →</span></a>
-<a class="dev-card" href="/site-wire-map.php"><code>/site-wire-map.php</code><h2>Live Wire Map</h2><p>Visual request flow from user intent through routing and modules to response.</p><span>Trace system →</span></a>
+<a class="dev-card" href="/ai-social-media/"><code>/ai-social-media/</code><h2>AI Social World</h2><p>Experimental social conversations, bots and shared-world experiences.</p><span>Open module →</span></a>
+<a class="dev-card" href="/keddy-bot/"><code>/keddy-bot/</code><h2>Keddy Bot</h2><p>Bot application and its supporting runtime code.</p><span>Open module →</span></a>
+<a class="dev-card" href="/smart-toolz/admin/"><code>/smart-toolz/admin/</code><h2>Admin & SaaS</h2><p>Operational dashboards, accounts, usage, plans and platform controls.</p><span>Open admin →</span></a>
 </section>
-<section class="flow"><h2>Request flow</h2><p><code>User → Root Entry → Intent / Router → Module → API / Service → UI → Response</code></p><p>For shared PHP logic use <code>core/</code> inside the owning application. For browser assets use <code>assets/css</code>, <code>assets/js</code> and <code>assets/img</code>. For Python/Node automation keep executable scripts inside the module that owns the workflow.</p></section>
+<section class="flow"><h2>Request flow</h2><p><code>User → Root Entry → Router → Active Module → API / Service → UI → Response</code></p><p>Global browser assets live in <code>/assets/</code>. Module-specific APIs live under the owning module's <code>api/</code>. Repository-wide maintenance belongs in <code>/scripts/</code>.</p></section>
 </main>
-<footer class="site-footer"><div><strong>SmartToolz</strong><span>Developer Hub</span></div><nav><a href="/">Home</a><a href="/site-wire-map.php">Wire Map</a><a href="/smart-toolz/">Tools</a><a href="/privacy-policy.php">Privacy</a></nav></footer>
+<footer class="site-footer"><div><strong>SmartToolz</strong><span>Developer Hub</span></div><nav><a href="/">Home</a><a href="/smart-toolz/">Tools</a><a href="/knowledge-base/">Knowledge</a><a href="/learning-hub/">Learning</a><a href="/privacy-policy.php">Privacy</a></nav></footer>
 <script src="/assets/js/smarttoolz.js" defer></script>
 </body>
 </html>

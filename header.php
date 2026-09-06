@@ -13,19 +13,19 @@ if ($currentPath === '') $currentPath = '/';
     <nav class="main-nav" aria-label="Primary navigation">
       <?php
       $links = [
-        ['Home', '/'],
-        ['All Tools', '/tools/'],
-        ['Categories', '/#categories'],
-        ['Popular', '/#popular'],
-        ['About', '/about.php'],
-        ['Contact', '/contact.php'],
+        ['Home', '/', 'home'],
+        ['All Tools', '/tools/', 'tools'],
+        ['Categories', '/#categories', 'categories'],
+        ['Popular', '/#popular', 'popular'],
+        ['About', '/about.php', 'about'],
+        ['Contact', '/contact.php', 'contact'],
       ];
-      foreach ($links as [$label, $href]):
+      foreach ($links as [$label, $href, $key]):
         $linkPath = rtrim(parse_url($href, PHP_URL_PATH) ?: '/', '/');
         if ($linkPath === '') $linkPath = '/';
-        $active = ($linkPath === '/') ? ($currentPath === '/') : ($currentPath === $linkPath || str_starts_with($currentPath, $linkPath . '/'));
+        $active = ($key === 'home') ? ($currentPath === '/') : (($key === 'categories' || $key === 'popular') ? false : ($currentPath === $linkPath || str_starts_with($currentPath, $linkPath . '/')));
       ?>
-        <a href="<?= htmlspecialchars($href, ENT_QUOTES, 'UTF-8') ?>" class="<?= $active ? 'active' : '' ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+        <a href="<?= htmlspecialchars($href, ENT_QUOTES, 'UTF-8') ?>" data-nav-key="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>" class="<?= $active ? 'active' : '' ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
       <?php endforeach; ?>
     </nav>
     <div class="header-actions">
@@ -39,9 +39,13 @@ if ($currentPath === '') $currentPath = '/';
     </div>
   </div>
   <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
-    <?php foreach ($links as [$label, $href]): ?>
-      <?php $linkPath = rtrim(parse_url($href, PHP_URL_PATH) ?: '/', '/'); if ($linkPath === '') $linkPath = '/'; $active = ($linkPath === '/') ? ($currentPath === '/') : ($currentPath === $linkPath || str_starts_with($currentPath, $linkPath . '/')); ?>
-      <a href="<?= htmlspecialchars($href, ENT_QUOTES, 'UTF-8') ?>"<?= $active ? ' class="active" aria-current="page"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+    <?php foreach ($links as [$label, $href, $key]): ?>
+      <?php
+      $linkPath = rtrim(parse_url($href, PHP_URL_PATH) ?: '/', '/');
+      if ($linkPath === '/') $linkPath = '/';
+      $active = ($key === 'home') ? ($currentPath === '/') : (($key === 'categories' || $key === 'popular') ? false : ($currentPath === $linkPath || str_starts_with($currentPath, $linkPath . '/')));
+      ?>
+      <a href="<?= htmlspecialchars($href, ENT_QUOTES, 'UTF-8') ?>" data-nav-key="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>"<?= $active ? ' class="active" aria-current="page"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
     <?php endforeach; ?>
     <form class="mobile-search" action="/tools/" method="get" role="search"><input name="q" type="search" placeholder="Search tools..." aria-label="Search tools"></form>
   </nav>
@@ -49,6 +53,15 @@ if ($currentPath === '') $currentPath = '/';
 <script>
 (()=>{
  const theme=document.getElementById('themeToggle'),menu=document.getElementById('mobileMenu'),nav=document.getElementById('mobileNav');
+ const updateHashNav=()=>{
+   const hash=window.location.hash;
+   if(window.location.pathname==='/' && (hash==='#categories'||hash==='#popular')){
+     document.querySelectorAll('[data-nav-key]').forEach(a=>{a.classList.remove('active');a.removeAttribute('aria-current')});
+     document.querySelectorAll('[data-nav-key="'+hash.slice(1)+'"]').forEach(a=>{a.classList.add('active');a.setAttribute('aria-current','page')});
+   }
+ };
+ updateHashNav();
+ window.addEventListener('hashchange',updateHashNav);
  if(theme){const k='smarttoolz-theme';const apply=t=>{document.documentElement.dataset.theme=t;theme.setAttribute('aria-label',t==='dark'?'Use light mode':'Use dark mode')};const saved=localStorage.getItem(k);if(saved)apply(saved);theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';apply(t);localStorage.setItem(k,t)})}
  if(menu&&nav){menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation')});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false')}))}
 })();

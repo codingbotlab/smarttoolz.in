@@ -42,7 +42,6 @@ $seoDescription = $isToolPage
             ? 'Browse free SmartToolz online tools for images, PDFs, text, developers, calculators and everyday tasks.'
             : 'SmartToolz provides free, fast and simple online tools for images, PDFs, text, developers and everyday tasks.'));
 
-/* Keep SEO markup as real whitespace, not the literal characters \\n. */
 $seoHead = "\n";
 $seoHead .= '<meta name="robots" content="index,follow,max-image-preview:large">' . "\n";
 $seoHead .= '<meta name="description" content="' . htmlspecialchars($seoDescription, ENT_QUOTES, 'UTF-8') . '">' . "\n";
@@ -82,10 +81,47 @@ if ($isToolPage) {
     $toolIntroHtml = '<section class="tool-seo-intro"><div><span class="tool-free-badge">FREE ONLINE TOOL</span><h2>Free Online ' . htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') . '</h2><p>' . htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . ' ' . htmlspecialchars($toolTitle, ENT_QUOTES, 'UTF-8') . ' helps you complete this task quickly and easily. ' . htmlspecialchars($siteTagline, ENT_QUOTES, 'UTF-8') . '</p></div><div class="how-use"><h3>How to Use</h3><ol><li>Enter, upload or select your data.</li><li>Choose your options and click the main action button.</li><li>Review the result and download or copy it.</li></ol></div></section>';
 }
 
-$cssHtml = is_file($cssFile) ? '<style id="smarttoolz-css">' . file_get_contents($cssFile) . '</style>' : '';
-$layoutCss = '<style id="smarttoolz-tool-layout">.tool-seo-intro{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:44px 0 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:40px;align-items:start}.tool-free-badge{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid #dedbff;border-radius:999px;background:#eeedff;color:var(--brand,#635bff);font-size:10px;font-weight:900;letter-spacing:1px}.tool-seo-intro h2{margin:14px 0 9px;font-size:clamp(28px,4vw,40px);line-height:1.12;letter-spacing:-1.5px}.tool-seo-intro>div>p{max-width:720px;margin:0;color:var(--muted,#667085);font-size:14px;line-height:1.7}.how-use{padding:20px 22px;background:#fff;border:1px solid var(--line,#e6e8ef);border-radius:16px;box-shadow:0 12px 35px rgba(16,24,40,.05)}.how-use h3{margin:0 0 10px;font-size:14px}.how-use ol{margin:0;padding-left:20px;color:var(--muted,#667085);font-size:12px;line-height:1.8}.how-use li+li{margin-top:3px}@media(max-width:800px){.tool-seo-intro{grid-template-columns:1fr;gap:18px;padding:32px 0 20px}.how-use{padding:18px}}@media(max-width:560px){.tool-seo-intro{width:calc(100% - 24px);padding:26px 0 16px}.tool-seo-intro h2{font-size:28px;letter-spacing:-1px}}</style>';
+$relatedToolsHtml = '';
+if ($isToolPage) {
+    $currentSlug = strtolower(basename(rtrim($requestPath, '/')));
+    $relatedSets = [
+        'image-resizer' => [
+            ['image-compressor','Image Compressor','Reduce JPG, PNG and WebP file sizes.','🗜'],
+            ['image-background-remover','Background Remover','Remove image backgrounds and create transparent PNGs.','✂'],
+            ['image-cropper','Image Cropper','Crop images to the exact area you need.','✂'],
+            ['jpg-to-png','JPG to PNG','Convert JPG images to PNG format.','🔄']
+        ],
+        'image-compressor' => [
+            ['image-resizer','Image Resizer','Resize images to exact width and height.','↔'],
+            ['image-background-remover','Background Remover','Remove backgrounds from your images.','✂'],
+            ['jpg-to-png','JPG to PNG','Convert JPG images to PNG format.','🔄'],
+            ['png-to-jpg','PNG to JPG','Convert PNG images to JPG format.','🔄']
+        ],
+        'image-background-remover' => [
+            ['image-resizer','Image Resizer','Resize images to exact dimensions.','↔'],
+            ['image-compressor','Image Compressor','Compress images while controlling quality.','🗜'],
+            ['image-cropper','Image Cropper','Crop images to the exact size you need.','✂'],
+            ['jpg-to-png','JPG to PNG','Convert JPG images to PNG format.','🔄']
+        ]
+    ];
+    $related = $relatedSets[$currentSlug] ?? [
+        ['image-compressor','Image Compressor','Compress JPG, PNG and WebP images.','🗜'],
+        ['image-resizer','Image Resizer','Resize images to exact dimensions.','↔'],
+        ['jpg-to-png','JPG to PNG','Convert JPG images into PNG format.','🔄'],
+        ['png-to-jpg','PNG to JPG','Convert PNG images into JPG format.','🔄']
+    ];
+    $cards = '';
+    foreach ($related as $item) {
+        $slug = $item[0];
+        $cards .= '<a class="related-tool-card" href="/tools/' . htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') . '/"><span class="related-tool-icon" aria-hidden="true">' . htmlspecialchars($item[3], ENT_QUOTES, 'UTF-8') . '</span><strong>' . htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8') . '</strong><span>' . htmlspecialchars($item[2], ENT_QUOTES, 'UTF-8') . '</span><em>Open tool →</em></a>';
+    }
+    $relatedToolsHtml = '<section class="related-tools" aria-labelledby="related-tools-title"><div class="related-tools-head"><div><span class="related-tools-label">KEEP WORKING</span><h2 id="related-tools-title">Related Tools</h2><p>More SmartToolz tools that can help with similar image tasks.</p></div><a href="/tool.php">View all tools →</a></div><div class="related-tool-grid">' . $cards . '</div></section>';
+}
 
-ob_start(function (string $html) use ($seoHead, $seoTitle, $headerHtml, $toolIntroHtml, $cssHtml, $layoutCss): string {
+$cssHtml = is_file($cssFile) ? '<style id="smarttoolz-css">' . file_get_contents($cssFile) . '</style>' : '';
+$layoutCss = '<style id="smarttoolz-tool-layout">.tool-seo-intro{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:44px 0 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:40px;align-items:start}.tool-free-badge{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid #dedbff;border-radius:999px;background:#eeedff;color:var(--brand,#635bff);font-size:10px;font-weight:900;letter-spacing:1px}.tool-seo-intro h2{margin:14px 0 9px;font-size:clamp(28px,4vw,40px);line-height:1.12;letter-spacing:-1.5px}.tool-seo-intro>div>p{max-width:720px;margin:0;color:var(--muted,#667085);font-size:14px;line-height:1.7}.how-use{padding:20px 22px;background:#fff;border:1px solid var(--line,#e6e8ef);border-radius:16px;box-shadow:0 12px 35px rgba(16,24,40,.05)}.how-use h3{margin:0 0 10px;font-size:14px}.how-use ol{margin:0;padding-left:20px;color:var(--muted,#667085);font-size:12px;line-height:1.8}.how-use li+li{margin-top:3px}.related-tools{width:min(1080px,calc(100% - 28px));margin:38px auto 0;padding-top:28px;border-top:1px solid var(--line,#e6e8ef)}.related-tools-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:16px}.related-tools-label{display:inline-flex;padding:6px 9px;border-radius:999px;background:#eeedff;color:var(--brand,#635bff);font-size:9px;font-weight:900;letter-spacing:1px}.related-tools-head h2{margin:10px 0 5px;font-size:24px;letter-spacing:-.8px}.related-tools-head p{margin:0;color:var(--muted,#667085);font-size:12px}.related-tools-head>a{color:var(--brand,#635bff);font-size:12px;font-weight:850;white-space:nowrap}.related-tool-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.related-tool-card{display:flex;min-height:180px;flex-direction:column;padding:17px;background:#fff;border:1px solid var(--line,#e6e8ef);border-radius:16px;transition:.2s;box-shadow:0 10px 30px rgba(16,24,40,.035)}.related-tool-card:hover{transform:translateY(-4px);border-color:#d8d4ff;box-shadow:0 18px 40px rgba(16,24,40,.08)}.related-tool-icon{width:42px;height:42px;display:grid;place-items:center;margin-bottom:13px;border-radius:12px;background:#f0efff;color:var(--brand,#635bff);font-size:19px}.related-tool-card strong{font-size:13px;line-height:1.25}.related-tool-card>span:not(.related-tool-icon){margin-top:6px;color:var(--muted,#667085);font-size:11px;line-height:1.55}.related-tool-card em{margin-top:auto;padding-top:13px;color:var(--brand,#635bff);font-size:10px;font-style:normal;font-weight:850}@media(max-width:900px){.related-tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:800px){.tool-seo-intro{grid-template-columns:1fr;gap:18px;padding:32px 0 20px}.how-use{padding:18px}.related-tools-head{align-items:start;flex-direction:column}.related-tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.tool-seo-intro{width:calc(100% - 24px);padding:26px 0 16px}.tool-seo-intro h2{font-size:28px;letter-spacing:-1px}.related-tools{width:calc(100% - 24px);margin-top:28px}.related-tool-grid{grid-template-columns:1fr}.related-tools-head h2{font-size:22px}}}</style>';
+
+ob_start(function (string $html) use ($seoHead, $seoTitle, $headerHtml, $toolIntroHtml, $relatedToolsHtml, $cssHtml, $layoutCss): string {
     if (stripos($html, '<head') !== false) {
         $html = preg_replace('~<meta[^>]+name=["\']description["\'][^>]*>~i', '', $html) ?? $html;
         $html = preg_replace('~<meta[^>]+name=["\']robots["\'][^>]*>~i', '', $html) ?? $html;
@@ -99,6 +135,9 @@ ob_start(function (string $html) use ($seoHead, $seoTitle, $headerHtml, $toolInt
     }
     if (stripos($html, '<body') !== false) {
         $html = preg_replace('~(<body[^>]*>)~i', '$1' . $headerHtml . $toolIntroHtml, $html, 1) ?? $html;
+    }
+    if ($relatedToolsHtml !== '' && stripos($html, '</main>') !== false) {
+        $html = preg_replace('~</main>~i', $relatedToolsHtml . '</main>', $html, 1) ?? $html;
     }
     return $html;
 });

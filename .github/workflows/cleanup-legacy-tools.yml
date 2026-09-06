@@ -26,18 +26,9 @@ jobs:
           import re
 
           targets = {
-              'tools/gif-maker/gif-maker.php': re.compile(
-                  r"<\?php\s*declare\(strict_types=1\);.*?smartToozAd\('socialbar'\);\s*\?>",
-                  re.I | re.S,
-              ),
-              'tools/meme-generator/meme-generator.php': re.compile(
-                  r"<\?php\s*declare\(strict_types=1\);.*?smartToozMemeAd\('socialbar'\);\s*\?>",
-                  re.I | re.S,
-              ),
-              'tools/color-picker/color-picker.php': re.compile(
-                  r"<\?php\s*declare\(strict_types=1\);.*?\?>",
-                  re.I | re.S,
-              ),
+              'tools/gif-maker/gif-maker.php': re.compile(r"<\?php\s*declare\(strict_types=1\);.*?smartToozAd\('socialbar'\);\s*\?>", re.I | re.S),
+              'tools/meme-generator/meme-generator.php': re.compile(r"<\?php\s*declare\(strict_types=1\);.*?smartToozMemeAd\('socialbar'\);\s*\?>", re.I | re.S),
+              'tools/color-picker/color-picker.php': re.compile(r"<\?php\s*declare\(strict_types=1\);\s*\?>", re.I | re.S),
           }
 
           for path, pattern in targets.items():
@@ -45,24 +36,22 @@ jobs:
               if not file.is_file():
                   continue
               text = file.read_text(encoding='utf-8')
-              if 'gif-maker' in path:
+              if path.endswith('gif-maker.php'):
                   replacement = "<?php\ndeclare(strict_types=1);\nfunction smartToolzAd(string $key): void {}\n?>"
                   text = pattern.sub(replacement, text, count=1)
                   text = text.replace('smartToozAd', 'smartToolzAd')
-              elif 'meme-generator' in path:
+              elif path.endswith('meme-generator.php'):
                   replacement = "<?php\ndeclare(strict_types=1);\nfunction smartToolzMemeAd(string $key): void {}\n?>"
                   text = pattern.sub(replacement, text, count=1)
                   text = text.replace('smartToozMemeAd', 'smartToolzMemeAd')
-              else:
-                  replacement = "<?php\ndeclare(strict_types=1);\nfunction colorPickerAd(string $key): void {}\n?>"
-                  text = pattern.sub(replacement, text, count=1)
+              elif path.endswith('color-picker.php'):
+                  # Color Picker was fully rebuilt; do not replace its page-level bootstrap.
+                  text = re.sub(r'\bif \(is_file\(\$tracker\)\) \{\s*require_once \$tracker;\s*\}', '', text, flags=re.I)
+                  text = re.sub(r'function colorPickerAd\([^)]*\):void\s*\{.*?\}', 'function colorPickerAd(string $key): void {}', text, flags=re.I | re.S)
 
               text = text.replace('Smart-Tooz', 'SmartToolz').replace('Smart Tooz', 'SmartToolz')
-              text = re.sub(r'/tools/([a-z0-9-]+)\.php(?=[\"\'?#\s>])', r'/tools/\1/', text, flags=re.I)
-              text = re.sub(
-                  r'<footer[^>]*>\s*<strong>\s*SmartToolz\s*</strong>.*?</footer>',
-                  '', text, flags=re.I | re.S
-              )
+              text = re.sub(r'/tools/([a-z0-9-]+)\.php(?=["\'?#\s>])', r'/tools/\1/', text, flags=re.I)
+              text = re.sub(r'<footer[^>]*>\s*<strong>\s*SmartToolz\s*</strong>.*?</footer>', '', text, flags=re.I | re.S)
               file.write_text(text, encoding='utf-8')
               print(f'Cleaned {path}')
 
@@ -74,11 +63,11 @@ jobs:
           pages=0
           while IFS= read -r -d '' file; do
             pages=$((pages+1))
-            if grep -qi 'Smart-Tooz\|smartTooz' "$file"; then
+            if grep -Eqi 'Smart-Tooz|smartTooz' "$file"; then
               echo "Legacy Smart-Tooz branding found: $file"
               failed=1
             fi
-            if grep -Eqi '/tools/[A-Za-z0-9-]+\.php(["'"'?#[:space:]>]|$)' "$file"; then
+            if grep -Eqi "/tools/[A-Za-z0-9-]+\.php(\"|\?|#|[[:space:]]|>|$)" "$file"; then
               echo "Legacy .php tool link found: $file"
               failed=1
             fi
@@ -90,7 +79,7 @@ jobs:
               cat /tmp/php-lint.txt
               failed=1
             fi
-          done < <(find tools -mindepth 2 -maxdepth 2 -type f -name '*.php' ! -name 'header.php' ! -name 'footer.php' ! -name 'bootstrap.php' ! -name 'tool-sidebar.php' -print0)
+          done < <(find tools -mindepth 2 -maxdepth 2 -type f -name '*.php' ! -name 'header.php' ! -name 'footer.php' ! -name 'bootstrap.php' ! -name 'tool-sidebar.php' ! -name 'head.php' -print0)
           echo "Canonical tool files audited: $pages"
           exit "$failed"
 

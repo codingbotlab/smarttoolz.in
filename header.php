@@ -7,9 +7,9 @@ $path = (string)($_SERVER['SCRIPT_NAME'] ?? '');
 $requestPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? '/');
 $script = basename($path);
 $isLegacyHome = rtrim($requestPath, '/') === '/smart-toolz';
-$isHome = in_array($script, ['index.php', 'home.php'], true) && !str_contains($path, '/tools/');
-$isToolPage = str_contains($requestPath, '/tools/');
-$isCategoryPage = str_starts_with(rtrim($requestPath, '/'), '/category/');
+$isHome = in_array($script, ['index.php', 'home.php'], true) && strpos($path, '/tools/') === false;
+$isToolPage = strpos($requestPath, '/tools/') !== false;
+$isCategoryPage = strpos(rtrim($requestPath, '/'), '/category/') === 0;
 $isAllTools = $script === 'tool.php' && !$isCategoryPage;
 $dir = basename(dirname($path));
 $toolTitle = $dir && $dir !== 'tools' ? ucwords(str_replace(['-', '_'], ' ', strtolower($dir))) : 'Online Tool';
@@ -92,7 +92,7 @@ ob_start(function (string $html) use ($seoHead, $seoTitle, $headerHtml, $toolInt
         $html = preg_replace('~<link[^>]+rel=["\']canonical["\'][^>]*>~i', '', $html) ?? $html;
         $html = preg_replace('~<meta[^>]+property=["\']og:[^"\']+["\'][^>]*>~i', '', $html) ?? $html;
         $html = preg_replace('~<meta[^>]+name=["\']twitter:[^"\']+["\'][^>]*>~i', '', $html) ?? $html;
-        if (stripos($html, '</title>') !== false && stripos($html, '<title>') !== false && str_contains($html, '/tools/')) {
+        if (stripos($html, '</title>') !== false && stripos($html, '<title>') !== false && strpos($html, '/tools/') !== false) {
             $html = preg_replace('~<title>.*?</title>~is', '<title>' . htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8') . '</title>', $html, 1) ?? $html;
         }
         $html = preg_replace('~</head>~i', $seoHead . $cssHtml . $layoutCss . '</head>', $html, 1) ?? $html;

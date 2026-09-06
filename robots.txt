@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /lib/
+Disallow: /assets/
+
+Sitemap: https://smarttoolz.in/sitemap.xml

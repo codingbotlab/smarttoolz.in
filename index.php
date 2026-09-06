@@ -1,5 +1,10 @@
 <?php
-// SmartToolz root entry point.
-// Keep the public root on PHP so shared-hosting document roots can serve the app.
-header('Location: /smart-toolz/', true, 301);
-exit;
+declare(strict_types=1);
+
+/*
+ * SmartToolz main route.
+ *
+ * The old wrapper depended on the removed Creator AI application. Keep this
+ * route self-contained and render the canonical tools registry directly.
+ */
+require_once __DIR__ . '/tool.php';

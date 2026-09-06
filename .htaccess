@@ -6,5 +6,8 @@ RewriteCond %{THE_REQUEST} \s/+tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
 RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]
 RewriteRule ^tools/([A-Za-z0-9-]+)/?$ tools/$1/$1.php [L,QSA,NC]
 
+# Keep the public sitemap URL while generating it dynamically from /tools/.
+RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
+
 ErrorDocument 404 /404.php
 DirectoryIndex index.php

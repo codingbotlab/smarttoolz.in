@@ -1,0 +1,8 @@
+<?php
+declare(strict_types=1);
+
+// Server-side configuration template.
+// Set these values in your hosting environment; do not put real API keys in GitHub.
+define('DOMAINNAMEAPI_RESELLER_ID', getenv('DOMAINNAMEAPI_RESELLER_ID') ?: '');
+define('DOMAINNAMEAPI_API_KEY', getenv('DOMAINNAMEAPI_API_KEY') ?: '');
+define('DOMAINNAMEAPI_BASE_URL', getenv('DOMAINNAMEAPI_BASE_URL') ?: 'https://ote.domainresellerapi.com');

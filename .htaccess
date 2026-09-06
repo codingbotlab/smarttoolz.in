@@ -1,5 +1,11 @@
 RewriteEngine On
 
+# Redirect legacy SmartToolz subfolder URLs to the new root-based canonical URLs.
+RewriteRule ^smart-toolz/?$ / [R=301,L,NE]
+RewriteRule ^smart-toolz/tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]
+RewriteRule ^smart-toolz/tools/([A-Za-z0-9-]+)/?$ /tools/$1/ [R=301,L,NE]
+RewriteRule ^smart-toolz/(tool\.php|all-tools)/?$ / [R=301,L,NE]
+
 # SmartToolz SEO URLs: clean, extensionless trailing-slash URLs.
 RewriteCond %{THE_REQUEST} \s/+tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
 RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]

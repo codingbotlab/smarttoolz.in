@@ -28,6 +28,19 @@ $filtered = array_values(array_filter($tools, static function (array $tool) use 
 <meta property="og:description" content="Find free browser-based tools for common image, PDF, text, developer and everyday tasks.">
 <meta property="og:url" content="https://smarttoolz.in/tools/">
 <?php require __DIR__ . '/head.php'; ?>
+<style>
+.tools-library-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;width:100%;margin:0;padding:0 0 10px}
+.tools-library-card{display:flex!important;flex-direction:column!important;min-height:235px;padding:22px!important;background:#fff!important;border:1px solid #e7eaf0!important;border-radius:20px!important;box-shadow:0 12px 34px rgba(16,24,40,.06)!important;visibility:visible!important;opacity:1!important;color:#101828!important}
+.tools-library-card h2{margin:14px 0 8px!important;font-size:18px!important;line-height:1.25!important;color:#101828!important}
+.tools-library-card p{margin:0!important;color:#667085!important;font-size:13px!important;line-height:1.7!important}
+.tools-library-card .tool-card-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0!important}
+.tools-library-card .tool-card-top>span{font-size:10px!important;font-weight:800!important;color:#7a85a1!important}
+.tools-library-card .tool-icon{display:grid!important;place-items:center!important;width:52px!important;height:52px!important;margin:0!important;border-radius:15px!important;background:#f0efff!important;color:#4d3cff!important;font-size:13px!important;font-weight:900!important}
+.tools-library-card .tool-link{display:block!important;margin-top:auto!important;padding-top:18px!important;color:#4b3cff!important;font-size:12px!important;font-weight:850!important}
+@media(max-width:1000px){.tools-library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.tools-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.tools-library-grid{grid-template-columns:1fr}}
+</style>
 <script type="application/ld+json">
 <?= json_encode(['@context'=>'https://schema.org','@type'=>'CollectionPage','name'=>'SmartToolz All Tools','url'=>'https://smarttoolz.in/tools/','description'=>'Free browser-based tools for common digital tasks.','isPartOf'=>['@type'=>'WebSite','name'=>'SmartToolz','url'=>'https://smarttoolz.in/']], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
@@ -61,9 +74,9 @@ $filtered = array_values(array_filter($tools, static function (array $tool) use 
   <?php if (!$filtered): ?>
     <div class="empty-tools"><div class="tool-icon">?</div><h2>No matching tools yet</h2><p>Try a broader search or clear the category filter to see the complete collection.</p><a class="tool-btn" href="/tools/">Show all tools</a></div>
   <?php else: ?>
-    <div class="tool-grid tool-grid-library">
+    <div class="tools-library-grid">
       <?php foreach ($filtered as $tool): ?>
-        <article class="tool-card" data-tool>
+        <article class="tools-library-card" data-tool data-name="<?= htmlspecialchars(strtolower($tool['name'].' '.$tool['description'].' '.$tool['category']), ENT_QUOTES, 'UTF-8') ?>">
           <div class="tool-card-top"><div class="tool-icon" aria-hidden="true"><?= htmlspecialchars((string)$tool['icon'], ENT_QUOTES, 'UTF-8') ?></div><span><?= htmlspecialchars((string)$tool['category'], ENT_QUOTES, 'UTF-8') ?></span></div>
           <h2><?= htmlspecialchars((string)$tool['name'], ENT_QUOTES, 'UTF-8') ?></h2>
           <p><?= htmlspecialchars((string)$tool['description'], ENT_QUOTES, 'UTF-8') ?></p>

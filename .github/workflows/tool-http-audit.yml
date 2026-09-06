@@ -1,0 +1,39 @@
+name: SmartToolz HTTP Audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  audit-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Audit every tool URL
+        shell: bash
+        run: |
+          set -u
+          api='https://api.github.com/repos/codingbotlab/smarttoolz.in/contents/tools?ref=${{ github.event.pull_request.head.ref || github.ref_name }}'
+          base='https://smarttoolz.in'
+          failed=0
+          echo '=== SmartToolz HTTP audit ==='
+          echo 'Checking every directory under /tools/ ...'
+          mapfile -t slugs < <(curl -fsSL "$api" | jq -r '.[] | select(.type=="dir") | .name' | sort)
+          if [ "${#slugs[@]}" -eq 0 ]; then
+            echo 'No tool directories found.'
+            exit 1
+          fi
+          for slug in "${slugs[@]}"; do
+            url="$base/tools/$slug/"
+            code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 25 "$url" || echo '000')
+            printf '%-42s %s\n' "$slug" "$code"
+            case "$code" in
+              4*|5*) failed=1; ;;
+            esac
+          done
+          echo
+          echo '=== Result ==='
+          if [ "$failed" -ne 0 ]; then
+            echo 'FAIL: One or more tool URLs returned HTTP 4xx/5xx.'
+            exit 1
+          fi
+          echo "PASS: ${#slugs[@]} tool URLs returned non-error HTTP status."

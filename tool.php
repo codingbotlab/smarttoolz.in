@@ -70,15 +70,13 @@ $categorySlug = static function (string $value): string {
     return trim(strtolower((string)$slug), '-');
 };
 
-/* Build the category index independently so every registered category is visible. */
 $categories = [];
 foreach ($tools as $tool) {
     $category = trim((string)($tool['category'] ?? 'Other'));
     if ($category === '') $category = 'Other';
-    if (!isset($categories[$category])) $categories[$category] = 0;
-    $categories[$category]++;
+    $categories[$category] = ($categories[$category] ?? 0) + 1;
 }
-ksort($categories, SORT_NATURAL | SORT_FLAG_CASE);
+ksort($categories);
 
 $visibleTools = $tools;
 if ($requestedCategory !== '') {
@@ -94,20 +92,11 @@ require_once __DIR__ . '/header.php';
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>All Tools — SmartToolz</title>
-<meta name="description" content="Browse all SmartToolz free online tools.">
+<title>All Free Online Tools | SmartToolz</title>
+<meta name="description" content="Browse all SmartToolz free online tools for images, PDFs, text, developers, calculators and everyday tasks.">
 <link rel="canonical" href="https://smarttoolz.in/tool.php">
 <style>
-/* All Tools page layout: explicit rules prevent global/theme styles from hiding the registry. */
-.tools-page .layout{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:22px!important;align-items:start!important}
-.tools-page .filters{display:block!important;visibility:visible!important}
-.tools-page .filter{display:flex!important;visibility:visible!important}
-.tools-page .content{display:block!important;visibility:visible!important;min-width:0!important}
-.tools-page .grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
-.tools-page .card{display:flex!important;visibility:visible!important;min-width:0!important}
-@media(max-width:1050px){.tools-page .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:800px){.tools-page .layout{grid-template-columns:1fr!important}.tools-page .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:560px){.tools-page .grid{grid-template-columns:1fr!important}}
+.tools-page{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:38px 0 70px}.tools-hero{padding:30px 36px;margin-bottom:22px;background:linear-gradient(135deg,#fff,#f0f2ff);border:1px solid #dedbff;border-radius:24px}.tools-hero .tag{display:inline-flex;padding:7px 11px;border-radius:999px;background:#eeedff;color:#635bff;font-size:10px;font-weight:900;letter-spacing:.8px}.tools-hero h1{margin:14px 0 8px;font-size:42px;line-height:1.1}.tools-hero p{margin:0;color:#667085}.tools-page .layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:start}.tools-page .filters{display:block;background:#fff;border:1px solid #e6e8ef;border-radius:18px;padding:16px;position:sticky;top:90px}.tools-page .filters h3{margin:2px 4px 12px;font-size:14px}.tools-page .filter{display:flex;align-items:center;justify-content:space-between;gap:8px;text-decoration:none;color:#475467;padding:10px 11px;border-radius:10px;font-size:12px;font-weight:700}.tools-page .filter:hover,.tools-page .filter.active{background:#eeedff;color:#635bff}.tools-page .count{font-size:10px;opacity:.75}.tools-page .content{min-width:0}.tools-page .search{width:100%;box-sizing:border-box;margin-bottom:14px;padding:14px 16px;border:1px solid #dfe3ec;border-radius:13px;background:#fff;font:inherit;outline:none}.tools-page .search:focus{border-color:#8a84ff;box-shadow:0 0 0 3px rgba(99,91,255,.1)}.tools-page .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.tools-page .card{display:flex;flex-direction:column;min-height:190px;padding:20px;text-decoration:none;background:#fff;border:1px solid #e6e8ef;border-radius:16px;box-sizing:border-box;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.tools-page .card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(16,24,40,.08);border-color:#c9c5ff}.tools-page .icon{width:40px;height:40px;display:grid;place-items:center;margin-bottom:14px;border-radius:11px;background:#eeedff;color:#635bff}.tools-page .icon svg{width:22px;height:22px;fill:currentColor}.tools-page .card h2{margin:0 0 7px;color:#101828;font-size:15px;line-height:1.3}.tools-page .card p{margin:0;color:#667085;font-size:12px;line-height:1.55}.tools-page .use{margin-top:auto;padding-top:18px;color:#635bff;font-size:11px;font-weight:800}.tools-page .use svg{width:14px;height:14px;vertical-align:-3px;fill:currentColor}.tools-page .empty{padding:30px;text-align:center;color:#667085;background:#fff;border:1px solid #e6e8ef;border-radius:16px}@media(max-width:1050px){.tools-page .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:800px){.tools-page{padding-top:24px}.tools-page .layout{grid-template-columns:1fr}.tools-page .filters{position:static}.tools-page .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.tools-page{width:calc(100% - 24px)}.tools-hero{padding:24px}.tools-hero h1{font-size:32px}.tools-page .grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -117,28 +106,19 @@ require_once __DIR__ . '/header.php';
 <h1>All Tools</h1>
 <p><?=count($tools)?> free online tools — find exactly what you need.</p>
 </section>
-
 <div class="layout">
-<aside class="filters" aria-label="Tool categories">
+<aside class="filters" id="categories" aria-label="Tool categories">
 <h3>Categories</h3>
 <a class="filter <?=$requestedCategory===''?'active':''?>" href="/tool.php">All Tools <span class="count"><?=count($tools)?></span></a>
-<?php foreach ($categories as $cat=>$num):
-    $cs = $categorySlug((string)$cat);
-?>
+<?php foreach ($categories as $cat=>$num): $cs=$categorySlug((string)$cat); ?>
 <a class="filter <?=$requestedCategory===$cs?'active':''?>" href="/category/<?=htmlspecialchars($cs,ENT_QUOTES,'UTF-8')?>/"><?=htmlspecialchars((string)$cat,ENT_QUOTES,'UTF-8')?> <span class="count"><?=$num?></span></a>
 <?php endforeach; ?>
 </aside>
-
 <section class="content">
 <input class="search" id="toolSearch" type="search" placeholder="Search tools by name or description…" autocomplete="off" aria-label="Search tools">
 <div class="grid" id="toolGrid">
 <?php foreach ($visibleTools as $tool):
-    $name = (string)($tool['name'] ?? 'Tool');
-    $description = (string)($tool['description'] ?? '');
-    $category = (string)($tool['category'] ?? 'Other');
-    $icon = (string)($tool['icon'] ?? 'build');
-    $url = (string)($tool['url'] ?? '#');
-?>
+$name=(string)($tool['name']??'Tool');$description=(string)($tool['description']??'');$category=(string)($tool['category']??'Other');$icon=(string)($tool['icon']??'build');$url=(string)($tool['url']??'#'); ?>
 <a class="card" data-search="<?=htmlspecialchars(strtolower($name.' '.$description.' '.$category),ENT_QUOTES,'UTF-8')?>" href="<?=htmlspecialchars($url,ENT_QUOTES,'UTF-8')?>">
 <span class="icon"><?=st_icon($icon)?></span>
 <h2><?=htmlspecialchars($name,ENT_QUOTES,'UTF-8')?></h2>
@@ -151,24 +131,8 @@ require_once __DIR__ . '/header.php';
 </section>
 </div>
 </main>
-
 <script>
-(() => {
-    const input = document.getElementById('toolSearch');
-    const cards = [...document.querySelectorAll('#toolGrid .card')];
-    const empty = document.getElementById('empty');
-    if (!input) return;
-    input.addEventListener('input', () => {
-        const value = input.value.toLowerCase().trim();
-        let visible = 0;
-        cards.forEach(card => {
-            const match = !value || (card.dataset.search || '').includes(value);
-            card.hidden = !match;
-            if (match) visible++;
-        });
-        if (empty) empty.hidden = visible !== 0;
-    });
-})();
+(()=>{const input=document.getElementById('toolSearch'),cards=[...document.querySelectorAll('#toolGrid .card')],empty=document.getElementById('empty');if(!input)return;input.addEventListener('input',()=>{const value=input.value.toLowerCase().trim();let visible=0;cards.forEach(card=>{const match=!value||(card.dataset.search||'').includes(value);card.hidden=!match;if(match)visible++});if(empty)empty.hidden=visible!==0})})();
 </script>
 </body>
 </html>

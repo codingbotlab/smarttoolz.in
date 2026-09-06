@@ -1,0 +1,10 @@
+RewriteEngine On
+Options -MultiViews
+
+# Canonical clean tool URLs.
+RewriteCond %{THE_REQUEST} \s/+tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
+RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]
+RewriteRule ^tools/([A-Za-z0-9-]+)/?$ tools/$1/$1.php [L,QSA,NC]
+
+ErrorDocument 404 /404.php
+DirectoryIndex index.php

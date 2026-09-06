@@ -28,21 +28,21 @@ SmartToolz is a PHP-based web platform for browser-friendly utilities, searchabl
 
 ```text
 smarttoolz.in/
-├── index.php                  # Public SmartToolz front door
-├── assets/                    # Global CSS, JS and images
-├── smart-toolz/               # Core tools, APIs, admin and SaaS
-├── knowledge-base/            # Guides and reference content
-├── learning-hub/              # Courses and curriculum
-├── ai-social-media/           # Social/world application
-├── analytics/                 # Analytics and tracking
-├── keddy-bot/                 # Bot application
-├── auth/                      # Authentication integration
-├── config/                    # Configuration helpers
-├── core/                      # Shared backend foundation
-├── scripts/                   # Maintenance and migrations
-├── developer/                 # Developer entry point
-├── docs/                      # Engineering documentation
-└── .github/workflows/         # Active CI/CD automation
+├── index.php
+├── assets/                 # Global CSS, JS and images
+├── smart-toolz/            # Core tools, APIs, admin and SaaS
+├── knowledge-base/         # Guides and reference content
+├── learning-hub/           # Courses and curriculum
+├── ai-social-media/        # Social/world application
+├── analytics/              # Analytics and tracking
+├── keddy-bot/              # Bot application
+├── auth/                   # Authentication integration
+├── config/                 # Configuration helpers
+├── core/                   # Shared backend foundation
+├── scripts/                # Maintenance and migrations
+├── developer/              # Developer entry point
+├── docs/                   # Engineering documentation
+└── .github/workflows/      # Active CI/CD automation
 ```
 
 ## Developer rules

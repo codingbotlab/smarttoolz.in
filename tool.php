@@ -1,117 +1,103 @@
 <?php
-/* SmartToolz — All Tools page and central registry. */
-$iconsFile = __DIR__ . '/lib/icons.php';
-if (is_file($iconsFile)) {
-    require_once $iconsFile;
-}
-if (!function_exists('st_icon')) {
-    function st_icon($name, $class = 'st-icon', $label = '') {
-        $safe = preg_replace('/[^a-z0-9_-]/i', '', (string)$name);
-        if (!$safe) $safe = 'build';
-        $safeClass = preg_replace('/[^a-z0-9_-]/i', ' ', (string)$class);
-        if (!$safeClass) $safeClass = 'st-icon';
-        $aria = $label === '' ? ' aria-hidden="true"' : ' role="img" aria-label="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '"';
-        return '<svg class="' . htmlspecialchars($safeClass, ENT_QUOTES, 'UTF-8') . '" viewBox="0 0 24 24" focusable="false"' . $aria . '><use href="/assets/icons/smarttoolz-icons.svg#' . htmlspecialchars($safe, ENT_QUOTES, 'UTF-8') . '"/></svg>';
+declare(strict_types=1);
+
+require_once __DIR__ . '/lib/icons.php';
+require_once __DIR__ . '/header.php';
+
+function smarttoolz_icon(string $name): string {
+    if (function_exists('st_icon')) {
+        return st_icon($name);
     }
+    $safe = preg_replace('/[^a-z0-9_-]/i', '', $name) ?: 'build';
+    return '<svg class="st-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/assets/icons/smarttoolz-icons.svg#' . htmlspecialchars($safe, ENT_QUOTES, 'UTF-8') . '"></use></svg>';
 }
 
-$tools = array(
-    array('name'=>'Image Background Remover','icon'=>'content_cut','category'=>'Image Tools','description'=>'Remove image backgrounds automatically with AI.','url'=>'/tools/image-background-remover/'),
-    array('name'=>'Image Compressor','icon'=>'compress','category'=>'Image Tools','description'=>'Compress JPG, PNG and WebP images online.','url'=>'/tools/image-compressor/'),
-    array('name'=>'Image Resizer','icon'=>'photo_size_select_large','category'=>'Image Tools','description'=>'Resize images to any width and height.','url'=>'/tools/image-resizer/'),
-    array('name'=>'JPG to PNG','icon'=>'swap_horiz','category'=>'Image Tools','description'=>'Convert JPG images into PNG format.','url'=>'/tools/jpg-to-png/'),
-    array('name'=>'PNG to JPG','icon'=>'swap_horiz','category'=>'Image Tools','description'=>'Convert PNG images into JPG format.','url'=>'/tools/png-to-jpg/'),
-    array('name'=>'Word Counter','icon'=>'article','category'=>'Text Tools','description'=>'Count words, characters, sentences and lines.','url'=>'/tools/word-counter/'),
-    array('name'=>'Case Converter','icon'=>'text_fields','category'=>'Text Tools','description'=>'Convert text to uppercase, lowercase and title case.','url'=>'/tools/case-converter/'),
-    array('name'=>'QR Code Generator','icon'=>'qr_code_2','category'=>'Generators','description'=>'Create QR codes for URLs and text.','url'=>'/tools/qr-generator/'),
-    array('name'=>'Password Generator','icon'=>'lock','category'=>'Security','description'=>'Generate strong and secure passwords.','url'=>'/tools/password-generator/'),
-    array('name'=>'JSON Formatter','icon'=>'data_object','category'=>'Developer Tools','description'=>'Format, beautify and validate JSON.','url'=>'/tools/json-formatter/'),
-    array('name'=>'URL Encoder','icon'=>'link','category'=>'Developer Tools','description'=>'Encode URLs safely and easily.','url'=>'/tools/url-encoder/'),
-    array('name'=>'PDF to JPG','icon'=>'picture_as_pdf','category'=>'PDF Tools','description'=>'Convert PDF pages into JPG images.','url'=>'/tools/pdf-to-jpg/'),
-    array('name'=>'Duplicate Line Remover','icon'=>'content_copy','category'=>'Text Tools','description'=>'Remove duplicate lines from text.','url'=>'/tools/remove-duplicate-lines/'),
-    array('name'=>'Image Cropper','icon'=>'crop','category'=>'Image Tools','description'=>'Crop images to the exact size you need.','url'=>'/tools/image-cropper/'),
-    array('name'=>'Image Rotator','icon'=>'rotate_right','category'=>'Image Tools','description'=>'Rotate images clockwise or counterclockwise.','url'=>'/tools/image-rotator/'),
-    array('name'=>'Image Flipper','icon'=>'flip','category'=>'Image Tools','description'=>'Flip images horizontally or vertically.','url'=>'/tools/image-flipper/'),
-    array('name'=>'WebP to JPG','icon'=>'image','category'=>'Image Tools','description'=>'Convert WebP images into JPG format.','url'=>'/tools/webp-to-jpg/'),
-    array('name'=>'JPG to WebP','icon'=>'swap_horiz','category'=>'Image Tools','description'=>'Convert JPG images to WebP format.','url'=>'/tools/jpg-to-webp/'),
-    array('name'=>'PNG to WebP','icon'=>'swap_horiz','category'=>'Image Tools','description'=>'Convert PNG images to WebP format.','url'=>'/tools/png-to-webp/'),
-    array('name'=>'GIF to JPG','icon'=>'gif','category'=>'Image Tools','description'=>'Convert GIF images into JPG format.','url'=>'/tools/gif-to-jpg/'),
-    array('name'=>'GIF Maker','icon'=>'gif_box','category'=>'Image Tools','description'=>'Create animated GIF files online.','url'=>'/tools/gif-maker/'),
-    array('name'=>'Meme Generator','icon'=>'sentiment_very_satisfied','category'=>'Generators','description'=>'Create custom memes with your own image and text.','url'=>'/tools/meme-generator/'),
-    array('name'=>'Color Picker','icon'=>'palette','category'=>'Design Tools','description'=>'Pick a color and get HEX and RGB values.','url'=>'/tools/color-picker/'),
-    array('name'=>'Color Converter','icon'=>'gradient','category'=>'Design Tools','description'=>'Convert HEX, RGB and HSL color values.','url'=>'/tools/color-converter/'),
-    array('name'=>'Base64 Encoder','icon'=>'lock','category'=>'Developer Tools','description'=>'Encode text and data into Base64.','url'=>'/tools/base64-encoder/'),
-    array('name'=>'Base64 Decoder','icon'=>'lock_open','category'=>'Developer Tools','description'=>'Decode Base64 encoded text and data.','url'=>'/tools/base64-decoder/'),
-    array('name'=>'URL Decoder','icon'=>'link_off','category'=>'Developer Tools','description'=>'Decode URL encoded text.','url'=>'/tools/url-decoder/'),
-    array('name'=>'HTML Encoder','icon'=>'code','category'=>'Developer Tools','description'=>'Encode HTML special characters.','url'=>'/tools/html-encoder/'),
-    array('name'=>'HTML Decoder','icon'=>'code','category'=>'Developer Tools','description'=>'Decode HTML entities.','url'=>'/tools/html-decoder/'),
-    array('name'=>'Markdown to HTML','icon'=>'description','category'=>'Developer Tools','description'=>'Convert Markdown into HTML.','url'=>'/tools/markdown-to-html/'),
-    array('name'=>'Favicon Generator','icon'=>'web_asset','category'=>'Developer Tools','description'=>'Create website favicons from images, emoji or text.','url'=>'/tools/favicon-generator/'),
-    array('name'=>'Favicon ICO Generator','icon'=>'web_asset','category'=>'Developer Tools','description'=>'Create favicon.ico files from images or text.','url'=>'/tools/favicon-ico-generator/'),
-    array('name'=>'Text to Slug','icon'=>'link','category'=>'Text Tools','description'=>'Convert text into URL-friendly slugs.','url'=>'/tools/text-to-slug/'),
-    array('name'=>'Remove Extra Spaces','icon'=>'space_bar','category'=>'Text Tools','description'=>'Remove unnecessary spaces from text.','url'=>'/tools/remove-extra-spaces/'),
-    array('name'=>'Sort Lines','icon'=>'sort','category'=>'Text Tools','description'=>'Sort lines alphabetically or numerically.','url'=>'/tools/sort-lines/'),
-    array('name'=>'Reverse Text','icon'=>'sync','category'=>'Text Tools','description'=>'Reverse text characters instantly.','url'=>'/tools/reverse-text/'),
-    array('name'=>'PDF Merger','icon'=>'merge_type','category'=>'PDF Tools','description'=>'Merge multiple PDF files into one.','url'=>'/tools/pdf-merger/'),
-    array('name'=>'PDF Splitter','icon'=>'call_split','category'=>'PDF Tools','description'=>'Split PDFs into separate pages.','url'=>'/tools/pdf-splitter/'),
-    array('name'=>'PDF Compressor','icon'=>'compress','category'=>'PDF Tools','description'=>'Reduce PDF file size.','url'=>'/tools/pdf-compressor/'),
-    array('name'=>'PDF to PNG','icon'=>'picture_as_pdf','category'=>'PDF Tools','description'=>'Convert PDF pages into PNG images.','url'=>'/tools/pdf-to-png/'),
-    array('name'=>'PNG to PDF','icon'=>'picture_as_pdf','category'=>'PDF Tools','description'=>'Convert images into PDF documents.','url'=>'/tools/png-to-pdf/'),
-    array('name'=>'Text to PDF','icon'=>'picture_as_pdf','category'=>'PDF Tools','description'=>'Convert text content into a PDF.','url'=>'/tools/text-to-pdf/'),
-    array('name'=>'QR Code Reader','icon'=>'qr_code_scanner','category'=>'Generators','description'=>'Read QR codes from images.','url'=>'/tools/qr-reader/'),
-    array('name'=>'Random Number Generator','icon'=>'casino','category'=>'Generators','description'=>'Generate random numbers in any range.','url'=>'/tools/random-number-generator/'),
-    array('name'=>'UUID Generator','icon'=>'fingerprint','category'=>'Developer Tools','description'=>'Generate unique UUID identifiers.','url'=>'/tools/uuid-generator/'),
-    array('name'=>'Timestamp Converter','icon'=>'schedule','category'=>'Developer Tools','description'=>'Convert Unix timestamps into readable dates.','url'=>'/tools/timestamp-converter/'),
-    array('name'=>'Unix Timestamp','icon'=>'timer','category'=>'Developer Tools','description'=>'Work with Unix timestamps.','url'=>'/tools/unix-timestamp/'),
-    array('name'=>'Lorem Ipsum Generator','icon'=>'article','category'=>'Generators','description'=>'Generate placeholder Lorem Ipsum text.','url'=>'/tools/lorem-ipsum-generator/'),
-    array('name'=>'Age Calculator','icon'=>'cake','category'=>'Calculators','description'=>'Calculate age from date of birth.','url'=>'/tools/age-calculator/'),
-    array('name'=>'Percentage Calculator','icon'=>'percent','category'=>'Calculators','description'=>'Calculate percentages quickly.','url'=>'/tools/percentage-calculator/'),
-    array('name'=>'BMI Calculator','icon'=>'monitor_heart','category'=>'Calculators','description'=>'Calculate Body Mass Index.','url'=>'/tools/bmi-calculator/'),
-    array('name'=>'Unit Converter','icon'=>'straighten','category'=>'Calculators','description'=>'Convert common units quickly.','url'=>'/tools/unit-converter/'),
-    array('name'=>'Stopwatch / Timer','icon'=>'timer','category'=>'Utilities','description'=>'Use an online stopwatch and timer.','url'=>'/tools/stopwatch-timer/')
-);
-
-/* When included by home.php, expose only the registry. */
-if (defined('SMARTTOOLZ_HOME_REGISTRY')) {
-    return;
-}
+$tools = [
+    ['Image Background Remover','content_cut','Image Tools','Remove image backgrounds automatically with AI.','/tools/image-background-remover/'],
+    ['Image Compressor','compress','Image Tools','Compress JPG, PNG and WebP images online.','/tools/image-compressor/'],
+    ['Image Resizer','photo_size_select_large','Image Tools','Resize images to any width and height.','/tools/image-resizer/'],
+    ['JPG to PNG','swap_horiz','Image Tools','Convert JPG images into PNG format.','/tools/jpg-to-png/'],
+    ['PNG to JPG','swap_horiz','Image Tools','Convert PNG images into JPG format.','/tools/png-to-jpg/'],
+    ['Word Counter','article','Text Tools','Count words, characters, sentences and paragraphs.','/tools/word-counter/'],
+    ['Case Converter','text_fields','Text Tools','Convert text to uppercase, lowercase and title case.','/tools/case-converter/'],
+    ['QR Code Generator','qr_code_2','Generators','Create QR codes for URLs and text.','/tools/qr-generator/'],
+    ['Password Generator','lock','Security','Generate strong and secure passwords.','/tools/password-generator/'],
+    ['JSON Formatter','data_object','Developer Tools','Format, beautify and validate JSON.','/tools/json-formatter/'],
+    ['URL Encoder','link','Developer Tools','Encode URLs safely and easily.','/tools/url-encoder/'],
+    ['PDF to JPG','picture_as_pdf','PDF Tools','Convert PDF pages into JPG images.','/tools/pdf-to-jpg/'],
+    ['Duplicate Line Remover','content_copy','Text Tools','Remove duplicate lines from text.','/tools/remove-duplicate-lines/'],
+    ['Image Cropper','crop','Image Tools','Crop images to the exact size you need.','/tools/image-cropper/'],
+    ['Image Rotator','rotate_right','Image Tools','Rotate images clockwise or counterclockwise.','/tools/image-rotator/'],
+    ['Image Flipper','flip','Image Tools','Flip images horizontally or vertically.','/tools/image-flipper/'],
+    ['WebP to JPG','image','Image Tools','Convert WebP images into JPG format.','/tools/webp-to-jpg/'],
+    ['JPG to WebP','swap_horiz','Image Tools','Convert JPG images to WebP format.','/tools/jpg-to-webp/'],
+    ['PNG to WebP','swap_horiz','Image Tools','Convert PNG images to WebP format.','/tools/png-to-webp/'],
+    ['GIF to JPG','gif','Image Tools','Convert GIF images into JPG format.','/tools/gif-to-jpg/'],
+    ['GIF Maker','gif_box','Image Tools','Create animated GIF files online.','/tools/gif-maker/'],
+    ['Meme Generator','sentiment_very_satisfied','Generators','Create custom memes with your own image and text.','/tools/meme-generator/'],
+    ['Color Picker','palette','Design Tools','Pick a color and get HEX and RGB values.','/tools/color-picker/'],
+    ['Color Converter','gradient','Design Tools','Convert HEX, RGB and HSL color values.','/tools/color-converter/'],
+    ['Base64 Encoder','lock','Developer Tools','Encode text and data into Base64.','/tools/base64-encoder/'],
+    ['Base64 Decoder','lock_open','Developer Tools','Decode Base64 encoded text and data.','/tools/base64-decoder/'],
+    ['URL Decoder','link_off','Developer Tools','Decode URL encoded text.','/tools/url-decoder/'],
+    ['HTML Encoder','code','Developer Tools','Encode HTML special characters.','/tools/html-encoder/'],
+    ['HTML Decoder','code','Developer Tools','Decode HTML entities.','/tools/html-decoder/'],
+    ['Markdown to HTML','description','Developer Tools','Convert Markdown into HTML.','/tools/markdown-to-html/'],
+    ['Favicon Generator','web_asset','Developer Tools','Create website favicons from images, emoji or text.','/tools/favicon-generator/'],
+    ['Favicon ICO Generator','web_asset','Developer Tools','Create favicon.ico files from images or text.','/tools/favicon-ico-generator/'],
+    ['Text to Slug','link','Text Tools','Convert text into URL-friendly slugs.','/tools/text-to-slug/'],
+    ['Remove Extra Spaces','space_bar','Text Tools','Remove unnecessary spaces from text.','/tools/remove-extra-spaces/'],
+    ['Sort Lines','sort','Text Tools','Sort lines alphabetically or numerically.','/tools/sort-lines/'],
+    ['Reverse Text','sync','Text Tools','Reverse text characters instantly.','/tools/reverse-text/'],
+    ['PDF Merger','merge_type','PDF Tools','Merge multiple PDF files into one.','/tools/pdf-merger/'],
+    ['PDF Splitter','call_split','PDF Tools','Split PDFs into separate pages.','/tools/pdf-splitter/'],
+    ['PDF Compressor','compress','PDF Tools','Reduce PDF file size.','/tools/pdf-compressor/'],
+    ['PDF to PNG','picture_as_pdf','PDF Tools','Convert PDF pages into PNG images.','/tools/pdf-to-png/'],
+    ['PNG to PDF','picture_as_pdf','PDF Tools','Convert images into PDF documents.','/tools/png-to-pdf/'],
+    ['Text to PDF','picture_as_pdf','PDF Tools','Convert text content into a PDF.','/tools/text-to-pdf/'],
+    ['QR Code Reader','qr_code_scanner','Generators','Read QR codes from images.','/tools/qr-reader/'],
+    ['Random Number Generator','casino','Generators','Generate random numbers in any range.','/tools/random-number-generator/'],
+    ['UUID Generator','fingerprint','Developer Tools','Generate unique UUID identifiers.','/tools/uuid-generator/'],
+    ['Timestamp Converter','schedule','Developer Tools','Convert Unix timestamps into readable dates.','/tools/timestamp-converter/'],
+    ['Unix Timestamp','timer','Developer Tools','Work with Unix timestamps.','/tools/unix-timestamp/'],
+    ['Lorem Ipsum Generator','article','Generators','Generate placeholder Lorem Ipsum text.','/tools/lorem-ipsum-generator/'],
+    ['Age Calculator','cake','Calculators','Calculate age from date of birth.','/tools/age-calculator/'],
+    ['Percentage Calculator','percent','Calculators','Calculate percentages quickly.','/tools/percentage-calculator/'],
+    ['BMI Calculator','monitor_heart','Calculators','Calculate Body Mass Index.','/tools/bmi-calculator/'],
+    ['Unit Converter','straighten','Calculators','Convert common units quickly.','/tools/unit-converter/'],
+    ['Stopwatch / Timer','timer','Utilities','Use an online stopwatch and timer.','/tools/stopwatch-timer/'],
+];
 
 $requestedCategory = isset($_GET['category']) ? trim((string)$_GET['category']) : '';
-function smarttoolz_slug($value) {
-    $slug = preg_replace('/[^a-z0-9]+/i', '-', (string)$value);
+$slugify = static function (string $value): string {
+    $slug = preg_replace('/[^a-z0-9]+/i', '-', $value);
     return trim(strtolower((string)$slug), '-');
-}
+};
 
-$categories = array();
+$categories = [];
 foreach ($tools as $tool) {
-    $category = trim((string)($tool['category'] ?? 'Other'));
-    if ($category === '') $category = 'Other';
-    if (!isset($categories[$category])) $categories[$category] = 0;
-    $categories[$category]++;
+    $categories[$tool[2]] = ($categories[$tool[2]] ?? 0) + 1;
 }
-ksort($categories, SORT_NATURAL | SORT_FLAG_CASE);
+uksort($categories, 'strnatcasecmp');
 
 $visibleTools = $tools;
 if ($requestedCategory !== '') {
-    $visibleTools = array();
-    foreach ($tools as $tool) {
-        if (smarttoolz_slug($tool['category'] ?? 'Other') === $requestedCategory) {
-            $visibleTools[] = $tool;
-        }
-    }
+    $visibleTools = array_values(array_filter($tools, static fn(array $tool): bool => $slugify($tool[2]) === $requestedCategory));
 }
-
-require_once __DIR__ . '/header.php';
 ?>
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>All Tools — SmartToolz</title>
+<title>All Free Online Tools | SmartToolz</title>
 <meta name="description" content="Browse all SmartToolz free online tools for images, PDF, text, developer tasks, calculators and everyday work.">
-<meta name="robots" content="index,follow">
+<meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://smarttoolz.in/tool.php">
+<style>
+:root{--brand:#635bff;--brand-dark:#5148e8;--ink:#101828;--muted:#667085;--line:#e6e8ef;--bg:#f6f8fc}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.tools-page{width:min(1240px,calc(100% - 28px));margin:0 auto 56px}.tools-hero{text-align:center;padding:46px 0 28px}.tools-hero .tag{display:inline-flex;padding:7px 11px;border:1px solid #dedbff;border-radius:999px;background:#efedff;color:var(--brand);font-size:10px;font-weight:900;letter-spacing:1px}.tools-hero h1{margin:13px 0 7px;font-size:clamp(34px,5vw,52px);line-height:1.08;letter-spacing:-2px}.tools-hero p{margin:0;color:var(--muted);font-size:14px}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px;align-items:start}.filters{position:sticky;top:90px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 10px 30px rgba(16,24,40,.04)}.filters h3{margin:3px 8px 10px;font-size:14px}.filter{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border-radius:10px;color:#475467;text-decoration:none;font-size:12px;font-weight:750}.filter:hover,.filter.active{background:#efedff;color:var(--brand)}.count{min-width:25px;padding:3px 7px;border-radius:999px;background:#f2f4f7;color:#667085;text-align:center;font-size:10px}.filter.active .count{background:#ddd9ff;color:#5148e8}.content{min-width:0}.search{width:100%;height:48px;padding:0 15px;border:1px solid var(--line);border-radius:13px;background:#fff;outline:0;color:var(--ink);font:inherit;box-shadow:0 8px 25px rgba(16,24,40,.03)}.search:focus{border-color:#bcb7ff;box-shadow:0 0 0 3px rgba(99,91,255,.08)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:15px}.card{display:flex;min-height:190px;flex-direction:column;padding:18px;background:#fff;border:1px solid var(--line);border-radius:17px;text-decoration:none;color:var(--ink);box-shadow:0 10px 30px rgba(16,24,40,.035);transition:.2s}.card:hover{transform:translateY(-3px);border-color:#d8d4ff;box-shadow:0 18px 40px rgba(16,24,40,.08)}.icon{width:42px;height:42px;display:grid;place-items:center;margin-bottom:13px;border-radius:12px;background:#efedff;color:var(--brand)}.st-icon{width:20px;height:20px;fill:currentColor}.card h2{margin:0 0 6px;font-size:14px;line-height:1.3}.card p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}.use{display:flex;align-items:center;gap:5px;margin-top:auto;padding-top:15px;color:var(--brand);font-size:10px;font-weight:850}.empty{padding:30px 10px;text-align:center;color:var(--muted);font-size:13px}@media(max-width:900px){.layout{grid-template-columns:1fr}.filters{position:static}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.tools-page{width:calc(100% - 18px)}.tools-hero{padding:30px 0 20px}.grid{grid-template-columns:1fr}.card{min-height:165px}}
+</style>
 </head>
 <body>
 <main class="tools-page">
@@ -124,26 +110,20 @@ require_once __DIR__ . '/header.php';
 <aside class="filters" aria-label="Tool categories">
 <h3>Categories</h3>
 <a class="filter <?php echo $requestedCategory === '' ? 'active' : ''; ?>" href="/tool.php">All Tools <span class="count"><?php echo count($tools); ?></span></a>
-<?php foreach ($categories as $cat => $num): $cs = smarttoolz_slug($cat); ?>
-<a class="filter <?php echo $requestedCategory === $cs ? 'active' : ''; ?>" href="/category/<?php echo htmlspecialchars($cs, ENT_QUOTES, 'UTF-8'); ?>/"><?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?> <span class="count"><?php echo $num; ?></span></a>
+<?php foreach ($categories as $category => $count): $slug = $slugify($category); ?>
+<a class="filter <?php echo $requestedCategory === $slug ? 'active' : ''; ?>" href="/category/<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>/"><?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?> <span class="count"><?php echo $count; ?></span></a>
 <?php endforeach; ?>
 </aside>
 <section class="content">
-<label class="sr-only" for="toolSearch">Search tools</label>
-<input class="search" id="toolSearch" type="search" placeholder="Search tools by name or description…" autocomplete="off" aria-label="Search tools">
+<label for="toolSearch" class="sr-only">Search tools</label>
+<input class="search" id="toolSearch" type="search" placeholder="Search tools by name or description…" autocomplete="off">
 <div class="grid" id="toolGrid">
-<?php foreach ($visibleTools as $tool):
-    $name = (string)($tool['name'] ?? 'Tool');
-    $description = (string)($tool['description'] ?? '');
-    $category = (string)($tool['category'] ?? 'Other');
-    $icon = (string)($tool['icon'] ?? 'build');
-    $url = (string)($tool['url'] ?? '#');
-?>
-<a class="card" data-search="<?php echo htmlspecialchars(strtolower($name . ' ' . $description . ' ' . $category), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>">
-<span class="icon"><?php echo st_icon($icon); ?></span>
-<h2><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></h2>
-<p><?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
-<span class="use">Open Tool <?php echo st_icon('arrow_forward'); ?></span>
+<?php foreach ($visibleTools as $tool): ?>
+<a class="card" href="<?php echo htmlspecialchars($tool[4], ENT_QUOTES, 'UTF-8'); ?>" data-search="<?php echo htmlspecialchars(strtolower($tool[0] . ' ' . $tool[2] . ' ' . $tool[3]), ENT_QUOTES, 'UTF-8'); ?>">
+<span class="icon"><?php echo smarttoolz_icon($tool[1]); ?></span>
+<h2><?php echo htmlspecialchars($tool[0], ENT_QUOTES, 'UTF-8'); ?></h2>
+<p><?php echo htmlspecialchars($tool[3], ENT_QUOTES, 'UTF-8'); ?></p>
+<span class="use">Open Tool <?php echo smarttoolz_icon('arrow_forward'); ?></span>
 </a>
 <?php endforeach; ?>
 </div>
@@ -153,21 +133,21 @@ require_once __DIR__ . '/header.php';
 </main>
 <?php require_once __DIR__ . '/footer.php'; ?>
 <script>
-(function () {
-    var input = document.getElementById('toolSearch');
-    var cards = Array.prototype.slice.call(document.querySelectorAll('#toolGrid .card'));
-    var empty = document.getElementById('empty');
-    if (!input) return;
-    input.addEventListener('input', function () {
-        var value = input.value.toLowerCase().replace(/^\s+|\s+$/g, '');
-        var visible = 0;
-        cards.forEach(function (card) {
-            var match = !value || (card.getAttribute('data-search') || '').indexOf(value) !== -1;
-            card.hidden = !match;
-            if (match) visible++;
-        });
-        if (empty) empty.hidden = visible !== 0;
-    });
+(function(){
+ var input=document.getElementById('toolSearch');
+ var cards=[].slice.call(document.querySelectorAll('#toolGrid .card'));
+ var empty=document.getElementById('empty');
+ if(!input)return;
+ input.addEventListener('input',function(){
+   var q=input.value.toLowerCase().trim();
+   var shown=0;
+   cards.forEach(function(card){
+     var match=!q || (card.getAttribute('data-search')||'').indexOf(q)!==-1;
+     card.hidden=!match;
+     if(match)shown++;
+   });
+   if(empty)empty.hidden=shown!==0;
+ });
 }());
 </script>
 </body>

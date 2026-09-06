@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 define('SMARTTOOLZ_HOME_REGISTRY', true);
 require __DIR__ . '/tool.php';
+require __DIR__ . '/lib/icons.php';
 require __DIR__ . '/header.php';
 
 $tools = is_array($tools ?? null) ? $tools : [];
@@ -38,22 +39,21 @@ function st_slug(string $value): string { return trim(strtolower((string)(preg_r
 <section class="home-hero">
   <div class="page-wrap hero-grid">
     <div>
-      <span class="eyebrow"><span class="material-symbols-rounded">bolt</span> FREE ONLINE TOOLS</span>
+      <span class="eyebrow"><?=st_icon('bolt','st-icon st-icon-sm')?> FREE ONLINE TOOLS</span>
       <h1>Get things done.<br><span class="gradient-text">Smarter & faster.</span></h1>
       <p class="hero-copy">A clean collection of practical tools for images, PDFs, text, developers and everyday tasks. Open a tool, do the job, and move on.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/tool.php"><span class="material-symbols-rounded">apps</span> Explore all tools</a>
-        <a class="btn" href="#popular"><span class="material-symbols-rounded">star</span> Popular tools</a>
+        <a class="btn btn-primary" href="/tool.php"><?=st_icon('apps')?> Explore all tools</a>
+        <a class="btn" href="#popular"><?=st_icon('star')?> Popular tools</a>
       </div>
       <div class="tool-search">
         <input data-tool-search type="search" placeholder="Search 50+ tools…" aria-label="Search SmartToolz tools" autocomplete="off">
-        <span class="material-symbols-rounded">search</span>
-        <div class="search-results" data-search-results></div>
+        <?=st_icon('search')?><div class="search-results" data-search-results></div>
       </div>
       <div class="trust-row">
-        <span class="trust-pill"><span class="material-symbols-rounded">check_circle</span> No signup</span>
-        <span class="trust-pill"><span class="material-symbols-rounded">speed</span> Fast & simple</span>
-        <span class="trust-pill"><span class="material-symbols-rounded">devices</span> Works in browser</span>
+        <span class="trust-pill"><?=st_icon('check_circle')?> No signup</span>
+        <span class="trust-pill"><?=st_icon('speed')?> Fast & simple</span>
+        <span class="trust-pill"><?=st_icon('devices')?> Works in browser</span>
       </div>
     </div>
     <div class="hero-art"><img src="/assets/home/hero-tools.svg" alt="SmartToolz online tools illustration" width="800" height="520"></div>
@@ -69,11 +69,11 @@ function st_slug(string $value): string { return trim(strtolower((string)(preg_r
 
 <section class="section" id="popular">
   <div class="page-wrap">
-    <div class="section-head"><div><h2>Popular tools</h2><p>The tools people reach for first.</p></div><a href="/tool.php">View all <span class="material-symbols-rounded">arrow_forward</span></a></div>
+    <div class="section-head"><div><h2>Popular tools</h2><p>The tools people reach for first.</p></div><a href="/tool.php">View all <?=st_icon('arrow_forward')?></a></div>
     <div class="tool-grid">
       <?php foreach ($popular as $tool): $name=(string)($tool['name']??'Tool'); $url=(string)($tool['url']??'#'); $icon=(string)($tool['icon']??'build'); $cat=(string)($tool['category']??'Tool'); $desc=(string)($tool['description']??''); ?>
       <a class="tool-card" data-tool-card data-search="<?=htmlspecialchars(strtolower($name.' '.$desc.' '.$cat),ENT_QUOTES,'UTF-8')?>" data-url="<?=htmlspecialchars($url,ENT_QUOTES,'UTF-8')?>" data-name="<?=htmlspecialchars($name,ENT_QUOTES,'UTF-8')?>" data-category="<?=htmlspecialchars($cat,ENT_QUOTES,'UTF-8')?>" data-icon="<?=htmlspecialchars($icon,ENT_QUOTES,'UTF-8')?>" href="<?=htmlspecialchars($url,ENT_QUOTES,'UTF-8')?>">
-        <span class="tool-icon"><span class="material-symbols-rounded"><?=htmlspecialchars($icon,ENT_QUOTES,'UTF-8')?></span></span><h3><?=htmlspecialchars($name,ENT_QUOTES,'UTF-8')?></h3><p><?=htmlspecialchars($desc,ENT_QUOTES,'UTF-8')?></p><span class="tool-open">Open tool <span class="material-symbols-rounded">arrow_forward</span></span>
+        <span class="tool-icon"><?=st_icon($icon)?></span><h3><?=htmlspecialchars($name,ENT_QUOTES,'UTF-8')?></h3><p><?=htmlspecialchars($desc,ENT_QUOTES,'UTF-8')?></p><span class="tool-open">Open tool <?=st_icon('arrow_forward')?></span>
       </a>
       <?php endforeach; ?>
     </div>
@@ -82,10 +82,10 @@ function st_slug(string $value): string { return trim(strtolower((string)(preg_r
 
 <section class="section section-white" id="categories">
   <div class="page-wrap">
-    <div class="section-head"><div><h2>Browse by category</h2><p>Jump straight to the kind of tool you need.</p></div><a href="/tool.php">All tools <span class="material-symbols-rounded">arrow_forward</span></a></div>
+    <div class="section-head"><div><h2>Browse by category</h2><p>Jump straight to the kind of tool you need.</p></div><a href="/tool.php">All tools <?=st_icon('arrow_forward')?></a></div>
     <div class="category-grid">
       <?php foreach ($categories as $category=>$count): $icon=$categoryIcons[$category]??'build'; $slug=st_slug($category); ?>
-      <div class="category-card"><h3><span class="material-symbols-rounded"><?=htmlspecialchars($icon,ENT_QUOTES,'UTF-8')?></span><?=htmlspecialchars($category,ENT_QUOTES,'UTF-8')?></h3><p><?=$count?> <?=($count===1?'tool':'tools')?> ready to use.</p><a href="/category/<?=htmlspecialchars($slug,ENT_QUOTES,'UTF-8')?>/">Explore category <span class="material-symbols-rounded">arrow_forward</span></a></div>
+      <div class="category-card"><h3><?=st_icon($icon)?><?=htmlspecialchars($category,ENT_QUOTES,'UTF-8')?></h3><p><?=$count?> <?=($count===1?'tool':'tools')?> ready to use.</p><a href="/category/<?=htmlspecialchars($slug,ENT_QUOTES,'UTF-8')?>/">Explore category <?=st_icon('arrow_forward')?></a></div>
       <?php endforeach; ?>
     </div>
   </div>
@@ -96,17 +96,17 @@ function st_slug(string $value): string { return trim(strtolower((string)(preg_r
     <div class="seo-panel">
       <div class="seo-copy"><h2>Simple tools. Zero learning curve.</h2><p>SmartToolz is built around focused utilities that solve one job well. Compress an image, convert a file, clean text, generate a value or format code without installing another app.</p></div>
       <div class="seo-list">
-        <div><span class="material-symbols-rounded">check_circle</span><span>Image conversion, compression and editing</span></div>
-        <div><span class="material-symbols-rounded">check_circle</span><span>PDF conversion, merging and splitting</span></div>
-        <div><span class="material-symbols-rounded">check_circle</span><span>Text and developer utilities</span></div>
-        <div><span class="material-symbols-rounded">check_circle</span><span>Calculators, generators and everyday utilities</span></div>
+        <div><?=st_icon('check_circle')?><span>Image conversion, compression and editing</span></div>
+        <div><?=st_icon('check_circle')?><span>PDF conversion, merging and splitting</span></div>
+        <div><?=st_icon('check_circle')?><span>Text and developer utilities</span></div>
+        <div><?=st_icon('check_circle')?><span>Calculators, generators and everyday utilities</span></div>
       </div>
     </div>
   </div>
 </section>
 
 <section class="section" style="padding-top:0">
-  <div class="page-wrap"><div class="cta-box"><h2>Find a tool and finish the task.</h2><p>Browse the complete SmartToolz collection and get straight to the utility you need.</p><a class="btn btn-primary" href="/tool.php"><span class="material-symbols-rounded">apps</span> Browse all tools</a></div></div>
+  <div class="page-wrap"><div class="cta-box"><h2>Find a tool and finish the task.</h2><p>Browse the complete SmartToolz collection and get straight to the utility you need.</p><a class="btn btn-primary" href="/tool.php"><?=st_icon('apps')?> Browse all tools</a></div></div>
 </section>
 <?php require __DIR__ . '/footer.php'; ?>
 </body>

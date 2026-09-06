@@ -21,7 +21,8 @@ define('SMARTTOOLZ_RENDER_SHELL', true);
 <title>SmartToolz — Free Online Tools for Images, PDF, Text &amp; More</title>
 <meta name="description" content="Free online tools for images, PDFs, text, developer tasks, calculators and everyday work. SmartToolz is fast, simple and built for your browser.">
 <meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="https://smarttoolz.in/">
-<meta property="og:type" content="website"><meta property="og:site_name" content="SmartToolz"><meta property="og:title" content="SmartToolz — Free Online Tools for Images, PDF, Text &amp; More"><meta property="og:description" content="Free, fast and simple online tools that work in your browser."><meta property="og:url" content="https://smarttoolz.in/"><meta name="twitter:card" content="summary"><meta name="theme-color" content="#635bff"><link rel="stylesheet" href="/assets/css/smarttoolz.css">
+<meta property="og:type" content="website"><meta property="og:site_name" content="SmartToolz"><meta property="og:title" content="SmartToolz — Free Online Tools for Images, PDF, Text &amp; More"><meta property="og:description" content="Free, fast and simple online tools that work in your browser."><meta property="og:url" content="https://smarttoolz.in/"><meta name="twitter:card" content="summary"><meta name="theme-color" content="#635bff">
+<?php require __DIR__ . '/head.php'; ?>
 </head><body>
 <?php require __DIR__ . '/header.php'; ?>
 <main>

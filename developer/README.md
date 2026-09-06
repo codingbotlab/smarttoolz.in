@@ -1,38 +1,35 @@
 # SmartToolz Developer Hub
 
-Developer entry point for the `smarttoolz.in` monorepo.
+Developer entry point for the active `smarttoolz.in` monorepo.
 
-## Repository rules
-
-- Keep each product/module self-contained.
-- Put shared application PHP in the owning module's `core/` or `includes/` directory.
-- Put browser CSS in `assets/css/` and browser JavaScript in `assets/js/`.
-- Put images, icons and other static media in `assets/img/`, `assets/icons/` or the module's existing asset tree.
-- Put APIs under `api/`.
-- Put administrative code under `admin/`.
-- Put migrations/seeds under `database/`, `migrations/` or `seed/` according to the owning module.
-- Put automation scripts beside the module they automate; repository-wide maintenance stays in `/scripts/`.
-- Keep secrets in environment configuration, never in committed source.
-- Preserve public routes while reorganising internals; use compatibility entry points when a move would otherwise break production URLs.
-
-## Product modules
+## Active modules
 
 | Module | Purpose | Public entry |
 |---|---|---|
 | `smart-toolz/` | Online tools platform | `/smart-toolz/` |
-| `creator-ai/` | AI + creator application | `/creator-ai/` |
 | `learning-hub/` | Courses and lessons | `/learning-hub/` |
 | `knowledge-base/` | Guides and articles | `/knowledge-base/` |
+| `ai-social-media/` | Social/world application | `/ai-social-media/` |
 | `analytics/` | Tracking and analytics | `/analytics/` |
-| `Reddott-films/` | Video/content workflows | `/Reddott-films/` |
-| `video-automation/` | Remotion automation | `/video-automation/` |
-| `monitor/` | Site health automation | `/monitor/` |
 | `keddy-bot/` | Bot application | `/keddy-bot/` |
 
-## Visual map
+## Repository rules
 
-Use `/site-wire-map.php` to inspect the current end-to-end request flow.
+- Keep each active module self-contained.
+- Put global CSS/JS in `/assets/css/` and `/assets/js/`.
+- Put module-only frontend assets in that module's `assets/` directory.
+- Put APIs under `<module>/api/`.
+- Put admin code under `<module>/admin/`.
+- Put shared module PHP under `<module>/core/` or `<module>/includes/`.
+- Put repository-wide maintenance in `/scripts/`.
+- Keep secrets in protected environment/server configuration.
+- Preserve working public routes when reorganising active code.
+- Remove retired products from navigation, registries and automation.
 
-## Migration strategy
+## Request flow
 
-Reorganisation is done in small, reviewable commits. Production entry points are not deleted until their replacement has been wired and verified. This keeps deployment URLs stable while the codebase moves toward predictable module boundaries.
+```text
+User → Root Entry → Router → Active Module → API/Service → UI → Response
+```
+
+Use `docs/REPOSITORY-STRUCTURE.md` as the canonical repository map.

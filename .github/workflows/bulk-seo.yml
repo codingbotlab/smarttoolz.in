@@ -10,13 +10,16 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   maintain:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip-site-automation]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -64,17 +67,11 @@ jobs:
                   text = page.read_text(encoding='utf-8')
                   original = text
 
-                  # Remove every retired tracker reference from tool source, including
-                  # assignments such as $tracker = .../analytics/tracker.php.
-                  text = re.sub(r'^.*analytics/tracker\\.php.*(?:\\r?\\n|$)', '', text, flags=re.I | re.M)
-
-                  # Normalize retired public URLs.
+                  text = re.sub(r'^.*analytics/tracker\.php.*(?:\r?\n|$)', '', text, flags=re.I | re.M)
                   text = text.replace('/smart-toolz/tools/', '/tools/')
                   text = text.replace('/smart-toolz/tool.php', '/tool.php')
 
-                  # Only real HTML pages receive shared header/footer injection.
-                  # Tiny wrappers/bootstraps must never receive extra PHP blocks.
-                  is_html_page = bool(re.search(r'<!doctype\\s+html|<html\\b', text, flags=re.I))
+                  is_html_page = bool(re.search(r'<!doctype\s+html|<html\b', text, flags=re.I))
                   if is_html_page:
                       text = ensure_header(text)
                       text = ensure_footer(text)
@@ -82,22 +79,6 @@ jobs:
                   if text != original:
                       page.write_text(text, encoding='utf-8')
 
-          # Keep shared includes idempotent.
-          hp = root / 'header.php'
-          if hp.is_file():
-              h = hp.read_text(encoding='utf-8')
-              if 'SMARTTOOLZ_HEADER_LOADED' not in h:
-                  h = h.replace('<?php', "<?php\nif (defined('SMARTTOOLZ_HEADER_LOADED')) { return; }\ndefine('SMARTTOOLZ_HEADER_LOADED', true);", 1)
-                  hp.write_text(h, encoding='utf-8')
-
-          fp = root / 'footer.php'
-          if fp.is_file():
-              f = fp.read_text(encoding='utf-8')
-              if 'SMARTTOOLZ_FOOTER_LOADED' not in f:
-                  f = f.replace('<?php', "<?php\nif (defined('SMARTTOOLZ_FOOTER_LOADED')) { return; }\ndefine('SMARTTOOLZ_FOOTER_LOADED', true);", 1)
-                  fp.write_text(f, encoding='utf-8')
-
-          # Generate sitemap from actual canonical tool folders.
           static_urls = [
               '/', '/tool.php', '/about.php', '/contact.php', '/privacy-policy.php',
               '/cookie-policy.php', '/terms.php', '/disclaimer.php'

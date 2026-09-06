@@ -14,31 +14,15 @@ SmartToolz is a PHP-based web platform for browser-friendly utilities, searchabl
 - Analytics: https://smarttoolz.in/analytics/
 - Developer Hub: https://smarttoolz.in/developer/
 
-## Core areas
+## Active modules
 
-### SmartToolz Tools
-
-The main application contains practical utilities for images, PDFs, text, developer tasks, QR codes, calculators, conversion and everyday productivity.
-
-### Knowledge Base
-
-Searchable guides, how-to content, tool documentation and contextual knowledge live under `knowledge-base/`.
-
-### Learning Hub
-
-Courses, lessons, practice, projects, quizzes, progress, certificates and curriculum tools live under `learning-hub/`.
-
-### AI Social World
-
-The experimental social/world experience lives under `ai-social-media/`.
-
-### Analytics
-
-Event tracking, activity data, realtime views and platform analytics live under `analytics/`.
-
-### Keddy Bot
-
-The bot application lives under `keddy-bot/`.
+- `smart-toolz/` — core online utilities, APIs, administration and SaaS.
+- `knowledge-base/` — guides and reference content.
+- `learning-hub/` — courses, lessons, practice and curriculum.
+- `ai-social-media/` — experimental social/world experience.
+- `analytics/` — event tracking and analytics.
+- `keddy-bot/` — bot application.
+- `developer/` — developer navigation and documentation.
 
 ## Architecture
 
@@ -47,8 +31,8 @@ smarttoolz.in/
 ├── index.php                  # Public SmartToolz front door
 ├── assets/                    # Global CSS, JS and images
 ├── smart-toolz/               # Core tools, APIs, admin and SaaS
-├── learning-hub/              # Courses and curriculum
 ├── knowledge-base/            # Guides and reference content
+├── learning-hub/              # Courses and curriculum
 ├── ai-social-media/           # Social/world application
 ├── analytics/                 # Analytics and tracking
 ├── keddy-bot/                 # Bot application

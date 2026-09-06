@@ -11,7 +11,6 @@ error_reporting(E_ALL);
 ------------------------------------------------------------ */
 $smartToozAds = [];
 
-$tracker = $_SERVER['DOCUMENT_ROOT'] . '/analytics/tracker.php';
 $config  = $_SERVER['DOCUMENT_ROOT'] . '/creator-ai/auth/config.php';
 
 try {

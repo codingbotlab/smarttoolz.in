@@ -4,7 +4,6 @@ ini_set('display_errors','0');
 error_reporting(0);
 
 /* Keep this tool independent of Creator AI/database configuration. */
-$tracker = $_SERVER['DOCUMENT_ROOT'].'/analytics/tracker.php';
 if (is_file($tracker)) { require_once $tracker; }
 
 function colorPickerAd(string $key): void {

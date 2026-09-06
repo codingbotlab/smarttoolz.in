@@ -10,7 +10,6 @@ error_reporting(E_ALL);
    ANALYTICS TRACKER
 ============================================================ */
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/analytics/tracker.php';
 
 
 /*

@@ -1,0 +1,108 @@
+name: Cleanup Legacy Tool Code
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  cleanup:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip-tool-cleanup]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Remove legacy tool integrations
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          targets = {
+              'tools/gif-maker/gif-maker.php': re.compile(
+                  r"<\?php\s*declare\(strict_types=1\);.*?smartToozAd\('socialbar'\);\s*\?>",
+                  re.I | re.S,
+              ),
+              'tools/meme-generator/meme-generator.php': re.compile(
+                  r"<\?php\s*declare\(strict_types=1\);.*?smartToozMemeAd\('socialbar'\);\s*\?>",
+                  re.I | re.S,
+              ),
+              'tools/color-picker/color-picker.php': re.compile(
+                  r"<\?php\s*declare\(strict_types=1\);.*?\?>",
+                  re.I | re.S,
+              ),
+          }
+
+          for path, pattern in targets.items():
+              file = Path(path)
+              if not file.is_file():
+                  continue
+              text = file.read_text(encoding='utf-8')
+              if 'gif-maker' in path:
+                  replacement = "<?php\ndeclare(strict_types=1);\nfunction smartToolzAd(string $key): void {}\n?>"
+                  text = pattern.sub(replacement, text, count=1)
+                  text = text.replace('smartToozAd', 'smartToolzAd')
+              elif 'meme-generator' in path:
+                  replacement = "<?php\ndeclare(strict_types=1);\nfunction smartToolzMemeAd(string $key): void {}\n?>"
+                  text = pattern.sub(replacement, text, count=1)
+                  text = text.replace('smartToozMemeAd', 'smartToolzMemeAd')
+              else:
+                  replacement = "<?php\ndeclare(strict_types=1);\nfunction colorPickerAd(string $key): void {}\n?>"
+                  text = pattern.sub(replacement, text, count=1)
+
+              text = text.replace('Smart-Tooz', 'SmartToolz').replace('Smart Tooz', 'SmartToolz')
+              text = re.sub(r'/tools/([a-z0-9-]+)\.php(?=[\"\'?#\s>])', r'/tools/\1/', text, flags=re.I)
+              text = re.sub(
+                  r'<footer[^>]*>\s*<strong>\s*SmartToolz\s*</strong>.*?</footer>',
+                  '', text, flags=re.I | re.S
+              )
+              file.write_text(text, encoding='utf-8')
+              print(f'Cleaned {path}')
+
+      - name: Audit all canonical tool pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+          pages=0
+          while IFS= read -r -d '' file; do
+            pages=$((pages+1))
+            if grep -qi 'Smart-Tooz\|smartTooz' "$file"; then
+              echo "Legacy Smart-Tooz branding found: $file"
+              failed=1
+            fi
+            if grep -Eqi '/tools/[A-Za-z0-9-]+\.php(["'"'?#[:space:]>]|$)' "$file"; then
+              echo "Legacy .php tool link found: $file"
+              failed=1
+            fi
+            if grep -Eqi 'creator-ai/auth/config\.php|analytics/tracker\.php' "$file"; then
+              echo "Legacy application integration found: $file"
+              failed=1
+            fi
+            if ! php -l "$file" >/tmp/php-lint.txt 2>&1; then
+              cat /tmp/php-lint.txt
+              failed=1
+            fi
+          done < <(find tools -mindepth 2 -maxdepth 2 -type f -name '*.php' ! -name 'header.php' ! -name 'footer.php' ! -name 'bootstrap.php' ! -name 'tool-sidebar.php' -print0)
+          echo "Canonical tool files audited: $pages"
+          exit "$failed"
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools
+          if git diff --cached --quiet; then
+            echo 'No legacy cleanup changes required.'
+            exit 0
+          fi
+          git commit -m 'Remove legacy integrations from tool pages [skip-tool-cleanup]'
+          git push

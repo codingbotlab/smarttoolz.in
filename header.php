@@ -17,6 +17,7 @@ if ($currentPath === '') $currentPath = '/';
         ['All Tools', '/tools/', 'tools'],
         ['Categories', '/#categories', 'categories'],
         ['Popular', '/#popular', 'popular'],
+        ['Blog', '/blog/', 'blog'],
         ['About', '/about.php', 'about'],
         ['Contact', '/contact.php', 'contact'],
       ];

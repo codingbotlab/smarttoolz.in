@@ -11,7 +11,7 @@ $add = static function (string $url, ?int $mtime = null) use (&$entries): void {
     $entries[$url] = $mtime;
 };
 
-$rootFiles = [
+$coreOrder = [
     '/' => __DIR__ . '/index.php',
     '/tools/' => __DIR__ . '/tools/index.php',
     '/how-to/' => __DIR__ . '/how-to/list.php',
@@ -22,8 +22,8 @@ $rootFiles = [
     '/privacy.php' => __DIR__ . '/privacy.php',
     '/terms.php' => __DIR__ . '/terms.php',
 ];
-foreach ($rootFiles as $url => $file) {
-    $add($url, is_file($file) ? filemtime($file) ?: null : null);
+foreach ($coreOrder as $url => $file) {
+    $add($url, is_file($file) ? (filemtime($file) ?: null) : null);
 }
 
 // Tools: include only real tool directories that contain their matching PHP file.
@@ -38,17 +38,16 @@ if (is_dir($toolsDir)) {
         if (!is_dir($path) || !is_file($toolFile)) continue;
 
         $toolSlugs[] = $dir;
-        $mtime = filemtime($toolFile) ?: null;
-        $add('/tools/' . $dir . '/', $mtime);
+        $add('/tools/' . $dir . '/', filemtime($toolFile) ?: null);
     }
 }
 sort($toolSlugs, SORT_STRING);
 
-// Each real tool gets one matching, indexable How-To guide URL.
+// Each real tool gets one matching How-To guide URL.
+$guideFile = __DIR__ . '/how-to/index.php';
+$guideMtime = is_file($guideFile) ? (filemtime($guideFile) ?: null) : null;
 foreach ($toolSlugs as $slug) {
-    $guideFile = __DIR__ . '/how-to/index.php';
-    $mtime = is_file($guideFile) ? (filemtime($guideFile) ?: null) : null;
-    $add('/how-to/' . $slug . '/', $mtime);
+    $add('/how-to/' . $slug . '/', $guideMtime);
 }
 
 // Blogs: include actual article PHP files only; skip routing files.
@@ -66,41 +65,34 @@ if (is_dir($blogDir)) {
     }
 }
 
-// Stable ordering: core pages first, then tools, guides and articles alphabetically.
-$coreOrder = ['/', '/tools/', '/how-to/', '/blog/', '/sitemap/', '/about.php', '/contact.php', '/privacy.php', '/terms.php'];
+// Sitemap order: core pages, then tools, How-To guides and blog articles.
+$groups = [
+    static fn(string $url): bool => array_key_exists($url, $coreOrder),
+    static fn(string $url): bool => str_starts_with($url, '/tools/'),
+    static fn(string $url): bool => str_starts_with($url, '/how-to/'),
+    static fn(string $url): bool => str_starts_with($url, '/blog/'),
+];
 $ordered = [];
-foreach ($coreOrder as $url) {
-    if (array_key_exists($url, $entries)) {
+foreach ($groups as $groupIndex => $matches) {
+    $urls = array_keys(array_filter($entries, static fn($mtime, $url) => $matches($url), ARRAY_FILTER_USE_BOTH));
+    if ($groupIndex === 0) {
+        $urls = array_values(array_filter(array_keys($coreOrder), static fn(string $url): bool => array_key_exists($url, $entries)));
+    } else {
+        sort($urls, SORT_STRING);
+    }
+    foreach ($urls as $url) {
         $ordered[$url] = $entries[$url];
-        unset($entries[$url]);
     }
 }
-uksort($entries, static function (string $a, string $b): int {
-    $group = static function (string $url): int {
-        if (str_starts_with($url, '/tools/')) return 1;
-        if (str_starts_with($url, '/how-to/')) return 2;
-        if (str_starts_with($url, '/blog/')) return 3;
-        return 4;
-    };
-    return ($group($a) <=> $group($b)) ?: strcmp($a, $b);
-});
-$entries += $ordered;
-
-// Remove duplicate URLs while preserving the deliberate sitemap order.
-$entries = array_unique($entries, SORT_REGULAR);
-
-$formatLastmod = static function (?int $timestamp): ?string {
-    if (!$timestamp) return null;
-    return gmdate('c', $timestamp);
-};
+$entries = $ordered;
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
 foreach ($entries as $url => $mtime) {
     echo "  <url>\n";
     echo '    <loc>' . htmlspecialchars($base . $url, ENT_XML1, 'UTF-8') . "</loc>\n";
-    if ($lastmod = $formatLastmod($mtime)) {
-        echo '    <lastmod>' . htmlspecialchars($lastmod, ENT_XML1, 'UTF-8') . "</lastmod>\n";
+    if ($mtime) {
+        echo '    <lastmod>' . gmdate('c', $mtime) . "</lastmod>\n";
     }
     echo "  </url>\n";
 }

@@ -12,6 +12,10 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
 # Human-friendly sitemap page.
 RewriteRule ^sitemap/?$ sitemap/index.php [L,QSA,NC]
 
+# Friendly blog listing and article URLs.
+RewriteRule ^blog/?$ blog/index.php [L,QSA,NC]
+RewriteRule ^blog/([a-z0-9]+(?:-[a-z0-9]+)*)/?$ blog/$1.php [L,QSA,NC]
+
 # Friendly, noindex error pages. The original HTTP status is preserved by error.php.
 ErrorDocument 400 /error.php?code=400
 ErrorDocument 401 /error.php?code=401

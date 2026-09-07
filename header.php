@@ -55,15 +55,8 @@ if ($currentPath === '') $currentPath = '/';
 <script>
 (()=>{
  const theme=document.getElementById('themeToggle'),menu=document.getElementById('mobileMenu'),nav=document.getElementById('mobileNav');
- const updateHashNav=()=>{
-   const hash=window.location.hash;
-   if(window.location.pathname==='/' && (hash==='#categories'||hash==='#popular')){
-     document.querySelectorAll('[data-nav-key]').forEach(a=>{a.classList.remove('active');a.removeAttribute('aria-current')});
-     document.querySelectorAll('[data-nav-key="'+hash.slice(1)+'"]').forEach(a=>{a.classList.add('active');a.setAttribute('aria-current','page')});
-   }
- };
- updateHashNav();
- window.addEventListener('hashchange',updateHashNav);
+ const updateHashNav=()=>{const hash=window.location.hash;if(window.location.pathname==='/'&&(hash==='#categories'||hash==='#popular')){document.querySelectorAll('[data-nav-key]').forEach(a=>{a.classList.remove('active');a.removeAttribute('aria-current')});document.querySelectorAll('[data-nav-key="'+hash.slice(1)+'"]').forEach(a=>{a.classList.add('active');a.setAttribute('aria-current','page')})}};
+ updateHashNav(); window.addEventListener('hashchange',updateHashNav);
  if(theme){const k='smarttoolz-theme';const apply=t=>{document.documentElement.dataset.theme=t;theme.setAttribute('aria-label',t==='dark'?'Use light mode':'Use dark mode')};const saved=localStorage.getItem(k);if(saved)apply(saved);theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';apply(t);localStorage.setItem(k,t)})}
  if(menu&&nav){menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation')});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false')}))}
 })();

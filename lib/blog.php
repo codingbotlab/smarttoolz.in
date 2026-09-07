@@ -7,7 +7,8 @@ function smarttoolz_blogs(): array
     if (!is_dir($dir)) return [];
     $posts = [];
     foreach (glob($dir . '/*.php') ?: [] as $file) {
-        if (basename($file) === 'index.php') continue;
+        $base = basename($file);
+        if ($base === 'index.php' || $base === 'article.php') continue;
         $slug = basename($file, '.php');
         if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) continue;
         $title = ucwords(str_replace('-', ' ', $slug));

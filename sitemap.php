@@ -17,15 +17,22 @@ $urls = [
 
 // Add every real tool URL automatically.
 $toolsDir = __DIR__ . '/tools';
+$toolSlugs = [];
 if (is_dir($toolsDir)) {
     foreach (scandir($toolsDir) ?: [] as $dir) {
         if ($dir === '.' || $dir === '..') continue;
         $path = $toolsDir . '/' . $dir;
         $toolFile = $path . '/' . $dir . '.php';
         if (is_dir($path) && is_file($toolFile) && preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $dir)) {
+            $toolSlugs[] = $dir;
             $urls[] = '/tools/' . $dir . '/';
         }
     }
+}
+
+// Add an indexable How To Use URL for every real tool automatically.
+foreach ($toolSlugs as $slug) {
+    $urls[] = '/how-to/' . $slug . '/';
 }
 
 // Add every real blog article automatically.

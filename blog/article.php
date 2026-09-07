@@ -44,7 +44,19 @@ $thumbnail = '/blog/' . $slug . '.svg';
 $thumbFile = __DIR__ . '/' . $slug . '.svg';
 if (!is_file($thumbFile)) $thumbnail = '/assets/img/blog-default.svg';
 
-$howToUrl = '/how-to/' . $slug . '/';
+// Map each blog article to the corresponding tool guide. This keeps links useful
+// even when a blog title/slug is different from the actual tool slug.
+$howToSlugMap = [
+    'how-to-compress-images-without-losing-quality' => 'image-compressor',
+    'how-to-count-words-and-characters-accurately' => 'word-counter',
+    'how-to-create-a-strong-password' => 'password-generator',
+    'how-to-format-json-and-fix-common-errors' => 'json-formatter',
+    'jpg-vs-png-which-image-format-should-you-use' => 'jpg-to-png',
+    'qr-code-guide-what-to-encode-and-how-to-use-it' => 'qr-generator',
+];
+$howToSlug = $howToSlugMap[$slug] ?? null;
+$howToUrl = $howToSlug ? '/how-to/' . $howToSlug . '/' : null;
+
 $posts = smarttoolz_blogs();
 $latest = array_values(array_filter($posts, static fn($p) => $p['slug'] !== $slug));
 $latest = array_slice($latest, 0, 5);
@@ -60,9 +72,13 @@ $hero = '<main class="blog-article-page">'
     . '<div class="article-hero-media"><img src="' . htmlspecialchars($thumbnail, ENT_QUOTES, 'UTF-8') . '" width="1200" height="630" fetchpriority="high" alt="' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '"></div>'
     . '</section>'
     . '<div class="article-layout"><article class="article-content">'
-    . $articleBody
-    . '<div class="how-to-card"><div><span class="how-to-eyebrow">STEP-BY-STEP GUIDE</span><h2>Want the quick how-to?</h2><p>Follow the dedicated step-by-step guide for this topic and get started in minutes.</p></div><a href="' . htmlspecialchars($howToUrl, ENT_QUOTES, 'UTF-8') . '">How to Use →</a></div>'
-    . '</article>'
+    . $articleBody;
+
+if ($howToUrl) {
+    $hero .= '<div class="how-to-card"><div><span class="how-to-eyebrow">STEP-BY-STEP GUIDE</span><h2>Want the quick how-to?</h2><p>Follow the dedicated step-by-step guide for this topic and get started in minutes.</p></div><a href="' . htmlspecialchars($howToUrl, ENT_QUOTES, 'UTF-8') . '">How to Use →</a></div>';
+}
+
+$hero .= '</article>'
     . '<aside class="article-sidebar">'
     . '<section class="sidebar-card sidebar-cta"><span class="sidebar-icon">✦</span><h2>Explore SmartToolz</h2><p>Use our free browser-based tools to get everyday digital tasks done quickly.</p><a href="/tools/" class="sidebar-button">Browse All Tools →</a></section>'
     . '<section class="sidebar-card"><h2>Latest Articles</h2><div class="sidebar-posts">';

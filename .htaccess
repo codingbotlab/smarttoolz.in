@@ -12,7 +12,8 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
 # Human-friendly sitemap page.
 RewriteRule ^sitemap/?$ sitemap/index.php [L,QSA,NC]
 
-# Automatic How To Use pages for every real tool.
+# How To Use listing and automatic tool-specific guides.
+RewriteRule ^how-to/?$ how-to/home.php [L,QSA,NC]
 RewriteRule ^how-to/([a-z0-9]+(?:-[a-z0-9]+)*)/?$ how-to/index.php?slug=$1 [L,QSA,NC]
 
 # Friendly blog listing and article URLs.

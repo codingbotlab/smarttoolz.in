@@ -9,6 +9,69 @@ function smarttoolz_slug(string $value): string
     return trim($value, '-');
 }
 
+function smarttoolz_tags_for(string $slug, string $category): array
+{
+    $map = [
+        'image-compressor'=>['image compression','compress images','JPG','PNG','WebP','image optimization'],
+        'image-resizer'=>['image resize','resize images','dimensions','social media','web images'],
+        'jpg-to-png'=>['JPG','PNG','image conversion','format conversion'],
+        'png-to-jpg'=>['PNG','JPG','image conversion','format conversion'],
+        'word-counter'=>['word count','character count','text analysis','writing','content'],
+        'case-converter'=>['case converter','uppercase','lowercase','text formatting'],
+        'json-formatter'=>['JSON','JSON formatter','JSON validator','developer tools','debugging'],
+        'qr-generator'=>['QR code','QR generator','URL QR','sharing','generators'],
+        'password-generator'=>['password generator','strong passwords','random password','security'],
+        'password-entropy-calculator'=>['password entropy','password security','entropy','security'],
+        'password-generator-advanced'=>['password generator','custom passwords','strong passwords','security'],
+        'password-hash-generator'=>['password hash','hash generator','SHA','password security'],
+        'password-pattern-checker'=>['password patterns','password security','pattern detection','security'],
+        'password-policy-checker'=>['password policy','password security','security rules','compliance'],
+        'password-rule-audit'=>['password rules','password audit','password security','security'],
+        'password-strength-checker'=>['password strength','password security','strong passwords','security'],
+        'password-token-generator'=>['secure token','random token','token generator','security'],
+        'age-calculator'=>['age calculator','date of birth','date calculation','calculator'],
+        'color-picker'=>['color picker','HEX','RGB','HSL','CSS colors','design'],
+        'pdf-to-jpg'=>['PDF','PDF to JPG','JPG','image conversion','PDF tools'],
+    ];
+    if (isset($map[$slug])) return $map[$slug];
+
+    $tags = [];
+    $keywords = [
+        'base64'=>['Base64','encoding','decoding','developer tools'],
+        'basic-auth'=>['Basic Auth','HTTP authentication','API','developer tools'],
+        'auth'=>['authentication','security','API'],
+        'password'=>['password','password security','security'],
+        'jwt'=>['JWT','JSON Web Token','developer tools','security'],
+        'hmac'=>['HMAC','hashing','cryptography','security'],
+        'hash'=>['hashing','cryptography','security'],
+        'url'=>['URL','encoding','decoding','developer tools'],
+        'html'=>['HTML','web development','developer tools'],
+        'css'=>['CSS','web development','developer tools'],
+        'code'=>['code','developer tools','formatting'],
+        'json'=>['JSON','developer tools'],
+        'image'=>['image','image tools'],
+        'jpg'=>['JPG','image conversion'],
+        'png'=>['PNG','image conversion'],
+        'webp'=>['WebP','image tools'],
+        'pdf'=>['PDF','PDF tools'],
+        'qr'=>['QR code','generators'],
+        'color'=>['color','design tools'],
+        'calculator'=>['calculator','calculations'],
+        'converter'=>['converter','format conversion'],
+        'generator'=>['generator','generators'],
+        'checker'=>['checker','validation'],
+        'validator'=>['validator','validation'],
+        'counter'=>['counter','text analysis'],
+        'minifier'=>['minification','performance','developer tools'],
+    ];
+    foreach ($keywords as $keyword => $values) {
+        if (str_contains($slug, $keyword)) $tags = array_merge($tags, $values);
+    }
+    $tags[] = $category;
+    $tags = array_values(array_unique(array_filter($tags)));
+    return array_slice($tags, 0, 6);
+}
+
 /**
  * Tool metadata for polished cards. The filesystem is the source of truth:
  * every folder under /tools containing <folder>/<folder>.php is discovered
@@ -79,15 +142,12 @@ function smarttoolz_tools(): array
     if (is_dir($toolsDir)) {
         $folders = scandir($toolsDir) ?: [];
         foreach ($folders as $folder) {
-            if ($folder === '.' || $folder === '..' || !preg_match('/^[a-z0-9-]+$/', $folder)) {
-                continue;
-            }
+            if ($folder === '.' || $folder === '..' || !preg_match('/^[a-z0-9-]+$/', $folder)) continue;
             $file = $toolsDir . '/' . $folder . '/' . $folder . '.php';
-            if (!is_file($file)) {
-                continue;
-            }
+            if (!is_file($file)) continue;
             $meta = $metadata[$folder] ?? smarttoolz_inferred_metadata($folder);
-            $tools[] = $meta + ['url'=>'/tools/' . $folder . '/'];
+            $meta['tags'] = smarttoolz_tags_for($folder, (string)$meta['category']);
+            $tools[] = $meta + ['url'=>'/tools/' . $folder . '/','slug'=>$folder];
         }
     }
 
@@ -98,9 +158,17 @@ function smarttoolz_tools(): array
 function smarttoolz_categories(): array
 {
     $out=[];
-    foreach(smarttoolz_tools() as $tool){
-        $out[$tool['category']]=($out[$tool['category']]??0)+1;
-    }
+    foreach(smarttoolz_tools() as $tool){ $out[$tool['category']]=($out[$tool['category']]??0)+1; }
     ksort($out,SORT_NATURAL|SORT_FLAG_CASE);
+    return $out;
+}
+
+function smarttoolz_tag_list(): array
+{
+    $out=[];
+    foreach (smarttoolz_tools() as $tool) {
+        foreach (($tool['tags'] ?? []) as $tag) $out[$tag]=($out[$tag]??0)+1;
+    }
+    uksort($out, static fn(string $a,string $b): int => strnatcasecmp($a,$b));
     return $out;
 }

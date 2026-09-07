@@ -43,10 +43,18 @@ $filtered = array_values(array_filter($tools, static function (array $tool) use 
 .tool-tag{display:inline-flex!important;align-items:center!important;padding:5px 9px!important;border-radius:999px!important;background:#f7f7fb!important;border:1px solid #e7eaf0!important;color:#667085!important;font-size:10px!important;font-weight:700!important;line-height:1.2!important;text-decoration:none!important}
 .tool-tag:hover,.tool-tag.active{background:#eeecff!important;color:#4b3cff!important;border-color:#d9d4ff!important}
 .tools-library-card .tool-link{display:block!important;margin-top:auto!important;padding-top:18px!important;color:#4b3cff!important;font-size:12px!important;font-weight:850!important}
-.tags-panel{display:flex!important;flex-wrap:wrap!important;gap:8px!important;margin-top:14px!important}
-.tags-panel .category-pill{font-size:11px!important}
+.tags-panel{display:flex!important;flex-wrap:nowrap!important;gap:10px!important;margin-top:14px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:smooth!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important;padding:2px 2px 9px!important;white-space:nowrap!important}
+.tags-panel::-webkit-scrollbar,.category-filter::-webkit-scrollbar{display:none!important}
+.tags-panel .category-pill{font-size:11px!important;flex:0 0 auto!important}
+.category-filter{display:flex!important;flex-wrap:nowrap!important;gap:10px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:smooth!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important;padding:2px 2px 9px!important;white-space:nowrap!important}
+.category-filter .category-pill{flex:0 0 auto!important}
+.filter-scroll-row{display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important}
+.filter-scroll-row .filter-scroll{flex:1 1 auto!important;min-width:0!important}
+.filter-scroll-btn{display:grid!important;place-items:center!important;flex:0 0 42px!important;width:42px!important;height:42px!important;padding:0!important;border:1px solid #e3e7f0!important;border-radius:50%!important;background:#fff!important;color:#4b3cff!important;box-shadow:0 8px 24px rgba(16,24,40,.07)!important;font-size:24px!important;line-height:1!important;cursor:pointer!important}
+.filter-scroll-btn:hover{background:#f7f6ff!important;border-color:#d9d4ff!important}
+.filter-scroll-btn:focus-visible{outline:3px solid rgba(75,60,255,.2)!important;outline-offset:2px!important}
 @media(max-width:1000px){.tools-library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:760px){.tools-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.tools-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filter-scroll-btn{display:none!important}.filter-scroll-row{display:block!important}.filter-scroll{width:100%!important}}
 @media(max-width:520px){.tools-library-grid{grid-template-columns:1fr}}
 </style>
 <script type="application/ld+json">
@@ -73,16 +81,28 @@ $filtered = array_values(array_filter($tools, static function (array $tool) use 
   </div>
 </section>
 <section class="page py-4">
-  <div class="category-filter" aria-label="Tool categories">
-    <a class="category-pill<?= $category === '' ? ' active' : '' ?>" href="/tools/">All <span><?= count($tools) ?></span></a>
-    <?php foreach ($categories as $name => $count): ?>
-      <a class="category-pill<?= $category === smarttoolz_slug($name) ? ' active' : '' ?>" href="/tools/?category=<?= rawurlencode(smarttoolz_slug($name)) ?><?= $query !== '' ? '&q='.rawurlencode($query) : '' ?><?= $tag !== '' ? '&tag='.rawurlencode($tag) : '' ?>"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?> <span><?= (int)$count ?></span></a>
-    <?php endforeach; ?>
+  <div class="filter-scroll-row" aria-label="Browse tool categories">
+    <button class="filter-scroll-btn" type="button" data-scroll-target="categoryScroll" data-scroll-dir="-1" aria-label="Scroll categories left">‹</button>
+    <div class="filter-scroll" id="categoryScroll">
+      <div class="category-filter" aria-label="Tool categories">
+        <a class="category-pill<?= $category === '' ? ' active' : '' ?>" href="/tools/">All <span><?= count($tools) ?></span></a>
+        <?php foreach ($categories as $name => $count): ?>
+          <a class="category-pill<?= $category === smarttoolz_slug($name) ? ' active' : '' ?>" href="/tools/?category=<?= rawurlencode(smarttoolz_slug($name)) ?><?= $query !== '' ? '&q='.rawurlencode($query) : '' ?><?= $tag !== '' ? '&tag='.rawurlencode($tag) : '' ?>"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?> <span><?= (int)$count ?></span></a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <button class="filter-scroll-btn" type="button" data-scroll-target="categoryScroll" data-scroll-dir="1" aria-label="Scroll categories right">›</button>
   </div>
-  <div class="tags-panel" aria-label="Popular tool tags">
-    <?php foreach ($tags as $name => $count): ?>
-      <a class="category-pill<?= $tag === $name ? ' active' : '' ?>" href="/tools/?tag=<?= rawurlencode($name) ?><?= $category !== '' ? '&category='.rawurlencode($category) : '' ?><?= $query !== '' ? '&q='.rawurlencode($query) : '' ?>"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?> <span><?= (int)$count ?></span></a>
-    <?php endforeach; ?>
+  <div class="filter-scroll-row" aria-label="Browse popular tool tags">
+    <button class="filter-scroll-btn" type="button" data-scroll-target="tagScroll" data-scroll-dir="-1" aria-label="Scroll tags left">‹</button>
+    <div class="filter-scroll" id="tagScroll">
+      <div class="tags-panel" aria-label="Popular tool tags">
+        <?php foreach ($tags as $name => $count): ?>
+          <a class="category-pill<?= $tag === $name ? ' active' : '' ?>" href="/tools/?tag=<?= rawurlencode($name) ?><?= $category !== '' ? '&category='.rawurlencode($category) : '' ?><?= $query !== '' ? '&q='.rawurlencode($query) : '' ?>"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?> <span><?= (int)$count ?></span></a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <button class="filter-scroll-btn" type="button" data-scroll-target="tagScroll" data-scroll-dir="1" aria-label="Scroll tags right">›</button>
   </div>
 </section>
 <section class="page pb-5">
@@ -129,5 +149,15 @@ $filtered = array_values(array_filter($tools, static function (array $tool) use 
 </section>
 </main>
 <?php require __DIR__ . '/footer.php'; ?>
+<script>
+document.querySelectorAll('[data-scroll-target]').forEach(function(button){
+  button.addEventListener('click', function(){
+    var target = document.getElementById(button.getAttribute('data-scroll-target'));
+    if (!target) return;
+    var amount = Math.max(260, target.clientWidth * 0.72);
+    target.scrollBy({left: amount * Number(button.getAttribute('data-scroll-dir') || 1), behavior:'smooth'});
+  });
+});
+</script>
 </body>
 </html>

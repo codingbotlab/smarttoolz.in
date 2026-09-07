@@ -34,7 +34,6 @@ foreach (array_keys($categories) as $i => $category) {
     }
 }
 $heroCategories = array_keys($categories);
-$homeTags = function_exists('smarttoolz_tags') ? smarttoolz_tags() : [];
 ?>
 <!doctype html>
 <html lang="en">
@@ -77,29 +76,6 @@ $homeTags = function_exists('smarttoolz_tags') ? smarttoolz_tags() : [];
     <div class="hero-art-wrap"><div class="hero-orbit orbit-one" aria-hidden="true"></div><div class="hero-orbit orbit-two" aria-hidden="true"></div><figure class="hero-art"><img src="/assets/home/hero-tools.svg" width="800" height="520" alt="SmartToolz collection of online tools shown on a modern dashboard" loading="eager" fetchpriority="high"></figure></div>
   </div>
 </section>
-<?php if ($homeTags): ?>
-<section class="page home-tag-section" aria-label="Popular tool topics">
-  <div class="home-tag-slider">
-    <button type="button" class="home-tag-arrow home-tag-prev" aria-label="Scroll topics left">‹</button>
-    <div class="home-tag-track" tabindex="0">
-      <?php foreach ($homeTags as $tag): ?><a class="home-tag-pill" href="/tools/?tag=<?= rawurlencode((string)$tag) ?>"><?= htmlspecialchars((string)$tag) ?></a><?php endforeach; ?>
-    </div>
-    <button type="button" class="home-tag-arrow home-tag-next" aria-label="Scroll topics right">›</button>
-  </div>
-</section>
-<script>
-(() => {
-  const slider = document.querySelector('.home-tag-slider');
-  if (!slider) return;
-  const track = slider.querySelector('.home-tag-track');
-  const prev = slider.querySelector('.home-tag-prev');
-  const next = slider.querySelector('.home-tag-next');
-  const amount = () => Math.max(240, Math.round(track.clientWidth * 0.72));
-  prev.addEventListener('click', () => track.scrollBy({left: -amount(), behavior: 'smooth'}));
-  next.addEventListener('click', () => track.scrollBy({left: amount(), behavior: 'smooth'}));
-})();
-</script>
-<?php endif; ?>
 <section class="page category-section" id="categories" aria-label="Tool categories"><div class="category-grid-home"><?php foreach ($heroCategories as $category): $meta = $categoryMeta[$category]; ?><a class="category-card-home" href="/tools/?category=<?= rawurlencode(smarttoolz_slug($category)) ?>"><span class="category-icon <?= htmlspecialchars($meta['class']) ?>"><?= htmlspecialchars($meta['icon']) ?></span><span class="category-copy"><strong><?= htmlspecialchars($category) ?></strong><small><?= htmlspecialchars($meta['copy']) ?></small><em><?= (int)$categories[$category] ?>+ Tools</em></span><span class="category-arrow" aria-hidden="true">→</span></a><?php endforeach; ?></div></section>
 <section class="page trust-strip" aria-label="Why use SmartToolz"><div class="trust-item"><span class="trust-symbol">ϟ</span><div><strong>Fast &amp; Reliable</strong><small>Get results in seconds</small></div></div><div class="trust-item"><span class="trust-symbol">♢</span><div><strong>100% Free</strong><small>No signup required</small></div></div><div class="trust-item"><span class="trust-symbol">♡</span><div><strong>User Friendly</strong><small>Simple and clean interface</small></div></div><div class="trust-item"><span class="trust-symbol">♟</span><div><strong>All-in-One</strong><small><?= count($tools) ?>+ useful tools</small></div></div></section>
 <section class="page py-5" id="popular"><div class="section-head home-section-head"><div><span class="eyebrow">POPULAR TOOLS</span><h2 class="mt-2">Start with a useful tool</h2><p>Focused utilities for common image, text, developer and everyday tasks.</p></div><a href="/tools/">View all tools →</a></div><div class="tool-grid"><?php foreach ($featured as $tool): ?><article class="tool-card"><div class="tool-icon" aria-hidden="true"><?= htmlspecialchars((string)$tool['icon']) ?></div><h2><?= htmlspecialchars((string)$tool['name']) ?></h2><p><?= htmlspecialchars((string)$tool['description']) ?></p><a class="tool-link" href="<?= htmlspecialchars((string)$tool['url']) ?>">Open tool →</a></article><?php endforeach; ?></div></section>
@@ -117,7 +93,7 @@ $homeTags = function_exists('smarttoolz_tags') ? smarttoolz_tags() : [];
 </main>
 <?php require __DIR__ . '/footer.php'; ?>
 <style>
-.home-tag-section{padding-top:10px;padding-bottom:8px}.home-tag-slider{display:flex;align-items:center;gap:10px}.home-tag-track{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;flex:1;padding:4px 2px}.home-tag-track::-webkit-scrollbar{display:none}.home-tag-pill{flex:0 0 auto;padding:9px 15px;border:1px solid #e7eaf0;border-radius:999px;background:#fff;color:#18234f;text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap}.home-tag-pill:hover{border-color:#6b5cff;color:#5a46ff}.home-tag-arrow{width:34px;height:34px;flex:0 0 34px;border:1px solid #e7eaf0;border-radius:50%;background:#fff;color:#18234f;font-size:23px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(16,24,40,.06)}.home-tag-arrow:hover{border-color:#6b5cff;color:#5a46ff}.latest-blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.latest-blog-card{padding:25px;border:1px solid #e7eaf0;border-radius:20px;background:#fff;box-shadow:0 12px 35px rgba(16,24,40,.05)}.latest-blog-label{font-size:9px;font-weight:900;letter-spacing:1.4px;color:#6b5cff}.latest-blog-card h3{font-size:20px;line-height:1.25;margin:20px 0 9px}.latest-blog-card h3 a{color:inherit;text-decoration:none}.latest-blog-card p{margin:0 0 18px;color:#667085;font-size:13px;line-height:1.7}.latest-blog-card>a{font-size:12px;font-weight:800;text-decoration:none}@media(max-width:800px){.latest-blog-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.latest-blog-grid{grid-template-columns:1fr}.home-tag-arrow{display:none}}
+.latest-blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.latest-blog-card{padding:25px;border:1px solid #e7eaf0;border-radius:20px;background:#fff;box-shadow:0 12px 35px rgba(16,24,40,.05)}.latest-blog-label{font-size:9px;font-weight:900;letter-spacing:1.4px;color:#6b5cff}.latest-blog-card h3{font-size:20px;line-height:1.25;margin:20px 0 9px}.latest-blog-card h3 a{color:inherit;text-decoration:none}.latest-blog-card p{margin:0 0 18px;color:#667085;font-size:13px;line-height:1.7}.latest-blog-card>a{font-size:12px;font-weight:800;text-decoration:none}@media(max-width:800px){.latest-blog-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.latest-blog-grid{grid-template-columns:1fr}}
 </style>
 </body>
 </html>

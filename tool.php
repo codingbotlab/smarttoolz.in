@@ -152,7 +152,9 @@ $filtered = array_values(array_filter($tools, static function (array $tool) use 
 <script>
 document.querySelectorAll('[data-scroll-target]').forEach(function(button){
   button.addEventListener('click', function(){
-    var target = document.getElementById(button.getAttribute('data-scroll-target'));
+    var wrapper = document.getElementById(button.getAttribute('data-scroll-target'));
+    if (!wrapper) return;
+    var target = wrapper.querySelector('.category-filter, .tags-panel');
     if (!target) return;
     var amount = Math.max(260, target.clientWidth * 0.72);
     target.scrollBy({left: amount * Number(button.getAttribute('data-scroll-dir') || 1), behavior:'smooth'});

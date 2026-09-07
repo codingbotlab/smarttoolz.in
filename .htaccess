@@ -13,7 +13,7 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
 RewriteRule ^sitemap/?$ sitemap/index.php [L,QSA,NC]
 
 # How To Use listing and automatic tool-specific guides.
-RewriteRule ^how-to/?$ how-to/home.php [L,QSA,NC]
+RewriteRule ^how-to/?$ how-to/list.php [L,QSA,NC]
 RewriteRule ^how-to/([a-z0-9]+(?:-[a-z0-9]+)*)/?$ how-to/index.php?slug=$1 [L,QSA,NC]
 
 # Friendly blog listing and article URLs.

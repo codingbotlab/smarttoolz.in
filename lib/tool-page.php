@@ -5,9 +5,12 @@ require_once __DIR__ . '/../bootstrap.php';
 
 function smarttoolz_tool_page_start(array $tool): void
 {
-    $title = htmlspecialchars((string)($tool['title'] ?? 'Online Tool') . ' | SmartToolz', ENT_QUOTES, 'UTF-8');
-    $description = htmlspecialchars((string)($tool['description'] ?? 'Free online tool from SmartToolz.'), ENT_QUOTES, 'UTF-8');
-    $canonical = htmlspecialchars((string)($tool['url'] ?? '/'), ENT_QUOTES, 'UTF-8');
+    $rawTitle = (string)($tool['title'] ?? 'Online Tool');
+    $rawDescription = (string)($tool['description'] ?? 'Free online tool from SmartToolz.');
+    $rawCanonical = (string)($tool['url'] ?? '/');
+    $title = htmlspecialchars($rawTitle . ' | SmartToolz', ENT_QUOTES, 'UTF-8');
+    $description = htmlspecialchars($rawDescription, ENT_QUOTES, 'UTF-8');
+    $canonical = htmlspecialchars($rawCanonical, ENT_QUOTES, 'UTF-8');
     ?>
 <!doctype html>
 <html lang="en">
@@ -16,13 +19,31 @@ function smarttoolz_tool_page_start(array $tool): void
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= $title ?></title>
 <meta name="description" content="<?= $description ?>">
-<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="canonical" href="<?= $canonical ?>">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SmartToolz">
 <meta property="og:title" content="<?= $title ?>">
 <meta property="og:description" content="<?= $description ?>">
 <meta property="og:url" content="<?= $canonical ?>">
+<script type="application/ld+json">
+<?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebApplication',
+    'name' => $rawTitle,
+    'url' => $rawCanonical,
+    'description' => $rawDescription,
+    'applicationCategory' => 'UtilitiesApplication',
+    'operatingSystem' => 'Any',
+    'browserRequirements' => 'Requires a modern web browser.',
+    'isAccessibleForFree' => true,
+    'publisher' => [
+        '@type' => 'Organization',
+        'name' => 'SmartToolz',
+        'url' => 'https://smarttoolz.in/'
+    ]
+], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+</script>
 <?php require __DIR__ . '/../head.php'; ?>
 </head>
 <body>

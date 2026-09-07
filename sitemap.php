@@ -27,9 +27,9 @@ if (is_dir($toolsDir)) {
 }
 
 $urls = array_values(array_unique($urls));
-echo '<?xml version="1.0" encoding="UTF-8"?>\n';
-echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
 foreach ($urls as $url) {
-    echo '  <url><loc>' . htmlspecialchars($base . $url, ENT_XML1, 'UTF-8') . '</loc></url>\n';
+    echo '  <url><loc>' . htmlspecialchars($base . $url, ENT_XML1, 'UTF-8') . "</loc></url>\n";
 }
-echo '</urlset>\n';
+echo "</urlset>\n";

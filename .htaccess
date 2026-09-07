@@ -6,8 +6,11 @@ RewriteCond %{THE_REQUEST} \s/+tools/([A-Za-z0-9-]+)\.php(?:[?\s]) [NC]
 RewriteRule ^tools/([A-Za-z0-9-]+)\.php$ /tools/$1/ [R=301,L,NE]
 RewriteRule ^tools/([A-Za-z0-9-]+)/?$ tools/$1/$1.php [L,QSA,NC]
 
-# Keep the public sitemap URL while generating it dynamically from /tools/.
+# Public XML sitemap for search engines.
 RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
+
+# Human-friendly sitemap page.
+RewriteRule ^sitemap/?$ sitemap/index.php [L,QSA,NC]
 
 # Friendly, noindex error pages. The original HTTP status is preserved by error.php.
 ErrorDocument 400 /error.php?code=400

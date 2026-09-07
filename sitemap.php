@@ -7,22 +7,34 @@ $base = 'https://smarttoolz.in';
 $urls = [
     '/',
     '/tools/',
+    '/blog/',
+    '/sitemap/',
     '/about.php',
     '/contact.php',
     '/privacy.php',
     '/terms.php',
 ];
 
+// Add every real tool URL automatically.
 $toolsDir = __DIR__ . '/tools';
 if (is_dir($toolsDir)) {
     foreach (scandir($toolsDir) ?: [] as $dir) {
         if ($dir === '.' || $dir === '..') continue;
         $path = $toolsDir . '/' . $dir;
         $toolFile = $path . '/' . $dir . '.php';
-        // Only publish URLs that have a real matching tool entry point.
         if (is_dir($path) && is_file($toolFile) && preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $dir)) {
             $urls[] = '/tools/' . $dir . '/';
         }
+    }
+}
+
+// Add every real blog article automatically.
+$blogDir = __DIR__ . '/blog';
+if (is_dir($blogDir)) {
+    foreach (scandir($blogDir) ?: [] as $file) {
+        if (!preg_match('/^([a-z0-9]+(?:-[a-z0-9]+)*)\.php$/', $file, $m)) continue;
+        if (in_array($m[1], ['index', 'article'], true)) continue;
+        $urls[] = '/blog/' . $m[1] . '/';
     }
 }
 

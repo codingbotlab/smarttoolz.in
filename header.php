@@ -54,6 +54,28 @@ $headerInnerClass = $isHowToHeader ? 'header-inner' : 'header-inner';
     <form class="mobile-search" action="/tools/" method="get" role="search"><input name="q" type="search" placeholder="Search tools..." aria-label="Search tools"></form>
   </nav>
 </header>
+<?php if ($currentPath === '/'): require_once __DIR__ . '/lib/tools.php'; $homeTags = smarttoolz_tag_list(); ?>
+<section class="home-tag-strip" aria-label="Explore tools by topic">
+  <div class="home-tag-strip-inner">
+    <span class="home-tag-title">Explore by topic</span>
+    <div class="home-tag-track-wrap">
+      <button class="home-tag-arrow home-tag-prev" type="button" aria-label="Scroll topics left">‹</button>
+      <div class="home-tag-track" id="homeTagTrack">
+        <?php foreach ($homeTags as $tag => $count): ?>
+          <a class="home-tag-pill" href="/tools/?tag=<?= rawurlencode($tag) ?>"><span><?= htmlspecialchars($tag, ENT_QUOTES, 'UTF-8') ?></span><small><?= (int)$count ?></small></a>
+        <?php endforeach; ?>
+      </div>
+      <button class="home-tag-arrow home-tag-next" type="button" aria-label="Scroll topics right">›</button>
+    </div>
+  </div>
+</section>
+<style>
+.home-tag-strip{border-bottom:1px solid #e7eaf0;background:#fff;position:relative;z-index:5}.home-tag-strip-inner{width:min(1240px,calc(100% - 48px));margin:auto;min-height:58px;display:flex;align-items:center;gap:18px}.home-tag-title{flex:0 0 auto;font-size:12px;font-weight:900;color:#17213f;white-space:nowrap}.home-tag-track-wrap{min-width:0;flex:1;display:flex;align-items:center;gap:7px}.home-tag-track{display:flex;gap:8px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;min-width:0;flex:1;padding:4px 1px}.home-tag-track::-webkit-scrollbar{display:none}.home-tag-pill{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;padding:8px 11px;border:1px solid #e4e7ec;border-radius:999px;background:#f9f9fc;color:#344054;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap}.home-tag-pill:hover{border-color:#d5d0ff;color:#5b43ff;background:#f7f5ff}.home-tag-pill small{font-size:9px;font-weight:900;color:#5b43ff;background:#eeebff;padding:2px 5px;border-radius:999px}.home-tag-arrow{width:30px;height:30px;flex:0 0 30px;border:1px solid #e1e4eb;border-radius:50%;background:#fff;color:#17213f;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}.home-tag-arrow:hover{border-color:#5b43ff;color:#5b43ff}.home-tag-arrow:disabled{opacity:.35;cursor:default}@media(max-width:700px){.home-tag-strip-inner{width:calc(100% - 20px);gap:10px}.home-tag-title{font-size:10px}.home-tag-arrow{display:none}.home-tag-track{touch-action:pan-x}}
+</style>
+<script>
+(()=>{const track=document.getElementById('homeTagTrack');if(!track)return;const prev=document.querySelector('.home-tag-prev'),next=document.querySelector('.home-tag-next');const step=()=>Math.max(220,track.clientWidth*.65);const update=()=>{if(prev)prev.disabled=track.scrollLeft<=2;if(next)next.disabled=track.scrollLeft+track.clientWidth>=track.scrollWidth-2};prev?.addEventListener('click',()=>{track.scrollBy({left:-step(),behavior:'smooth'});setTimeout(update,350)});next?.addEventListener('click',()=>{track.scrollBy({left:step(),behavior:'smooth'});setTimeout(update,350)});track.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);update()})();
+</script>
+<?php endif; ?>
 <script>
 (()=>{
  const theme=document.getElementById('themeToggle'),menu=document.getElementById('mobileMenu'),nav=document.getElementById('mobileNav');

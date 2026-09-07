@@ -4,7 +4,7 @@ require_once __DIR__ . '/bootstrap.php';
 $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/');
 if ($currentPath === '') $currentPath = '/';
 $isHowToHeader = str_starts_with($currentPath, '/how-to');
-$headerInnerClass = $isHowToHeader ? 'howto-header-inner' : 'header-inner';
+$headerInnerClass = $isHowToHeader ? 'header-inner' : 'header-inner';
 ?>
 <header class="site-header">
   <div class="<?= $headerInnerClass ?>">

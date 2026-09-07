@@ -3,9 +3,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/');
 if ($currentPath === '') $currentPath = '/';
+$isHowToHeader = str_starts_with($currentPath, '/how-to');
+$headerInnerClass = $isHowToHeader ? 'howto-header-inner' : 'header-inner';
 ?>
 <header class="site-header">
-  <div class="header-inner">
+  <div class="<?= $headerInnerClass ?>">
     <a class="brand" href="/" aria-label="SmartToolz home">
       <span class="brand-word">Smart<span>Toolz</span></span>
       <span class="brand-tagline">Many Tools. A Smarter You.</span>

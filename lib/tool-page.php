@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/tools.php';
 
 function smarttoolz_tool_page_start(array $tool): void
 {
@@ -53,12 +54,31 @@ function smarttoolz_tool_page_start(array $tool): void
 
 function smarttoolz_tool_page_end(): void
 {
-    // Every tool gets a matching, crawlable How To Use guide link.
     $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
     $parts = array_values(array_filter(explode('/', trim($requestPath, '/'))));
     $slug = ($parts[0] ?? '') === 'tools' ? ($parts[1] ?? '') : '';
+
     if ($slug !== '' && preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
+        $meta = smarttoolz_inferred_metadata($slug);
+        foreach (smarttoolz_tool_metadata() as $knownSlug => $knownMeta) {
+            if ($knownSlug === $slug) { $meta = $knownMeta; break; }
+        }
+        $tags = smarttoolz_tags_for($slug, (string)$meta['category']);
         ?>
+        <section class="tool-tags-section" aria-labelledby="tool-tags-title">
+          <div class="tool-tags-inner">
+            <span class="tool-tags-label">RELATED TOPICS</span>
+            <h2 id="tool-tags-title">Tags for this tool</h2>
+            <div class="tool-tags-list">
+              <?php foreach ($tags as $tag): ?>
+                <a href="/tools/?q=<?= rawurlencode($tag) ?>" class="tool-tag-link"><?= htmlspecialchars($tag, ENT_QUOTES, 'UTF-8') ?></a>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        </section>
+        <style>
+        .tool-tags-section{width:min(920px,calc(100% - 32px));margin:0 auto 28px}.tool-tags-inner{padding:20px 22px;border:1px solid #e7eaf0;border-radius:18px;background:#fff}.tool-tags-label{font-size:8px;letter-spacing:1.3px;font-weight:900;color:#5b43f5}.tool-tags-inner h2{margin:4px 0 12px;font-size:17px;color:#111936}.tool-tags-list{display:flex;flex-wrap:wrap;gap:7px}.tool-tag-link{display:inline-flex;padding:6px 10px;border:1px solid #e3e6ee;border-radius:999px;background:#f8f9fc;color:#596579;text-decoration:none;font-size:10px;font-weight:750}.tool-tag-link:hover{border-color:#cfc9ff;color:#4b3cff}@media(max-width:600px){.tool-tags-section{width:calc(100% - 20px)}}
+        </style>
         <section class="tool-howto-cta" aria-labelledby="tool-howto-title">
           <div class="tool-howto-inner">
             <div class="tool-howto-icon" aria-hidden="true">?</div>

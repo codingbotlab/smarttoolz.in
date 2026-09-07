@@ -18,7 +18,9 @@ if (is_dir($toolsDir)) {
     foreach (scandir($toolsDir) ?: [] as $dir) {
         if ($dir === '.' || $dir === '..') continue;
         $path = $toolsDir . '/' . $dir;
-        if (is_dir($path) && preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $dir)) {
+        $toolFile = $path . '/' . $dir . '.php';
+        // Only publish URLs that have a real matching tool entry point.
+        if (is_dir($path) && is_file($toolFile) && preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $dir)) {
             $urls[] = '/tools/' . $dir . '/';
         }
     }

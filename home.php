@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/lib/tools.php';
+require_once __DIR__ . '/lib/blog.php';
 
 $tools = smarttoolz_tools();
 $categories = smarttoolz_categories();
 $featured = array_slice($tools, 0, 8);
+$blogs = smarttoolz_blogs();
+$latestBlogs = array_slice($blogs, 0, 3);
 $categoryMeta = [
     'Image Tools' => ['icon' => '▧', 'class' => 'pink', 'copy' => 'Resize, compress, convert and edit images.'],
     'PDF Tools' => ['icon' => '⌑', 'class' => 'red', 'copy' => 'Convert, merge, split and edit PDFs.'],
@@ -70,53 +73,26 @@ $heroCategories = array_keys($categories);
       </form>
       <div class="hero-note"><span>✓ Works in your browser</span><span>✓ No software to install</span><span>✓ Mobile friendly</span></div>
     </div>
-    <div class="hero-art-wrap">
-      <div class="hero-orbit orbit-one" aria-hidden="true"></div><div class="hero-orbit orbit-two" aria-hidden="true"></div>
-      <figure class="hero-art">
-        <img src="/assets/home/hero-tools.svg" width="800" height="520" alt="SmartToolz collection of online tools shown on a modern dashboard" loading="eager" fetchpriority="high">
-      </figure>
-    </div>
+    <div class="hero-art-wrap"><div class="hero-orbit orbit-one" aria-hidden="true"></div><div class="hero-orbit orbit-two" aria-hidden="true"></div><figure class="hero-art"><img src="/assets/home/hero-tools.svg" width="800" height="520" alt="SmartToolz collection of online tools shown on a modern dashboard" loading="eager" fetchpriority="high"></figure></div>
   </div>
 </section>
-
-<section class="page category-section" id="categories" aria-label="Tool categories">
-  <div class="category-grid-home">
-    <?php foreach ($heroCategories as $category): $meta = $categoryMeta[$category]; ?>
-      <a class="category-card-home" href="/tools/?category=<?= rawurlencode(smarttoolz_slug($category)) ?>">
-        <span class="category-icon <?= htmlspecialchars($meta['class']) ?>"><?= htmlspecialchars($meta['icon']) ?></span>
-        <span class="category-copy"><strong><?= htmlspecialchars($category) ?></strong><small><?= htmlspecialchars($meta['copy']) ?></small><em><?= (int)$categories[$category] ?>+ Tools</em></span>
-        <span class="category-arrow" aria-hidden="true">→</span>
-      </a>
-    <?php endforeach; ?>
+<section class="page category-section" id="categories" aria-label="Tool categories"><div class="category-grid-home"><?php foreach ($heroCategories as $category): $meta = $categoryMeta[$category]; ?><a class="category-card-home" href="/tools/?category=<?= rawurlencode(smarttoolz_slug($category)) ?>"><span class="category-icon <?= htmlspecialchars($meta['class']) ?>"><?= htmlspecialchars($meta['icon']) ?></span><span class="category-copy"><strong><?= htmlspecialchars($category) ?></strong><small><?= htmlspecialchars($meta['copy']) ?></small><em><?= (int)$categories[$category] ?>+ Tools</em></span><span class="category-arrow" aria-hidden="true">→</span></a><?php endforeach; ?></div></section>
+<section class="page trust-strip" aria-label="Why use SmartToolz"><div class="trust-item"><span class="trust-symbol">ϟ</span><div><strong>Fast &amp; Reliable</strong><small>Get results in seconds</small></div></div><div class="trust-item"><span class="trust-symbol">♢</span><div><strong>100% Free</strong><small>No signup required</small></div></div><div class="trust-item"><span class="trust-symbol">♡</span><div><strong>User Friendly</strong><small>Simple and clean interface</small></div></div><div class="trust-item"><span class="trust-symbol">♟</span><div><strong>All-in-One</strong><small><?= count($tools) ?>+ useful tools</small></div></div></section>
+<section class="page py-5" id="popular"><div class="section-head home-section-head"><div><span class="eyebrow">POPULAR TOOLS</span><h2 class="mt-2">Start with a useful tool</h2><p>Focused utilities for common image, text, developer and everyday tasks.</p></div><a href="/tools/">View all tools →</a></div><div class="tool-grid"><?php foreach ($featured as $tool): ?><article class="tool-card"><div class="tool-icon" aria-hidden="true"><?= htmlspecialchars((string)$tool['icon']) ?></div><h2><?= htmlspecialchars((string)$tool['name']) ?></h2><p><?= htmlspecialchars((string)$tool['description']) ?></p><a class="tool-link" href="<?= htmlspecialchars((string)$tool['url']) ?>">Open tool →</a></article><?php endforeach; ?></div></section>
+<?php if ($latestBlogs): ?>
+<section class="page py-5" id="latest-blog">
+  <div class="section-head home-section-head"><div><span class="eyebrow">FROM THE BLOG</span><h2 class="mt-2">Latest articles</h2><p>Practical guides, tips and ideas for everyday digital work.</p></div><a href="/blog/">View all articles →</a></div>
+  <div class="latest-blog-grid">
+    <?php foreach ($latestBlogs as $post): ?><article class="latest-blog-card"><span class="latest-blog-label">GUIDE</span><h3><a href="<?= htmlspecialchars($post['url'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($post['title'], ENT_QUOTES, 'UTF-8') ?></a></h3><p>Useful tips and straightforward guidance from SmartToolz.</p><a href="<?= htmlspecialchars($post['url'], ENT_QUOTES, 'UTF-8') ?>">Read article →</a></article><?php endforeach; ?>
   </div>
 </section>
-
-<section class="page trust-strip" aria-label="Why use SmartToolz">
-  <div class="trust-item"><span class="trust-symbol">ϟ</span><div><strong>Fast &amp; Reliable</strong><small>Get results in seconds</small></div></div>
-  <div class="trust-item"><span class="trust-symbol">♢</span><div><strong>100% Free</strong><small>No signup required</small></div></div>
-  <div class="trust-item"><span class="trust-symbol">♡</span><div><strong>User Friendly</strong><small>Simple and clean interface</small></div></div>
-  <div class="trust-item"><span class="trust-symbol">♟</span><div><strong>All-in-One</strong><small><?= count($tools) ?>+ useful tools</small></div></div>
-</section>
-
-<section class="page py-5" id="popular">
-  <div class="section-head home-section-head"><div><span class="eyebrow">POPULAR TOOLS</span><h2 class="mt-2">Start with a useful tool</h2><p>Focused utilities for common image, text, developer and everyday tasks.</p></div><a href="/tools/">View all tools →</a></div>
-  <div class="tool-grid">
-    <?php foreach ($featured as $tool): ?>
-      <article class="tool-card"><div class="tool-icon" aria-hidden="true"><?= htmlspecialchars((string)$tool['icon']) ?></div><h2><?= htmlspecialchars((string)$tool['name']) ?></h2><p><?= htmlspecialchars((string)$tool['description']) ?></p><a class="tool-link" href="<?= htmlspecialchars((string)$tool['url']) ?>">Open tool →</a></article>
-    <?php endforeach; ?>
-  </div>
-</section>
-
-<section class="section section-alt" id="about">
-  <div class="page">
-    <div class="section-head home-section-head"><div><span class="eyebrow">WHY SMARTTOOLZ</span><h2 class="mt-2">Useful tools without the clutter.</h2><p>Each utility is designed around one clear task, with straightforward controls and practical guidance.</p></div></div>
-    <div class="reason-grid"><article><b>01</b><h3>Simple by design</h3><p>Important controls stay visible so you can move from input to result without learning a complicated dashboard.</p></article><article><b>02</b><h3>Made for everyday work</h3><p>Use quick utilities while studying, creating content, building websites or preparing digital files.</p></article><article><b>03</b><h3>Easy to discover</h3><p>Consistent categories and page layouts make related tools easier to find when the next task comes up.</p></article></div>
-  </div>
-</section>
-
+<?php endif; ?>
+<section class="section section-alt" id="about"><div class="page"><div class="section-head home-section-head"><div><span class="eyebrow">WHY SMARTTOOLZ</span><h2 class="mt-2">Useful tools without the clutter.</h2><p>Each utility is designed around one clear task, with straightforward controls and practical guidance.</p></div></div><div class="reason-grid"><article><b>01</b><h3>Simple by design</h3><p>Important controls stay visible so you can move from input to result without learning a complicated dashboard.</p></article><article><b>02</b><h3>Made for everyday work</h3><p>Use quick utilities while studying, creating content, building websites or preparing digital files.</p></article><article><b>03</b><h3>Easy to discover</h3><p>Consistent categories and page layouts make related tools easier to find when the next task comes up.</p></article></div></div></section>
 <section class="page py-5" id="resources"><div class="seo-section"><span class="eyebrow">LEARN BEFORE YOU USE</span><h2 class="mt-3">Free online tools for real-world digital tasks</h2><p>People often need a small utility at exactly the moment a larger application feels unnecessary. A student may need a word count, a developer may need a JSON formatter, a designer may need a color value, or a website owner may need to reduce an image before uploading it. SmartToolz keeps these practical tasks together while giving each tool its own focused workflow and helpful explanation.</p><div class="row g-4 mt-2"><div class="col-md-4"><h3>Work &amp; study</h3><p>Count, clean and transform text, calculate values and prepare common files quickly.</p></div><div class="col-md-4"><h3>Web &amp; development</h3><p>Format structured data, encode URLs, generate useful strings and simplify repetitive tasks.</p></div><div class="col-md-4"><h3>Images &amp; documents</h3><p>Compress, resize and convert images and handle common PDF workflows in the browser.</p></div></div></div></section>
 <section class="page pb-5"><div class="seo-section"><span class="eyebrow">FAQ</span><h2 class="mt-3">Frequently asked questions</h2><div class="faq mt-3"><details><summary>Are SmartToolz tools free?</summary><p>The public SmartToolz collection is designed as free online utilities. Individual tools may have their own browser or technical limits.</p></details><details><summary>Do I need to install software?</summary><p>Most tools are designed to work directly in a modern browser, so everyday jobs can be handled without a separate desktop application.</p></details><details><summary>Can I use SmartToolz on a phone?</summary><p>Yes. The layouts are responsive so the site can be used across desktop and mobile screens.</p></details></div></div></section>
 </main>
-<?php require __DIR__ . '/footer.php'; ?>
+<style>
+.latest-blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.latest-blog-card{padding:25px;border:1px solid #e7eaf0;border-radius:20px;background:#fff;box-shadow:0 12px 35px rgba(16,24,40,.05)}.latest-blog-label{font-size:9px;font-weight:900;letter-spacing:1.4px;color:#6b5cff}.latest-blog-card h3{font-size:20px;line-height:1.25;margin:20px 0 9px}.latest-blog-card h3 a{color:inherit;text-decoration:none}.latest-blog-card p{margin:0 0 18px;color:#667085;font-size:13px;line-height:1.7}.latest-blog-card>a{font-size:12px;font-weight:800;text-decoration:none}@media(max-width:800px){.latest-blog-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.latest-blog-grid{grid-template-columns:1fr}}
+</style>
 </body>
 </html>

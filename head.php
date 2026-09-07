@@ -5,7 +5,7 @@ require_once __DIR__ . '/bootstrap.php';
 // Version query strings prevent browsers/CDNs from serving older cached styles after deployment.
 $assetVersion = '2026090703';
 ?>
-<script async src="https://pagead2.googlesyndication.com/adsbygoogle.js?client=ca-pub-9562924671441246" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9562924671441246"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WBXX9J5G3H"></script>
 <script>
   window.dataLayer = window.dataLayer || [];

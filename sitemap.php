@@ -43,6 +43,17 @@ if (is_dir($toolsDir)) {
 }
 sort($toolSlugs, SORT_STRING);
 
+// Category landing pages: one clean filtered URL per real category.
+require_once __DIR__ . '/lib/tools.php';
+$categoryNames = smarttoolz_categories();
+$categoryMtime = is_file($toolsDir . '/index.php') ? (filemtime($toolsDir . '/index.php') ?: null) : null;
+foreach ($categoryNames as $categoryName => $count) {
+    $slug = smarttoolz_slug((string)$categoryName);
+    if ($slug !== '') {
+        $add('/tools/?category=' . rawurlencode($slug), $categoryMtime);
+    }
+}
+
 // Each real tool gets one matching How-To guide URL.
 $guideFile = __DIR__ . '/how-to/index.php';
 $guideMtime = is_file($guideFile) ? (filemtime($guideFile) ?: null) : null;
@@ -65,24 +76,24 @@ if (is_dir($blogDir)) {
     }
 }
 
-// Sitemap order: core pages, then tools, How-To guides and blog articles.
+// Sitemap order: core pages, categories, tools, How-To guides and blog articles.
+$ordered = [];
+foreach ($coreOrder as $url => $file) {
+    if (array_key_exists($url, $entries)) $ordered[$url] = $entries[$url];
+}
+$categoryUrls = array_filter(array_keys($entries), static fn(string $url): bool => str_starts_with($url, '/tools/?category='));
+sort($categoryUrls, SORT_STRING);
+foreach ($categoryUrls as $url) $ordered[$url] = $entries[$url];
+
 $groups = [
-    static fn(string $url): bool => array_key_exists($url, $coreOrder),
-    static fn(string $url): bool => str_starts_with($url, '/tools/'),
+    static fn(string $url): bool => str_starts_with($url, '/tools/') && !str_starts_with($url, '/tools/?category='),
     static fn(string $url): bool => str_starts_with($url, '/how-to/'),
     static fn(string $url): bool => str_starts_with($url, '/blog/'),
 ];
-$ordered = [];
-foreach ($groups as $groupIndex => $matches) {
+foreach ($groups as $matches) {
     $urls = array_keys(array_filter($entries, static fn($mtime, $url) => $matches($url), ARRAY_FILTER_USE_BOTH));
-    if ($groupIndex === 0) {
-        $urls = array_values(array_filter(array_keys($coreOrder), static fn(string $url): bool => array_key_exists($url, $entries)));
-    } else {
-        sort($urls, SORT_STRING);
-    }
-    foreach ($urls as $url) {
-        $ordered[$url] = $entries[$url];
-    }
+    sort($urls, SORT_STRING);
+    foreach ($urls as $url) $ordered[$url] = $entries[$url];
 }
 $entries = $ordered;
 
@@ -91,9 +102,7 @@ echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
 foreach ($entries as $url => $mtime) {
     echo "  <url>\n";
     echo '    <loc>' . htmlspecialchars($base . $url, ENT_XML1, 'UTF-8') . "</loc>\n";
-    if ($mtime) {
-        echo '    <lastmod>' . gmdate('c', $mtime) . "</lastmod>\n";
-    }
+    if ($mtime) echo '    <lastmod>' . gmdate('c', $mtime) . "</lastmod>\n";
     echo "  </url>\n";
 }
 echo "</urlset>\n";

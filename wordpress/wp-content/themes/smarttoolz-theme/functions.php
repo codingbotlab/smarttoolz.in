@@ -6,7 +6,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'SMARTTOOLZ_VERSION', '2.4.0' );
+define( 'SMARTTOOLZ_VERSION', '2.5.0' );
 
 function smarttoolz_setup() {
     load_theme_textdomain( 'smarttoolz', get_template_directory() . '/languages' );
@@ -31,9 +31,11 @@ function smarttoolz_widgets() {
 add_action( 'widgets_init', 'smarttoolz_widgets' );
 
 function smarttoolz_assets() {
+    $theme_uri = get_template_directory_uri();
     wp_enqueue_style( 'smarttoolz-style', get_stylesheet_uri(), array(), SMARTTOOLZ_VERSION );
-    wp_enqueue_style( 'smarttoolz-enhancements', get_template_directory_uri() . '/assets/css/enhancements.css', array( 'smarttoolz-style' ), SMARTTOOLZ_VERSION );
-    wp_enqueue_script( 'smarttoolz-theme', get_template_directory_uri() . '/assets/js/theme.js', array(), SMARTTOOLZ_VERSION, true );
+    wp_enqueue_style( 'smarttoolz-enhancements', $theme_uri . '/assets/css/enhancements.css', array( 'smarttoolz-style' ), SMARTTOOLZ_VERSION );
+    wp_enqueue_style( 'smarttoolz-final', $theme_uri . '/assets/css/final.css', array( 'smarttoolz-enhancements' ), SMARTTOOLZ_VERSION );
+    wp_enqueue_script( 'smarttoolz-theme', $theme_uri . '/assets/js/theme.js', array(), SMARTTOOLZ_VERSION, true );
 }
 add_action( 'wp_enqueue_scripts', 'smarttoolz_assets' );
 

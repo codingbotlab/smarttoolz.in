@@ -1,39 +1,8 @@
 <?php
-/**
- * The template for displaying all single posts.
- *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
- *
- * @package SmartToolz
- * @since 1.0.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
-
-get_header(); ?>
-
-<?php if ( smarttoolz_page_layout() === 'left-sidebar' ) { ?>
-
-	<?php get_sidebar(); ?>
-
-<?php } ?>
-
-	<div id="primary" <?php smarttoolz_primary_class(); ?>>
-
-		<?php smarttoolz_primary_content_top(); ?>
-
-		<?php smarttoolz_content_loop(); ?>
-
-		<?php smarttoolz_primary_content_bottom(); ?>
-
-	</div><!-- #primary -->
-
-<?php if ( smarttoolz_page_layout() === 'right-sidebar' ) { ?>
-
-	<?php get_sidebar(); ?>
-
-<?php } ?>
-
-<?php get_footer(); ?>
+/** SmartToolz single post template. */
+get_header();
+if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
+<article class="st-entry">
+<div class="st-card"><div class="st-meta"><?php echo esc_html( get_the_date() ); ?> · <?php the_category( ', ' ); ?></div><h1 class="st-entry-title"><?php the_title(); ?></h1><?php if ( has_post_thumbnail() ) : ?><div style="margin:20px 0;border-radius:16px;overflow:hidden"><?php the_post_thumbnail( 'large' ); ?></div><?php endif; ?><div class="st-entry-content"><?php the_content(); ?></div></div>
+</article>
+<?php endwhile; endif; get_footer(); ?>

@@ -1,0 +1,10 @@
+/*
+Theme Name: SmartToolz Business
+Theme URI: https://smarttoolz.in/
+Author: SmartToolz
+Description: Professional corporate and business WordPress theme for agencies, consultants and service companies.
+Version: 1.0.0
+Text Domain: smarttoolz-business
+SmartToolz Category: Business
+*/
+:root{--primary:#0f4c81;--accent:#18a999;--ink:#102033;--muted:#617084;--bg:#f5f8fb;--card:#fff;--line:#dfe7ef}*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:Inter,system-ui,sans-serif;background:var(--bg);line-height:1.6}.container{width:min(1180px,calc(100% - 36px));margin:auto}.header{background:#fff;border-bottom:1px solid var(--line)}.header .container{min-height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:1.3rem;font-weight:850;color:var(--ink);text-decoration:none}.nav{display:flex;gap:24px}.nav a{color:var(--muted);text-decoration:none;font-weight:650}.hero{padding:86px 0 72px;background:linear-gradient(135deg,#eef6ff,#f7fffd)}.eyebrow{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}.hero h1{max-width:780px;font-size:clamp(2.7rem,6vw,5rem);line-height:1.02;margin:14px 0}.hero p{max-width:690px;color:var(--muted);font-size:1.15rem}.actions{display:flex;gap:12px;margin-top:28px}.btn{padding:13px 20px;border-radius:10px;text-decoration:none;font-weight:800;background:var(--primary);color:#fff}.btn.alt{background:#fff;color:var(--primary);border:1px solid var(--line)}.section{padding:64px 0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(16,32,51,.05)}.card h2{margin-top:0}.muted{color:var(--muted)}.footer{padding:30px 0;background:#102033;color:#cbd5e1}@media(max-width:760px){.nav{display:none}.hero{padding:58px 0}.grid{grid-template-columns:1fr}.actions{flex-wrap:wrap}}

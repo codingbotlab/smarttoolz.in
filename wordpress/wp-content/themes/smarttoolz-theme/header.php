@@ -1,69 +1,17 @@
 <?php
-/**
- * The header for SmartToolz Theme.
- *
- * This is the template that displays all of the <head> section and everything up until <div id="content">
- *
- * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
- *
- * @package SmartToolz
- * @since 1.0.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
-
-?><!DOCTYPE html>
-<?php smarttoolz_html_before(); ?>
-<html <?php language_attributes(); ?>>
-<head>
-<?php smarttoolz_head_top(); ?>
+/** SmartToolz header. */
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+?><!doctype html>
+<html <?php language_attributes(); ?>><head>
 <meta charset="<?php bloginfo( 'charset' ); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?php
-if ( apply_filters( 'smarttoolz_header_profile_gmpg_link', true ) ) {
-	?>
-	<link rel="profile" href="https://gmpg.org/xfn/11"> 
-	<?php
-}
-?>
-<?php wp_head(); ?>
-<?php smarttoolz_head_bottom(); ?>
-</head>
-
-<body <?php smarttoolz_schema_body(); ?> <?php body_class(); ?>>
-<?php smarttoolz_body_top(); ?>
-<?php wp_body_open(); ?>
-
-<a
-	class="skip-link screen-reader-text"
-	href="#content">
-		<?php echo esc_html( smarttoolz_default_strings( 'string-header-skip-link', false ) ); ?>
+<?php wp_head(); ?></head>
+<body <?php body_class(); ?>><?php wp_body_open(); ?>
+<header class="st-site-header"><div class="st-container st-header-inner">
+<a class="st-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+<?php if ( has_custom_logo() ) { the_custom_logo(); } else { echo esc_html( get_bloginfo( 'name' ) ?: 'SmartToolz' ); } ?>
 </a>
-
-<div
-<?php
-	echo wp_kses_post(
-		smarttoolz_attr(
-			'site',
-			array(
-				'id'    => 'page',
-				'class' => 'hfeed site',
-			)
-		)
-	);
-	?>
->
-	<?php
-	smarttoolz_header_before();
-
-	smarttoolz_header();
-
-	smarttoolz_header_after();
-
-	smarttoolz_content_before();
-	?>
-	<div id="content" class="site-content">
-		<div class="ast-container">
-		<?php smarttoolz_content_top(); ?>
+<nav class="st-menu" aria-label="<?php esc_attr_e( 'Primary Menu', 'smarttoolz' ); ?>">
+<?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'fallback_cb' => 'smarttoolz_fallback_menu' ) ); ?>
+</nav></div></header>
+<main class="st-main"><div class="st-container st-content">

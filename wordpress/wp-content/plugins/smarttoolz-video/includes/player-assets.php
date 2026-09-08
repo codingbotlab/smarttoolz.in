@@ -40,6 +40,16 @@ function smarttoolz_video_enqueue_player_assets() {
         true
     );
 
+    if ( is_singular( 'st_video' ) ) {
+        wp_enqueue_script(
+            'smarttoolz-video-edit',
+            SMARTTOOLZ_VIDEO_URL . 'assets/js/video-edit.js',
+            array(),
+            SMARTTOOLZ_VIDEO_VERSION . '.edit1',
+            true
+        );
+    }
+
     wp_localize_script(
         'smarttoolz-video',
         'stvPlatform',

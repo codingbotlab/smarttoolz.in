@@ -21,7 +21,7 @@ function smarttoolz_video_page_definitions() {
 }
 
 function smarttoolz_video_sync_pages( $force = false ) {
-    $version = '3.1.0';
+    $version = '3.2.0';
     if ( ! $force && get_option( 'smarttoolz_video_pages_version' ) === $version ) { return; }
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     foreach ( smarttoolz_video_page_definitions() as $slug => $page ) {
@@ -34,15 +34,20 @@ function smarttoolz_video_sync_pages( $force = false ) {
             'post_content' => $page['content'],
         );
         if ( $page_obj && 'page' === $page_obj->post_type ) {
-            $needs_update = ( (string) $page_obj->post_content !== (string) $page['content'] );
-            if ( $needs_update ) {
+            $managed = (bool) get_post_meta( $page_obj->ID, '_smarttoolz_video_managed', true );
+            $legacy_owned = (string) $page_obj->post_content === (string) $page['content'];
+            if ( $managed || $legacy_owned ) {
                 $data['ID'] = $page_obj->ID;
                 wp_update_post( $data );
+                update_post_meta( $page_obj->ID, '_smarttoolz_video_managed', 1 );
             }
             $ids[ $slug ] = (int) $page_obj->ID;
         } else {
             $new_id = wp_insert_post( $data, true );
-            if ( ! is_wp_error( $new_id ) ) { $ids[ $slug ] = (int) $new_id; }
+            if ( ! is_wp_error( $new_id ) ) {
+                $ids[ $slug ] = (int) $new_id;
+                update_post_meta( $new_id, '_smarttoolz_video_managed', 1 );
+            }
         }
     }
     update_option( 'smarttoolz_video_page_ids', $ids, false );
@@ -56,7 +61,6 @@ function smarttoolz_video_activate_pages() {
 if ( defined( 'SMARTTOOLZ_VIDEO_FILE' ) ) {
     register_activation_hook( SMARTTOOLZ_VIDEO_FILE, 'smarttoolz_video_activate_pages' );
 }
-
 add_action( 'plugins_loaded', 'smarttoolz_video_sync_pages', 30 );
 
 function smarttoolz_video_page_link( $slug ) {
@@ -68,6 +72,18 @@ function smarttoolz_video_page_link( $slug ) {
     if ( 'videos' === $slug ) { return get_post_type_archive_link( 'st_video' ) ?: home_url( '/videos/' ); }
     return home_url( '/' . trim( $slug, '/' ) . '/' );
 }
+
+function smarttoolz_video_pretty_channel_routes( $rules ) {
+    $custom = array( '^channel/([^/]+)/?$' => 'index.php?pagename=channel&stv_channel=$matches[1]' );
+    return $custom + $rules;
+}
+add_filter( 'rewrite_rules_array', 'smarttoolz_video_pretty_channel_routes', 30 );
+
+function smarttoolz_video_query_vars( $vars ) {
+    $vars[] = 'stv_channel';
+    return $vars;
+}
+add_filter( 'query_vars', 'smarttoolz_video_query_vars' );
 
 function smarttoolz_video_user_video_ids( $meta_key ) {
     if ( ! is_user_logged_in() ) { return array(); }

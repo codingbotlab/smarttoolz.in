@@ -10,7 +10,13 @@
     <?php endif; ?>
     <div class="footer-bottom">
       <?php wp_nav_menu(array('theme_location'=>'footer','container'=>false,'fallback_cb'=>false)); ?>
-      © <?php echo esc_html(date('Y')); ?> <?php bloginfo('name'); ?> · <?php esc_html_e('Built for thoughtful publishing.', 'smarttoolz-blog'); ?>
+      <div class="copyright">© <?php echo esc_html(date('Y')); ?> <?php bloginfo('name'); ?> · <?php esc_html_e('Built for thoughtful publishing.', 'smarttoolz-blog'); ?></div>
+    </div>
+    <div class="smarttoolz-footer-brand" aria-label="SmartToolz branding">
+      <span class="smarttoolz-footer-spark">✦</span>
+      <span>Powered by <strong>SmartToolz</strong></span>
+      <span class="smarttoolz-footer-dot">•</span>
+      <span>Smart tools for a smarter web</span>
     </div>
   </div>
 </footer>

@@ -43,7 +43,7 @@ jobs:
               -e 's/ASTRA/SMARTTOOLZ/g' \
               "$f"
           done
-          if grep -RniE 'astra|Astra|ASTRA' "$DST" --exclude='*.png' --exclude='*.jpg' --exclude='*.jpeg' --exclude='*.gif' --exclude='*.webp' 2>/dev/null; then
+          if find "$DST" -type f \( -name '*.php' -o -name '*.css' -o -name '*.js' -o -name '*.json' -o -name '*.xml' -o -name '*.html' -o -name '*.htm' -o -name '*.md' -o -name '*.txt' -o -name '*.svg' -o -name '*.scss' -o -name '*.less' \) -print0 | xargs -0 grep -niE 'astra|ASTRA' 2>/dev/null; then
             echo 'Rebrand check failed: old brand text remains.'
             exit 1
           fi

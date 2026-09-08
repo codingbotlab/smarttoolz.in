@@ -11,8 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'SMARTTOOLZ_VERSION', '1.0.0' );
 
-action_exists( 'wp_enqueue_scripts' );
-
 add_action( 'after_setup_theme', 'smarttoolz_setup' );
 function smarttoolz_setup() {
     add_theme_support( 'title-tag' );

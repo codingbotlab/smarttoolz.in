@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 <a class="st-skip-link" href="#st-main-content"><?php esc_html_e( 'Skip to content', 'smarttoolz' ); ?></a>
 <header class="st-site-header">
   <div class="st-container st-header-inner">
-    <a class="st-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+    <a class="st-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="SmartToolz home">
       <?php if ( has_custom_logo() ) : the_custom_logo(); else : ?>
-        <span class="st-logo-mark">S</span><span><?php echo esc_html( get_bloginfo( 'name' ) ?: 'SmartToolz' ); ?></span>
+        <span class="st-logo-mark" aria-hidden="true">S</span><span>SmartToolz</span>
       <?php endif; ?>
     </a>
     <button type="button" class="st-menu-toggle" aria-expanded="false" aria-controls="st-primary-menu" aria-label="<?php esc_attr_e( 'Open menu', 'smarttoolz' ); ?>">☰</button>
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
       </nav>
       <div class="st-header-tools">
         <div class="st-header-search"><?php get_search_form(); ?></div>
-        <?php if ( '1' === get_theme_mod( 'smarttoolz_dark_mode', '0' ) ) : ?>
+        <?php if ( get_theme_mod( 'smarttoolz_dark_mode', 0 ) ) : ?>
           <button type="button" class="st-theme-toggle" aria-pressed="false" aria-label="<?php esc_attr_e( 'Toggle dark mode', 'smarttoolz' ); ?>">◐ Dark</button>
         <?php endif; ?>
       </div>

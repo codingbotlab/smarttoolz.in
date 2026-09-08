@@ -44,11 +44,11 @@ function smarttoolz_video_menu_items() {
     );
     if ( is_user_logged_in() ) {
         $items['Subscriptions'] = smarttoolz_video_page_link( 'subscriptions' );
-        $items['Liked']         = smarttoolz_video_page_link( 'liked-videos' );
-        $items['History']       = smarttoolz_video_page_link( 'watch-history' );
-        $items['Upload']        = smarttoolz_video_page_link( 'video-upload' );
+        $items['Liked']          = smarttoolz_video_page_link( 'liked-videos' );
+        $items['History']        = smarttoolz_video_page_link( 'watch-history' );
+        $items['Upload']         = smarttoolz_video_page_link( 'video-upload' );
         $items['Creator Studio'] = smarttoolz_video_page_link( 'creator-studio' );
-        $items['My Channel']    = smarttoolz_video_page_link( 'channel' );
+        $items['My Channel']     = smarttoolz_video_page_link( 'channel' );
     }
     return $items;
 }
@@ -79,9 +79,12 @@ function smarttoolz_video_create_managed_pages() {
         }
     }
     update_option( 'smarttoolz_video_page_ids', $ids, false );
-    update_option( 'smarttoolz_video_pages_version', '4.2.0', false );
+    update_option( 'smarttoolz_video_pages_version', '4.3.0', false );
     flush_rewrite_rules( true );
     do_action( 'smarttoolz_video_after_pages_sync' );
 }
 
 register_activation_hook( SMARTTOOLZ_VIDEO_FILE, 'smarttoolz_video_create_managed_pages' );
+
+// Load frontend library page shortcodes on every normal plugin request.
+require_once dirname( __FILE__ ) . '/library-pages.php';

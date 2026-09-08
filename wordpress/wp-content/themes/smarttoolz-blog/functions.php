@@ -38,19 +38,47 @@ function smarttoolz_blog_customize_register($wp_customize){
  foreach(array('footer_brand'=>'SmartToolz','footer_text'=>'SmartToolz — useful tools, ideas and digital products.','footer_copyright'=>'© %year% SmartToolz. All rights reserved.') as $id=>$default){$wp_customize->add_setting('smarttoolz_'.$id,array('default'=>$default,'sanitize_callback'=>'sanitize_textarea_field'));$wp_customize->add_control('smarttoolz_'.$id,array('label'=>__($id==='footer_brand'?'Branding Text':($id==='footer_text'?'Footer Description':'Copyright Text'),'smarttoolz-blog'),'section'=>'smarttoolz_blog_footer','type'=>'textarea'));}
  $wp_customize->add_section('smarttoolz_blog_social',array('title'=>__('Social Links','smarttoolz-blog'),'panel'=>'smarttoolz_blog_design'));
  foreach(array('facebook'=>'Facebook','instagram'=>'Instagram','youtube'=>'YouTube','twitter'=>'X / Twitter','linkedin'=>'LinkedIn') as $id=>$label){$wp_customize->add_setting('smarttoolz_social_'.$id,array('default'=>'','sanitize_callback'=>'esc_url_raw'));$wp_customize->add_control('smarttoolz_social_'.$id,array('label'=>$label.' URL','section'=>'smarttoolz_blog_social','type'=>'url'));}
+
+ $wp_customize->add_section('smarttoolz_blog_engagement',array('title'=>__('Engagement & Reader Experience','smarttoolz-blog'),'panel'=>'smarttoolz_blog_design','description'=>__('Turn reader-friendly engagement features on or off.','smarttoolz-blog')));
+ foreach(array('reading_progress'=>'Reading Progress Bar','share_buttons'=>'Social Share Buttons','related_posts'=>'Related Stories','author_box'=>'Author Box','helpful_feedback'=>'Was This Helpful?','back_to_top'=>'Back To Top Button','newsletter_cta'=>'Newsletter CTA') as $id=>$label){$wp_customize->add_setting('smarttoolz_'.$id,array('default'=>true,'sanitize_callback'=>'rest_sanitize_boolean'));$wp_customize->add_control('smarttoolz_'.$id,array('label'=>__($label,'smarttoolz-blog'),'section'=>'smarttoolz_blog_engagement','type'=>'checkbox'));}
+ $wp_customize->add_setting('smarttoolz_related_count',array('default'=>3,'sanitize_callback'=>'absint'));$wp_customize->add_control('smarttoolz_related_count',array('label'=>__('Related Stories Count','smarttoolz-blog'),'section'=>'smarttoolz_blog_engagement','type'=>'range','input_attrs'=>array('min'=>2,'max'=>6,'step'=>1)));
+ $wp_customize->add_setting('smarttoolz_share_label',array('default'=>'Enjoyed this story? Share it.','sanitize_callback'=>'sanitize_text_field'));$wp_customize->add_control('smarttoolz_share_label',array('label'=>__('Share Prompt','smarttoolz-blog'),'section'=>'smarttoolz_blog_engagement','type'=>'text'));
+ $wp_customize->add_section('smarttoolz_blog_newsletter',array('title'=>__('Newsletter CTA','smarttoolz-blog'),'panel'=>'smarttoolz_blog_design'));
+ foreach(array('newsletter_title'=>'Get smarter stories in your inbox','newsletter_text'=>'Useful ideas, tools and fresh reads — delivered without the noise.','newsletter_button'=>'Subscribe','newsletter_url'=>'') as $id=>$default){$wp_customize->add_setting('smarttoolz_'.$id,array('default'=>$default,'sanitize_callback'=>$id==='newsletter_url'?'esc_url_raw':'sanitize_textarea_field'));$wp_customize->add_control('smarttoolz_'.$id,array('label'=>__($id==='newsletter_title'?'CTA Title':($id==='newsletter_text'?'CTA Description':($id==='newsletter_button'?'Button Text':'Subscription URL')),'smarttoolz-blog'),'section'=>'smarttoolz_blog_newsletter','type'=>$id==='newsletter_url'?'url':'text')) ;}
+ $wp_customize->add_section('smarttoolz_blog_advanced',array('title'=>__('Advanced Experience','smarttoolz-blog'),'panel'=>'smarttoolz_blog_design'));
+ $wp_customize->add_setting('smarttoolz_hover_lift',array('default'=>4,'sanitize_callback'=>'absint'));$wp_customize->add_control('smarttoolz_hover_lift',array('label'=>__('Card Hover Lift (px)','smarttoolz-blog'),'section'=>'smarttoolz_blog_advanced','type'=>'range','input_attrs'=>array('min'=>0,'max'=>12,'step'=>1)));
+ $wp_customize->add_setting('smarttoolz_container_width',array('default'=>1240,'sanitize_callback'=>'absint'));$wp_customize->add_control('smarttoolz_container_width',array('label'=>__('Content Max Width (px)','smarttoolz-blog'),'section'=>'smarttoolz_blog_advanced','type'=>'range','input_attrs'=>array('min'=>980,'max'=>1500,'step'=>20)));
 }
 add_action('customize_register','smarttoolz_blog_customize_register');
 
 function smarttoolz_blog_customizer_css(){
  $map=array('accent'=>'#e64b2e','accent_soft'=>'#ffe9e2','ink'=>'#111318','paper'=>'#f7f6f2','surface'=>'#fff','dark'=>'#17191f','line'=>'#deded8');
  foreach($map as $k=>$v){$c=get_theme_mod('smarttoolz_'.$k,$v);if($c)$map[$k]=$c;}
- $sticky=get_theme_mod('smarttoolz_header_sticky',true);$search=get_theme_mod('smarttoolz_show_search',true);$sw=absint(get_theme_mod('smarttoolz_sidebar_width',300));$gap=absint(get_theme_mod('smarttoolz_content_gap',70));$radius=absint(get_theme_mod('smarttoolz_card_radius',18));$ih=absint(get_theme_mod('smarttoolz_story_image_height',156));$font=get_theme_mod('smarttoolz_body_font','Inter,ui-sans-serif,system-ui,sans-serif');
- $css=':root{--accent:'.$map['accent'].';--accent-soft:'.$map['accent_soft'].';--ink:'.$map['ink'].';--paper:'.$map['paper'].';--surface:'.$map['surface'].';--dark:'.$map['dark'].';--line:'.$map['line'].';--sidebar-width:'.$sw.'px;--content-gap:'.$gap.'px;--card-radius:'.$radius.'px;--body-font:'.$font.'}.body{font-family:var(--body-font)}body{font-family:var(--body-font)}.content-with-sidebar,.archive-layout{grid-template-columns:minmax(0,1fr) var(--sidebar-width);gap:var(--content-gap)}.single-grid{grid-template-columns:minmax(0,820px) var(--sidebar-width);gap:var(--content-gap)}.hero-card{border-radius:var(--card-radius)}.story-media{height:'.$ih.'px;border-radius:calc(var(--card-radius) * .7)}';
+ $sticky=get_theme_mod('smarttoolz_header_sticky',true);$search=get_theme_mod('smarttoolz_show_search',true);$sw=absint(get_theme_mod('smarttoolz_sidebar_width',300));$gap=absint(get_theme_mod('smarttoolz_content_gap',70));$radius=absint(get_theme_mod('smarttoolz_card_radius',18));$ih=absint(get_theme_mod('smarttoolz_story_image_height',156));$font=get_theme_mod('smarttoolz_body_font','Inter,ui-sans-serif,system-ui,sans-serif');$lift=absint(get_theme_mod('smarttoolz_hover_lift',4));$cw=absint(get_theme_mod('smarttoolz_container_width',1240));
+ $css=':root{--accent:'.$map['accent'].';--accent-soft:'.$map['accent_soft'].';--ink:'.$map['ink'].';--paper:'.$map['paper'].';--surface:'.$map['surface'].';--dark:'.$map['dark'].';--line:'.$map['line'].';--sidebar-width:'.$sw.'px;--content-gap:'.$gap.'px;--card-radius:'.$radius.'px;--body-font:'.$font.';--container-width:'.$cw.'px;--hover-lift:'.$lift.'px}.body{font-family:var(--body-font)}body{font-family:var(--body-font)}.container{width:min(var(--container-width),calc(100% - 48px))}.content-with-sidebar,.archive-layout{grid-template-columns:minmax(0,1fr) var(--sidebar-width);gap:var(--content-gap)}.single-grid{grid-template-columns:minmax(0,820px) var(--sidebar-width);gap:var(--content-gap)}.hero-card{border-radius:var(--card-radius)}.story-media{height:'.$ih.'px;border-radius:calc(var(--card-radius) * .7)}.story-card:hover{transform:translateY(calc(var(--hover-lift) * -1))}.topic-card:hover{transform:translateY(calc(var(--hover-lift) * -.75))}';
  if(!$sticky)$css.='.header{position:relative}';
  if(!$search)$css.='.header-search{display:none!important}';
+ if(!get_theme_mod('smarttoolz_reading_progress',true))$css.='.reading-progress{display:none!important}';
+ if(!get_theme_mod('smarttoolz_back_to_top',true))$css.='.back-to-top{display:none!important}';
  wp_add_inline_style('smarttoolz-blog-style',$css);
 }
 add_action('wp_enqueue_scripts','smarttoolz_blog_customizer_css',20);
-
 function smarttoolz_blog_customizer_preview(){ if(is_customize_preview()) smarttoolz_blog_customizer_css(); }
 add_action('wp_footer','smarttoolz_blog_customizer_preview');
+
+function smarttoolz_blog_engagement_scripts(){
+ if(!is_single()) return;
+ ?>
+ <script>
+ document.addEventListener('DOMContentLoaded',function(){
+   const bar=document.querySelector('.reading-progress');
+   const top=document.querySelector('.back-to-top');
+   const update=function(){const h=document.documentElement.scrollHeight-window.innerHeight;const p=h>0?(window.scrollY/h)*100:0;if(bar)bar.style.width=Math.min(100,Math.max(0,p))+'%';if(top)top.classList.toggle('is-visible',window.scrollY>500);};
+   window.addEventListener('scroll',update,{passive:true}); update();
+   if(top)top.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+   document.querySelectorAll('.helpful-choice').forEach(function(btn){btn.addEventListener('click',function(){const key='smarttoolz-helpful-'+location.pathname;localStorage.setItem(key,btn.dataset.value);const box=btn.closest('.helpful-box');if(box){box.classList.add('answered');box.querySelector('.helpful-message').textContent=btn.dataset.value==='yes'?'Thanks! Glad it helped.':'Thanks for the feedback — we will keep improving.';}});const key='smarttoolz-helpful-'+location.pathname;if(localStorage.getItem(key)){const box=btn.closest('.helpful-box');if(box)box.classList.add('answered');}});
+ });
+ </script>
+ <?php
+}
+add_action('wp_footer','smarttoolz_blog_engagement_scripts',30);

@@ -1,44 +1,8 @@
 <?php
-/**
- * The template for displaying all pages.
- *
- * This is the template that displays all pages by default.
- * Please note that this is the WordPress construct of pages
- * and that other 'pages' on your WordPress site may use a
- * different template.
- *
- * @link https://codex.wordpress.org/Template_Hierarchy
- *
- * @package SmartToolz
- * @since 1.0.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
-
-get_header(); ?>
-
-<?php if ( smarttoolz_page_layout() === 'left-sidebar' ) { ?>
-
-	<?php get_sidebar(); ?>
-
-<?php } ?>
-
-	<div id="primary" <?php smarttoolz_primary_class(); ?>>
-
-		<?php smarttoolz_primary_content_top(); ?>
-
-		<?php smarttoolz_content_page_loop(); ?>
-
-		<?php smarttoolz_primary_content_bottom(); ?>
-
-	</div><!-- #primary -->
-
-<?php if ( smarttoolz_page_layout() === 'right-sidebar' ) { ?>
-
-	<?php get_sidebar(); ?>
-
-<?php } ?>
-
+/** SmartToolz page template. */
+get_header();
+?>
+<article class="st-entry">
+<div class="st-card"><div class="st-meta"><?php echo esc_html( get_the_date() ); ?></div><h1 class="st-entry-title"><?php the_title(); ?></h1><div class="st-entry-content"><?php while ( have_posts() ) : the_post(); the_content(); endwhile; ?></div></div>
+</article>
 <?php get_footer(); ?>

@@ -1,36 +1,10 @@
 <?php
-/**
- * The template for displaying the footer.
- *
- * Contains the closing of the #content div and all content after.
- *
- * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
- *
- * @package SmartToolz
- * @since 1.0.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
-
+/** SmartToolz footer. */
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 ?>
-<?php smarttoolz_content_bottom(); ?>
-	</div> <!-- ast-container -->
-	</div><!-- #content -->
-<?php
-	smarttoolz_content_after();
-
-	smarttoolz_footer_before();
-
-	smarttoolz_footer();
-
-	smarttoolz_footer_after();
-?>
-	</div><!-- #page -->
-<?php
-	smarttoolz_body_bottom();
-	wp_footer();
-?>
-	</body>
-</html>
+</div></main>
+<footer class="st-site-footer"><div class="st-container st-footer-inner">
+<div>© <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php echo esc_html( get_bloginfo( 'name' ) ?: 'SmartToolz' ); ?></div>
+<div><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Smart tools. Simple experience.', 'smarttoolz' ); ?></a></div>
+</div></footer>
+<?php wp_footer(); ?></body></html>

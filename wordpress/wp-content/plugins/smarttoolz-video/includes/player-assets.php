@@ -25,11 +25,18 @@ function smarttoolz_video_enqueue_player_assets() {
         SMARTTOOLZ_VIDEO_VERSION . '.player2'
     );
 
+    wp_enqueue_style(
+        'smarttoolz-video-thumbnails',
+        SMARTTOOLZ_VIDEO_URL . 'assets/css/thumbnails.css',
+        array( 'smarttoolz-video' ),
+        SMARTTOOLZ_VIDEO_VERSION . '.thumb1'
+    );
+
     wp_enqueue_script(
         'smarttoolz-video',
         SMARTTOOLZ_VIDEO_URL . 'assets/js/video.js',
         array(),
-        SMARTTOOLZ_VIDEO_VERSION . '.player2',
+        SMARTTOOLZ_VIDEO_VERSION . '.player3',
         true
     );
 

@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 function smarttoolz_video_page_definitions() {
     return array(
         'video-home'       => array( 'title' => 'Video Home', 'content' => '[smarttoolz_video_home]' ),
-        'videos'           => array( 'title' => 'Videos', 'content' => '[smarttoolz_video_platform]' ),
+        'video-library'    => array( 'title' => 'Videos', 'content' => '[smarttoolz_video_platform]' ),
         'trending-videos'  => array( 'title' => 'Trending Videos', 'content' => '[smarttoolz_video_trending]' ),
         'video-categories' => array( 'title' => 'Video Categories', 'content' => '[smarttoolz_video_categories]' ),
         'video-search'     => array( 'title' => 'Search Videos', 'content' => '[smarttoolz_video_search]' ),
@@ -21,7 +21,7 @@ function smarttoolz_video_page_definitions() {
 }
 
 function smarttoolz_video_sync_pages( $force = false ) {
-    $version = '3.0.0';
+    $version = '3.1.0';
     if ( ! $force && get_option( 'smarttoolz_video_pages_version' ) === $version ) { return; }
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     foreach ( smarttoolz_video_page_definitions() as $slug => $page ) {
@@ -34,7 +34,8 @@ function smarttoolz_video_sync_pages( $force = false ) {
             'post_content' => $page['content'],
         );
         if ( $page_obj && 'page' === $page_obj->post_type ) {
-            if ( false === strpos( (string) $page_obj->post_content, 'smarttoolz_' ) || $page_obj->post_content !== $page['content'] ) {
+            $needs_update = ( (string) $page_obj->post_content !== (string) $page['content'] );
+            if ( $needs_update ) {
                 $data['ID'] = $page_obj->ID;
                 wp_update_post( $data );
             }
@@ -48,6 +49,14 @@ function smarttoolz_video_sync_pages( $force = false ) {
     update_option( 'smarttoolz_video_pages_version', $version, false );
 }
 
+function smarttoolz_video_activate_pages() {
+    smarttoolz_video_sync_pages( true );
+    flush_rewrite_rules( true );
+}
+if ( defined( 'SMARTTOOLZ_VIDEO_FILE' ) ) {
+    register_activation_hook( SMARTTOOLZ_VIDEO_FILE, 'smarttoolz_video_activate_pages' );
+}
+
 add_action( 'plugins_loaded', 'smarttoolz_video_sync_pages', 30 );
 
 function smarttoolz_video_page_link( $slug ) {
@@ -56,6 +65,7 @@ function smarttoolz_video_page_link( $slug ) {
         $url = get_permalink( (int) $ids[ $slug ] );
         if ( $url ) { return $url; }
     }
+    if ( 'videos' === $slug ) { return get_post_type_archive_link( 'st_video' ) ?: home_url( '/videos/' ); }
     return home_url( '/' . trim( $slug, '/' ) . '/' );
 }
 
@@ -86,8 +96,8 @@ function smarttoolz_video_home_shortcode() {
     ob_start(); ?>
     <div class="stv-page-shell">
       <section class="stv-page-hero"><div><span class="stv-eyebrow">SmartToolz Video</span><h1>Watch. Share. Create.</h1><p>Discover videos, follow creators and build your own channel.</p></div><div class="stv-page-hero-actions"><a class="stv-upload-cta" href="<?php echo esc_url( smarttoolz_video_page_link( 'video-upload' ) ); ?>">Upload video</a></div></section>
-      <div class="stv-chip-row"><a href="<?php echo esc_url( smarttoolz_video_page_link( 'videos' ) ); ?>">All videos</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'trending-videos' ) ); ?>">Trending</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'video-categories' ) ); ?>">Categories</a><?php if ( is_user_logged_in() ) : ?><a href="<?php echo esc_url( smarttoolz_video_page_link( 'subscriptions' ) ); ?>">Subscriptions</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'watch-history' ) ); ?>">History</a><?php endif; ?></div>
-      <section class="stv-home-section"><div class="stv-home-section-head"><h2>Latest videos</h2><a href="<?php echo esc_url( smarttoolz_video_page_link( 'videos' ) ); ?>">View all →</a></div><?php echo stv_render_feed( array( 'per_page' => 12, 'orderby' => 'date' ) ); ?></section>
+      <div class="stv-chip-row"><a href="<?php echo esc_url( get_post_type_archive_link( 'st_video' ) ?: home_url( '/videos/' ) ); ?>">All videos</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'trending-videos' ) ); ?>">Trending</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'video-categories' ) ); ?>">Categories</a><?php if ( is_user_logged_in() ) : ?><a href="<?php echo esc_url( smarttoolz_video_page_link( 'subscriptions' ) ); ?>">Subscriptions</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'watch-history' ) ); ?>">History</a><?php endif; ?></div>
+      <section class="stv-home-section"><div class="stv-home-section-head"><h2>Latest videos</h2><a href="<?php echo esc_url( get_post_type_archive_link( 'st_video' ) ?: home_url( '/videos/' ) ); ?>">View all →</a></div><?php echo stv_render_feed( array( 'per_page' => 12, 'orderby' => 'date' ) ); ?></section>
       <section class="stv-home-section"><div class="stv-home-section-head"><h2>Trending</h2><a href="<?php echo esc_url( smarttoolz_video_page_link( 'trending-videos' ) ); ?>">See all →</a></div><?php echo stv_render_feed( array( 'per_page' => 8, 'orderby' => 'views' ) ); ?></section>
     </div>
     <?php return ob_get_clean();
@@ -124,15 +134,15 @@ function smarttoolz_video_subscriptions_shortcode() {
 add_shortcode( 'smarttoolz_video_subscriptions', 'smarttoolz_video_subscriptions_shortcode' );
 
 function smarttoolz_video_liked_shortcode() {
-    $ids = smarttoolz_video_user_video_ids( 'stv_liked_' );
     if ( ! is_user_logged_in() ) { return '<div class="stv-login"><h2>Sign in to see liked videos</h2></div>'; }
+    $ids = smarttoolz_video_user_video_ids( 'stv_liked_' );
     ob_start(); ?><div class="stv-page-shell"><div class="stv-page-heading"><span class="stv-eyebrow">Library</span><h1>Liked Videos</h1></div><?php echo stv_render_feed_from_query( smarttoolz_video_library_query( $ids ) ); ?></div><?php return ob_get_clean();
 }
 add_shortcode( 'smarttoolz_video_liked', 'smarttoolz_video_liked_shortcode' );
 
 function smarttoolz_video_history_shortcode() {
-    $ids = smarttoolz_video_user_video_ids( 'stv_history_' );
     if ( ! is_user_logged_in() ) { return '<div class="stv-login"><h2>Sign in to see watch history</h2></div>'; }
+    $ids = smarttoolz_video_user_video_ids( 'stv_history_' );
     ob_start(); ?><div class="stv-page-shell"><div class="stv-page-heading"><span class="stv-eyebrow">Library</span><h1>Watch History</h1></div><?php echo stv_render_feed_from_query( smarttoolz_video_library_query( $ids ) ); ?></div><?php return ob_get_clean();
 }
 add_shortcode( 'smarttoolz_video_history', 'smarttoolz_video_history_shortcode' );

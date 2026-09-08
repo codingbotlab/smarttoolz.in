@@ -16,24 +16,28 @@ $is_video = function_exists( 'smarttoolz_is_video_context' ) && smarttoolz_is_vi
     </a>
     <button type="button" class="st-menu-toggle" aria-expanded="false" aria-controls="st-primary-menu" aria-label="<?php esc_attr_e( 'Open menu', 'smarttoolz' ); ?>">☰</button>
     <div id="st-primary-menu" class="st-header-controls">
-      <?php if ( ! $is_video ) : ?>
-        <nav class="st-menu" aria-label="<?php esc_attr_e( 'Primary Menu', 'smarttoolz' ); ?>">
-          <?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'fallback_cb' => 'smarttoolz_fallback_menu', 'items_wrap' => '<ul class="st-nav-list">%3$s</ul>' ) ); ?>
+      <?php if ( $is_video ) : ?>
+        <nav class="stv-header-nav stv-related-pages" aria-label="Video platform navigation">
+          <?php
+          if ( function_exists( 'smarttoolz_video_menu_items' ) ) {
+              foreach ( smarttoolz_video_menu_items() as $label => $url ) {
+                  if ( ! $url ) { continue; }
+                  echo '<a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
+              }
+          } else {
+              echo '<a href="' . esc_url( home_url( '/' ) ) . '">Video Home</a>';
+          }
+          ?>
         </nav>
       <?php else : ?>
-        <nav class="stv-header-nav" aria-label="Video navigation">
-          <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
-          <a href="<?php echo esc_url( get_post_type_archive_link( 'st_video' ) ); ?>">Videos</a>
-          <?php if ( is_user_logged_in() ) : ?>
-            <a href="<?php echo esc_url( home_url( '/video-upload/' ) ); ?>">Upload</a>
-            <a href="<?php echo esc_url( home_url( '/creator-studio/' ) ); ?>">Studio</a>
-          <?php endif; ?>
+        <nav class="st-menu" aria-label="<?php esc_attr_e( 'Primary Menu', 'smarttoolz' ); ?>">
+          <?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'fallback_cb' => 'smarttoolz_fallback_menu', 'items_wrap' => '<ul class="st-nav-list">%3$s</ul>' ) ); ?>
         </nav>
       <?php endif; ?>
       <div class="st-header-tools">
         <div class="st-header-search">
           <?php if ( $is_video ) : ?>
-            <form class="st-search-form" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+            <form class="st-search-form" method="get" action="<?php echo esc_url( smarttoolz_video_page_link( 'video-search' ) ); ?>">
               <label class="screen-reader-text" for="stv-header-search">Search videos</label>
               <input class="st-search-field" id="stv-header-search" name="stv_search" type="search" value="<?php echo isset( $_GET['stv_search'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['stv_search'] ) ) ) : ''; ?>" placeholder="Search videos...">
               <button class="st-search-submit" type="submit">Search</button>

@@ -40,6 +40,19 @@
         });
     });
 
+    var progress = document.querySelector('.st-reading-progress span');
+    var updateProgress = function () {
+        if (!progress) return;
+        var scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        var percent = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+        progress.style.width = Math.min(100, Math.max(0, percent)) + '%';
+    };
+    if (progress) {
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress);
+        updateProgress();
+    }
+
     var top = document.querySelector('.st-back-top');
     if (top) {
         window.addEventListener('scroll', function () {

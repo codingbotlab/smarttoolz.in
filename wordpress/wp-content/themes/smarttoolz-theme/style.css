@@ -1,0 +1,98 @@
+/*
+Theme Name: SmartToolz
+Theme URI: https://smarttoolz.in/
+Author: SmartToolz
+Author URI: https://smarttoolz.in/
+Description: A clean, lightweight WordPress theme for SmartToolz.
+Version: 1.0.0
+Requires at least: 6.0
+Requires PHP: 7.4
+Text Domain: smarttoolz
+License: GPL-2.0-or-later
+*/
+
+:root {
+  --st-bg: #f7f8fc;
+  --st-surface: #ffffff;
+  --st-text: #182033;
+  --st-muted: #667085;
+  --st-border: #e6e8ef;
+  --st-primary: #5b5ce2;
+  --st-primary-dark: #4445bd;
+  --st-radius: 16px;
+  --st-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--st-bg);
+  color: var(--st-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.7;
+}
+a { color: var(--st-primary); text-decoration: none; }
+a:hover { color: var(--st-primary-dark); }
+img { max-width: 100%; height: auto; }
+
+.st-container {
+  width: min(1120px, calc(100% - 32px));
+  margin-inline: auto;
+}
+.st-site-header {
+  background: var(--st-surface);
+  border-bottom: 1px solid var(--st-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.st-header-inner {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.st-brand { font-size: 1.35rem; font-weight: 800; color: var(--st-text); }
+.st-menu { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.st-menu a { color: var(--st-text); font-weight: 600; }
+.st-menu a:hover { color: var(--st-primary); }
+.st-main { padding: 48px 0 64px; min-height: 70vh; }
+.st-content { display: grid; gap: 24px; }
+.st-card {
+  background: var(--st-surface);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius);
+  box-shadow: var(--st-shadow);
+  padding: 28px;
+}
+.st-title { margin: 0 0 12px; line-height: 1.2; }
+.st-meta { color: var(--st-muted); font-size: .92rem; margin-bottom: 18px; }
+.st-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: var(--st-primary);
+  color: #fff;
+  font-weight: 700;
+}
+.st-button:hover { background: var(--st-primary-dark); color: #fff; }
+.st-pagination { margin-top: 24px; }
+.st-site-footer {
+  border-top: 1px solid var(--st-border);
+  background: var(--st-surface);
+  padding: 28px 0;
+  color: var(--st-muted);
+}
+.alignwide { max-width: 1200px; margin-inline: auto; }
+.alignfull { width: 100%; }
+
+@media (max-width: 700px) {
+  .st-header-inner { flex-direction: column; justify-content: center; padding: 14px 0; }
+  .st-menu { justify-content: center; }
+  .st-main { padding-top: 28px; }
+  .st-card { padding: 20px; }
+}

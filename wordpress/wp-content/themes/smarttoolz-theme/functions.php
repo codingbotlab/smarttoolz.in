@@ -6,7 +6,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'SMARTTOOLZ_VERSION', '3.1.0' );
+define( 'SMARTTOOLZ_VERSION', '3.2.0' );
 
 function smarttoolz_setup() {
     load_theme_textdomain( 'smarttoolz', get_template_directory() . '/languages' );
@@ -24,6 +24,29 @@ function smarttoolz_setup() {
     register_nav_menus( array( 'primary' => __( 'Primary Menu', 'smarttoolz' ), 'footer' => __( 'Footer Menu', 'smarttoolz' ) ) );
 }
 add_action( 'after_setup_theme', 'smarttoolz_setup' );
+
+/**
+ * Keep SmartToolz video permalinks working when WordPress is installed in a subdirectory.
+ * WordPress matches rewrite rules against the path relative to the site root, so the
+ * /wordpress installation directory must not be repeated in the rule itself.
+ */
+function smarttoolz_video_rewrite_rules( $rules ) {
+    if ( ! post_type_exists( 'st_video' ) ) { return $rules; }
+    $custom = array(
+        '^videos/([^/]+)/?$'            => 'index.php?post_type=st_video&name=$matches[1]',
+        '^index\.php/videos/([^/]+)/?$' => 'index.php?post_type=st_video&name=$matches[1]',
+    );
+    return $custom + $rules;
+}
+add_filter( 'rewrite_rules_array', 'smarttoolz_video_rewrite_rules', 50 );
+
+function smarttoolz_video_refresh_routes() {
+    $route_version = '3.2.0';
+    if ( get_option( 'smarttoolz_video_theme_routes' ) === $route_version ) { return; }
+    flush_rewrite_rules( false );
+    update_option( 'smarttoolz_video_theme_routes', $route_version, false );
+}
+add_action( 'init', 'smarttoolz_video_refresh_routes', 100 );
 
 function smarttoolz_widgets() {
     register_sidebar( array( 'name' => __( 'Main Sidebar', 'smarttoolz' ), 'id' => 'sidebar-1', 'description' => __( 'Optional widgets for content templates.', 'smarttoolz' ), 'before_widget' => '<section id="%1$s" class="widget %2$s st-card">', 'after_widget' => '</section>', 'before_title' => '<h2 class="widget-title">', 'after_title' => '</h2>' ) );

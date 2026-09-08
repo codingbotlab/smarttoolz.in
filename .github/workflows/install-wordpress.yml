@@ -1,0 +1,45 @@
+name: Install WordPress Core
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install-wordpress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download latest WordPress
+        run: |
+          set -e
+          curl -fL https://wordpress.org/latest.tar.gz -o /tmp/wordpress.tar.gz
+          tar -xzf /tmp/wordpress.tar.gz -C /tmp
+
+      - name: Install WordPress core into /wordpress
+        run: |
+          set -e
+          mkdir -p wordpress
+          rsync -a /tmp/wordpress/ wordpress/ --exclude='wp-content/themes/' --exclude='wp-content/plugins/'
+          mkdir -p wordpress/wp-content/themes wordpress/wp-content/plugins
+          test -f wordpress/wp-settings.php
+          test -d wordpress/wp-admin
+          test -d wordpress/wp-includes
+
+      - name: Commit WordPress core
+        run: |
+          set -e
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add wordpress
+          if git diff --cached --quiet; then
+            echo 'WordPress core is already installed.'
+            exit 0
+          fi
+          git commit -m 'Install WordPress core in /wordpress'
+          git push

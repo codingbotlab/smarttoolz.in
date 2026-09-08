@@ -3,8 +3,8 @@
 <body <?php body_class(); ?>><?php wp_body_open(); ?>
 <header class="header">
   <div class="container">
-    <a class="brand" href="<?php echo esc_url(home_url('/')); ?>" aria-label="SmartToolz Home">
-      <?php if (has_custom_logo()) { the_custom_logo(); } else { ?><span class="brand-mark" aria-hidden="true">ST</span><span class="brand-name">SmartToolz</span><?php } ?>
+    <a class="brand" href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php echo esc_attr(get_bloginfo('name')); ?> Home">
+      <?php if (has_custom_logo()) { the_custom_logo(); } else { ?><span class="brand-name"><?php bloginfo('name'); ?></span><?php } ?>
     </a>
     <nav class="nav" aria-label="Primary Navigation">
       <?php wp_nav_menu(array('theme_location'=>'primary','container'=>false,'fallback_cb'=>function(){ echo '<ul>'; echo '<li><a href="'.esc_url(home_url('/')).'">'.esc_html__('Home','smarttoolz-blog').'</a></li>'; wp_list_pages(array('title_li'=>'','depth'=>1)); echo '</ul>'; })); ?>

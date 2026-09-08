@@ -12,20 +12,25 @@ function smarttoolz_video_page_definitions() {
         'video-categories' => array( 'title' => 'Video Categories', 'content' => '[smarttoolz_video_categories]' ),
         'video-search'     => array( 'title' => 'Search Videos', 'content' => '[smarttoolz_video_search]' ),
         'subscriptions'   => array( 'title' => 'Subscriptions', 'content' => '[smarttoolz_video_subscriptions]' ),
-        'liked-videos'    => array( 'title' => 'Liked Videos', 'content' => '[smarttoolz_video_liked]' ),
-        'watch-history'   => array( 'title' => 'Watch History', 'content' => '[smarttoolz_video_history]' ),
-        'video-upload'    => array( 'title' => 'Upload Video', 'content' => '[smarttoolz_video_upload]' ),
-        'creator-studio'  => array( 'title' => 'Creator Studio', 'content' => '[smarttoolz_creator_dashboard]' ),
-        'channel'         => array( 'title' => 'Channel', 'content' => '[smarttoolz_channel]' ),
+        'liked-videos'     => array( 'title' => 'Liked Videos', 'content' => '[smarttoolz_video_liked]' ),
+        'watch-history'    => array( 'title' => 'Watch History', 'content' => '[smarttoolz_video_history]' ),
+        'video-upload'     => array( 'title' => 'Upload Video', 'content' => '[smarttoolz_video_upload]' ),
+        'creator-studio'   => array( 'title' => 'Creator Studio', 'content' => '[smarttoolz_creator_dashboard]' ),
+        'channel'          => array( 'title' => 'Channel', 'content' => '[smarttoolz_channel]' ),
     );
 }
 
+/**
+ * Sync only when the managed-page schema version changes. This is intentionally
+ * attached to init, after the plugin has registered its post type/taxonomy.
+ */
 function smarttoolz_video_sync_pages( $force = false ) {
-    $version = '3.3.0';
+    $version = '3.4.0';
     if ( ! $force && get_option( 'smarttoolz_video_pages_version' ) === $version ) { return; }
+
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
 
-    // Older builds could create a page called /videos/, which conflicts with the video archive.
+    // Older builds could create /videos/ as a normal page, conflicting with the CPT archive.
     $legacy_videos = get_page_by_path( 'videos', OBJECT, 'page' );
     if ( $legacy_videos && get_post_meta( $legacy_videos->ID, '_smarttoolz_video_managed', true ) ) {
         wp_delete_post( $legacy_videos->ID, true );
@@ -41,6 +46,7 @@ function smarttoolz_video_sync_pages( $force = false ) {
             'post_name'    => $slug,
             'post_content' => $page['content'],
         );
+
         if ( $page_obj && 'page' === $page_obj->post_type ) {
             $managed = (bool) get_post_meta( $page_obj->ID, '_smarttoolz_video_managed', true );
             $legacy_owned = (string) $page_obj->post_content === (string) $page['content'];
@@ -58,6 +64,7 @@ function smarttoolz_video_sync_pages( $force = false ) {
             }
         }
     }
+
     update_option( 'smarttoolz_video_page_ids', $ids, false );
     update_option( 'smarttoolz_video_pages_version', $version, false );
     flush_rewrite_rules( false );
@@ -67,10 +74,13 @@ function smarttoolz_video_activate_pages() {
     smarttoolz_video_sync_pages( true );
     flush_rewrite_rules( true );
 }
-if ( defined( 'SMARTTOOLZ_VIDEO_FILE' ) ) {
+
+if ( defined( 'SMARTTOOLZ_VIDEO_FILE' ) && function_exists( 'register_activation_hook' ) ) {
     register_activation_hook( SMARTTOOLZ_VIDEO_FILE, 'smarttoolz_video_activate_pages' );
 }
-add_action( 'plugins_loaded', 'smarttoolz_video_sync_pages', 30 );
+
+// First frontend/admin request after an update automatically creates/syncs all managed pages.
+add_action( 'init', 'smarttoolz_video_sync_pages', 20 );
 
 function smarttoolz_video_page_link( $slug ) {
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
@@ -186,8 +196,3 @@ function smarttoolz_video_record_history( $post_id ) {
     update_user_meta( get_current_user_id(), 'stv_history_' . absint( $post_id ), time() );
 }
 add_action( 'wp', function() { if ( is_singular( 'st_video' ) ) { smarttoolz_video_record_history( get_queried_object_id() ); } }, 25 );
-
-function smarttoolz_video_upgrade_sync() {
-    if ( is_admin() && current_user_can( 'manage_options' ) ) { smarttoolz_video_sync_pages(); }
-}
-add_action( 'admin_init', 'smarttoolz_video_upgrade_sync' );

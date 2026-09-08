@@ -3,7 +3,7 @@
  * Plugin Name: SmartToolz Video
  * Plugin URI: https://smarttoolz.in/
  * Description: YouTube-style video sharing platform for SmartToolz WordPress.
- * Version: 2.1.2
+ * Version: 2.1.3
  * Author: SmartToolz
  * License: GPL-2.0-or-later
  * Text Domain: smarttoolz-video
@@ -11,7 +11,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'SMARTTOOLZ_VIDEO_VERSION', '2.1.2' );
+define( 'SMARTTOOLZ_VIDEO_VERSION', '2.1.3' );
 define( 'SMARTTOOLZ_VIDEO_FILE', __FILE__ );
 define( 'SMARTTOOLZ_VIDEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
@@ -70,37 +70,16 @@ function smarttoolz_video_content_filter($content){ if(is_singular('st_video')&&
 add_filter('the_content','smarttoolz_video_content_filter',20);
 function smarttoolz_video_frontend_upload(){ if(!is_user_logged_in()||!isset($_POST['st_video_frontend_action']))return; if(!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['st_video_frontend_nonce']??'')),'st_video_frontend_upload'))return; if(!current_user_can('publish_posts'))return; $title=isset($_POST['st_video_title'])?sanitize_text_field(wp_unslash($_POST['st_video_title'])):''; $description=isset($_POST['st_video_description'])?wp_kses_post(wp_unslash($_POST['st_video_description'])):''; $source_url=isset($_POST['st_video_url'])?esc_url_raw(wp_unslash($_POST['st_video_url'])):''; if(!$title){wp_safe_redirect(add_query_arg('st_video_upload','missing-title',wp_get_referer()?:home_url('/')));exit;} $post_id=wp_insert_post(array('post_type'=>'st_video','post_status'=>'publish','post_title'=>$title,'post_content'=>$description,'post_author'=>get_current_user_id()),true); if(is_wp_error($post_id)){wp_safe_redirect(add_query_arg('st_video_upload','failed',wp_get_referer()?:home_url('/')));exit;} if(!empty($_FILES['st_video_file']['name'])){require_once ABSPATH.'wp-admin/includes/file.php';$upload=wp_handle_upload($_FILES['st_video_file'],array('test_form'=>false,'mimes'=>array('mp4'=>'video/mp4','webm'=>'video/webm','ogg'=>'video/ogg')));if(isset($upload['error'])){wp_delete_post($post_id,true);wp_safe_redirect(add_query_arg('st_video_upload','file-error',wp_get_referer()?:home_url('/')));exit;}update_post_meta($post_id,'_st_video_source',esc_url_raw($upload['url']));}elseif($source_url){update_post_meta($post_id,'_st_video_source',$source_url);}else{wp_delete_post($post_id,true);wp_safe_redirect(add_query_arg('st_video_upload','missing-video',wp_get_referer()?:home_url('/')));exit;} wp_safe_redirect(add_query_arg('st_video_upload','success',get_permalink($post_id)));exit; }
 add_action('template_redirect','smarttoolz_video_frontend_upload',1);
-function smarttoolz_video_upload_shortcode(){ if(!is_user_logged_in())return '<div class="st-video-login-note">'.esc_html__('Please log in to upload a video.','smarttoolz-video').'</div>'; if(!current_user_can('publish_posts'))return '<div class="st-video-login-note">'.esc_html__('Your account is not allowed to publish videos yet.','smarttoolz-video').'</div>'; $status=isset($_GET['st_video_upload'])?sanitize_key(wp_unslash($_GET['st_video_upload'])):''; ob_start(); ?>
-<div class="st-video-upload-wrap"><?php if('success'===$status): ?><div class="st-video-notice st-video-notice-success">Video published successfully.</div><?php endif; ?><form class="st-video-upload-form" method="post" enctype="multipart/form-data"><?php wp_nonce_field('st_video_frontend_upload','st_video_frontend_nonce'); ?><input type="hidden" name="st_video_frontend_action" value="upload"><label>Video title<input name="st_video_title" type="text" maxlength="180" required></label><label>Description<textarea name="st_video_description"></textarea></label><label>Video file<input name="st_video_file" type="file" accept="video/mp4,video/webm,video/ogg"></label><label>Or video URL<input name="st_video_url" type="url" placeholder="https://..."></label><button type="submit">Publish video</button></form></div>
+function smarttoolz_video_upload_shortcode(){ if(!is_user_logged_in())return '<div class="stv-upload-page"><div class="stv-upload-card stv-upload-login"><div class="stv-upload-icon">↥</div><h1>Sign in to upload</h1><p>Please log in to publish videos on SmartToolz.</p></div></div>'; if(!current_user_can('publish_posts'))return '<div class="stv-upload-page"><div class="stv-upload-card stv-upload-login"><div class="stv-upload-icon">!</div><h1>Uploads are not enabled</h1><p>Your account is not allowed to publish videos yet.</p></div></div>'; $status=isset($_GET['st_video_upload'])?sanitize_key(wp_unslash($_GET['st_video_upload'])):''; ob_start(); ?>
+<div class="stv-upload-page"><div class="stv-upload-head"><div><span class="stv-eyebrow">Creator</span><h1>Upload a video</h1><p>Share your next video with the SmartToolz community.</p></div><a class="stv-upload-back" href="<?php echo esc_url(home_url('/video-home/')); ?>">Back to videos</a></div><?php if('success'===$status): ?><div class="stv-upload-success"><strong>Video published.</strong> Your video is now live.</div><?php elseif(in_array($status,array('failed','file-error','missing-video','missing-title'),true)): ?><div class="stv-upload-error">We could not publish that video. Please check the title and video file or URL and try again.</div><?php endif; ?><form class="stv-video-upload-form" method="post" enctype="multipart/form-data"><?php wp_nonce_field('st_video_frontend_upload','st_video_frontend_nonce'); ?><input type="hidden" name="st_video_frontend_action" value="upload"><div class="stv-upload-main"><div class="stv-upload-section"><label class="stv-field"><span>Title</span><input name="st_video_title" type="text" maxlength="180" placeholder="Add a title that describes your video" required></label><label class="stv-field"><span>Description</span><textarea name="st_video_description" rows="7" placeholder="Tell viewers what your video is about..."></textarea></label></div><div class="stv-upload-section"><div class="stv-dropzone"><div class="stv-drop-icon">▶</div><strong>Select a video to upload</strong><p>MP4, WebM or OGG · Use a direct video URL when your file is hosted elsewhere.</p><label class="stv-file-button">Choose video<input name="st_video_file" type="file" accept="video/mp4,video/webm,video/ogg"></label><span class="stv-selected-file" data-stv-file-name>No file selected</span></div><div class="stv-or"><span>OR</span></div><label class="stv-field"><span>Video URL</span><input name="st_video_url" type="url" placeholder="https://example.com/video.mp4"></label></div></div><div class="stv-upload-footer"><span>Your video will be published as a public SmartToolz video.</span><button type="submit" class="stv-publish-button">Publish video</button></div></form></div>
 <?php return ob_get_clean(); }
 add_shortcode('smarttoolz_video_upload','smarttoolz_video_upload_shortcode');
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/platform.php';
 
-function smarttoolz_video_create_page( $slug, $title, $content ) {
-    $existing = get_page_by_path( $slug, OBJECT, 'page' );
-    if ( $existing ) { return (int) $existing->ID; }
-    $page_id = wp_insert_post(array('post_type'=>'page','post_status'=>'publish','post_title'=>$title,'post_name'=>$slug,'post_content'=>$content,'post_author'=>get_current_user_id() ?: 1),true);
-    return is_wp_error($page_id) ? 0 : (int)$page_id;
-}
-function smarttoolz_video_create_platform_pages() {
-    $pages=array(
-        'video-home'=>array('title'=>'Video Home','content'=>'[smarttoolz_video_platform]'),
-        'video-upload'=>array('title'=>'Upload Video','content'=>'[smarttoolz_video_upload]'),
-        'creator-studio'=>array('title'=>'Creator Studio','content'=>'[smarttoolz_creator_dashboard]'),
-        'channel'=>array('title'=>'Channel','content'=>'[smarttoolz_channel]'),
-    );
-    $page_ids=array(); foreach($pages as $slug=>$page){$page_ids[$slug]=smarttoolz_video_create_page($slug,$page['title'],$page['content']);}
-    update_option('smarttoolz_video_page_ids',$page_ids,false);
-}
-function smarttoolz_video_refresh_rewrites() {
-    $version = '2.1.2';
-    if ( get_option( 'smarttoolz_video_rewrite_version' ) === $version ) { return; }
-    smarttoolz_video_register_post_type();
-    smarttoolz_video_register_taxonomy();
-    flush_rewrite_rules( false );
-    update_option( 'smarttoolz_video_rewrite_version', $version, false );
-}
-add_action( 'init', 'smarttoolz_video_refresh_rewrites', 99 );
+function smarttoolz_video_create_page( $slug, $title, $content ) { $existing = get_page_by_path( $slug, OBJECT, 'page' ); if ( $existing ) { return (int) $existing->ID; } $page_id = wp_insert_post(array('post_type'=>'page','post_status'=>'publish','post_title'=>$title,'post_name'=>$slug,'post_content'=>$content,'post_author'=>get_current_user_id() ?: 1),true); return is_wp_error($page_id) ? 0 : (int)$page_id; }
+function smarttoolz_video_create_platform_pages() { $pages=array('video-home'=>array('title'=>'Video Home','content'=>'[smarttoolz_video_platform]'),'video-upload'=>array('title'=>'Upload Video','content'=>'[smarttoolz_video_upload]'),'creator-studio'=>array('title'=>'Creator Studio','content'=>'[smarttoolz_creator_dashboard]'),'channel'=>array('title'=>'Channel','content'=>'[smarttoolz_channel]')); $page_ids=array(); foreach($pages as $slug=>$page){$page_ids[$slug]=smarttoolz_video_create_page($slug,$page['title'],$page['content']);} update_option('smarttoolz_video_page_ids',$page_ids,false); }
+function smarttoolz_video_refresh_rewrites() { $version='2.1.2'; if(get_option('smarttoolz_video_rewrite_version')===$version)return; smarttoolz_video_register_post_type(); smarttoolz_video_register_taxonomy(); flush_rewrite_rules(false); update_option('smarttoolz_video_rewrite_version',$version,false); }
+add_action('init','smarttoolz_video_refresh_rewrites',99);
 function smarttoolz_video_activation(){smarttoolz_video_register_post_type();smarttoolz_video_register_taxonomy();smarttoolz_video_create_platform_pages();flush_rewrite_rules(true);update_option('smarttoolz_video_rewrite_version','2.1.2',false);}
 register_activation_hook(__FILE__,'smarttoolz_video_activation');
 function smarttoolz_video_deactivation(){flush_rewrite_rules(true);delete_option('smarttoolz_video_rewrite_version');}

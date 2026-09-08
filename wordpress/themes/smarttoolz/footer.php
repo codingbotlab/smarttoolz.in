@@ -1,0 +1,1 @@
+<?php if (!defined('ABSPATH')) exit; ?></div></main><footer class="site-footer"><div class="container"><small>&copy; <?php echo esc_html(wp_date('Y')); ?> SmartToolz. Self-testing WordPress environment.</small></div></footer><?php wp_footer(); ?></body></html>

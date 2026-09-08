@@ -1,0 +1,1 @@
+<?php get_header(); ?><section class="hero"><h1>SmartToolz WordPress Lab</h1><p>Self-testing environment for building and validating the next SmartToolz theme and tools plugin without touching production.</p></section><?php echo do_shortcode('[smarttoolz_tools]'); ?><?php get_footer(); ?>

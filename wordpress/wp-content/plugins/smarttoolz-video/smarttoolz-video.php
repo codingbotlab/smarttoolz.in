@@ -3,7 +3,7 @@
  * Plugin Name: SmartToolz Video
  * Plugin URI: https://smarttoolz.in/
  * Description: YouTube-style video sharing platform for SmartToolz WordPress.
- * Version: 2.1.0
+ * Version: 2.1.1
  * Author: SmartToolz
  * License: GPL-2.0-or-later
  * Text Domain: smarttoolz-video
@@ -11,7 +11,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'SMARTTOOLZ_VIDEO_VERSION', '2.1.0' );
+define( 'SMARTTOOLZ_VIDEO_VERSION', '2.1.1' );
 define( 'SMARTTOOLZ_VIDEO_FILE', __FILE__ );
 define( 'SMARTTOOLZ_VIDEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
@@ -19,11 +19,11 @@ define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
 function smarttoolz_video_register_post_type() {
     register_post_type( 'st_video', array(
         'labels' => array('name'=>__('Videos','smarttoolz-video'),'singular_name'=>__('Video','smarttoolz-video'),'add_new'=>__('Add Video','smarttoolz-video'),'add_new_item'=>__('Add New Video','smarttoolz-video'),'edit_item'=>__('Edit Video','smarttoolz-video'),'new_item'=>__('New Video','smarttoolz-video'),'view_item'=>__('View Video','smarttoolz-video'),'search_items'=>__('Search Videos','smarttoolz-video'),'not_found'=>__('No videos found.','smarttoolz-video'),'menu_name'=>__('SmartToolz Videos','smarttoolz-video')),
-        'public'=>true,'show_ui'=>true,'show_in_rest'=>true,'menu_icon'=>'dashicons-video-alt3','supports'=>array('title','editor','thumbnail','author','comments'),'has_archive'=>true,'rewrite'=>array('slug'=>'videos'),'capability_type'=>'post','map_meta_cap'=>true,
+        'public'=>true,'publicly_queryable'=>true,'show_ui'=>true,'show_in_rest'=>true,'menu_icon'=>'dashicons-video-alt3','supports'=>array('title','editor','thumbnail','author','comments'),'has_archive'=>'videos','rewrite'=>array('slug'=>'videos','with_front'=>false,'feeds'=>true,'pages'=>true),'query_var'=>'st_video','capability_type'=>'post','map_meta_cap'=>true,
     ) );
 }
 add_action( 'init', 'smarttoolz_video_register_post_type' );
-function smarttoolz_video_register_taxonomy() { register_taxonomy('st_video_category','st_video',array('labels'=>array('name'=>__('Video Categories','smarttoolz-video'),'singular_name'=>__('Video Category','smarttoolz-video')),'public'=>true,'show_ui'=>true,'show_in_rest'=>true,'hierarchical'=>true,'rewrite'=>array('slug'=>'video-category'))); }
+function smarttoolz_video_register_taxonomy() { register_taxonomy('st_video_category','st_video',array('labels'=>array('name'=>__('Video Categories','smarttoolz-video'),'singular_name'=>__('Video Category','smarttoolz-video')),'public'=>true,'show_ui'=>true,'show_in_rest'=>true,'hierarchical'=>true,'rewrite'=>array('slug'=>'video-category','with_front'=>false))); }
 add_action( 'init', 'smarttoolz_video_register_taxonomy' );
 function smarttoolz_video_register_meta() {
     register_post_meta('st_video','_st_video_source',array('type'=>'string','single'=>true,'show_in_rest'=>true,'sanitize_callback'=>'esc_url_raw','auth_callback'=>function(){return current_user_can('edit_posts');}));
@@ -56,65 +56,32 @@ function smarttoolz_video_upload_shortcode(){ if(!is_user_logged_in())return '<d
 add_shortcode('smarttoolz_video_upload','smarttoolz_video_upload_shortcode');
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/platform.php';
 
-/**
- * Create the platform pages once when the plugin is activated.
- * Existing pages with the same slug are reused instead of duplicated.
- */
 function smarttoolz_video_create_page( $slug, $title, $content ) {
     $existing = get_page_by_path( $slug, OBJECT, 'page' );
-    if ( $existing ) {
-        return (int) $existing->ID;
-    }
-
-    $page_id = wp_insert_post(
-        array(
-            'post_type'    => 'page',
-            'post_status'  => 'publish',
-            'post_title'   => $title,
-            'post_name'    => $slug,
-            'post_content' => $content,
-            'post_author'  => get_current_user_id() ?: 1,
-        ),
-        true
-    );
-
-    return is_wp_error( $page_id ) ? 0 : (int) $page_id;
+    if ( $existing ) { return (int) $existing->ID; }
+    $page_id = wp_insert_post(array('post_type'=>'page','post_status'=>'publish','post_title'=>$title,'post_name'=>$slug,'post_content'=>$content,'post_author'=>get_current_user_id() ?: 1),true);
+    return is_wp_error($page_id) ? 0 : (int)$page_id;
 }
-
 function smarttoolz_video_create_platform_pages() {
-    $pages = array(
-        'video-home' => array(
-            'title'   => 'Video Home',
-            'content' => '[smarttoolz_video_platform]',
-        ),
-        'video-upload' => array(
-            'title'   => 'Upload Video',
-            'content' => '[smarttoolz_video_upload]',
-        ),
-        'creator-studio' => array(
-            'title'   => 'Creator Studio',
-            'content' => '[smarttoolz_creator_dashboard]',
-        ),
-        'channel' => array(
-            'title'   => 'Channel',
-            'content' => '[smarttoolz_channel]',
-        ),
+    $pages=array(
+        'video-home'=>array('title'=>'Video Home','content'=>'[smarttoolz_video_platform]'),
+        'video-upload'=>array('title'=>'Upload Video','content'=>'[smarttoolz_video_upload]'),
+        'creator-studio'=>array('title'=>'Creator Studio','content'=>'[smarttoolz_creator_dashboard]'),
+        'channel'=>array('title'=>'Channel','content'=>'[smarttoolz_channel]'),
     );
-
-    $page_ids = array();
-    foreach ( $pages as $slug => $page ) {
-        $page_ids[ $slug ] = smarttoolz_video_create_page( $slug, $page['title'], $page['content'] );
-    }
-
-    update_option( 'smarttoolz_video_page_ids', $page_ids, false );
+    $page_ids=array(); foreach($pages as $slug=>$page){$page_ids[$slug]=smarttoolz_video_create_page($slug,$page['title'],$page['content']);}
+    update_option('smarttoolz_video_page_ids',$page_ids,false);
 }
-
-function smarttoolz_video_activation() {
+function smarttoolz_video_refresh_rewrites() {
+    $version = '2.1.1';
+    if ( get_option( 'smarttoolz_video_rewrite_version' ) === $version ) { return; }
     smarttoolz_video_register_post_type();
     smarttoolz_video_register_taxonomy();
-    smarttoolz_video_create_platform_pages();
-    flush_rewrite_rules();
+    flush_rewrite_rules( false );
+    update_option( 'smarttoolz_video_rewrite_version', $version, false );
 }
+add_action( 'init', 'smarttoolz_video_refresh_rewrites', 99 );
+function smarttoolz_video_activation(){smarttoolz_video_register_post_type();smarttoolz_video_register_taxonomy();smarttoolz_video_create_platform_pages();flush_rewrite_rules(true);update_option('smarttoolz_video_rewrite_version','2.1.1',false);}
 register_activation_hook(__FILE__,'smarttoolz_video_activation');
-function smarttoolz_video_deactivation(){flush_rewrite_rules();}
+function smarttoolz_video_deactivation(){flush_rewrite_rules(true);delete_option('smarttoolz_video_rewrite_version');}
 register_deactivation_hook(__FILE__,'smarttoolz_video_deactivation');

@@ -1,6 +1,23 @@
 (function () {
     'use strict';
 
+    var menuButton = document.querySelector('.st-menu-toggle');
+    var menu = document.getElementById('st-primary-menu');
+    if (menuButton && menu) {
+        menuButton.addEventListener('click', function () {
+            var open = menu.classList.toggle('is-open');
+            menuButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+            menuButton.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        });
+        menu.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                menu.classList.remove('is-open');
+                menuButton.setAttribute('aria-expanded', 'false');
+                menuButton.setAttribute('aria-label', 'Open menu');
+            });
+        });
+    }
+
     var button = document.querySelector('.st-theme-toggle');
     if (button) {
         var saved = localStorage.getItem('smarttoolz-theme-mode');
@@ -21,8 +38,8 @@
         copyButton.addEventListener('click', function () {
             var url = copyButton.getAttribute('data-copy-url');
             if (!url) return;
+            var original = copyButton.textContent;
             var done = function () {
-                var original = copyButton.textContent;
                 copyButton.textContent = 'Copied!';
                 window.setTimeout(function () { copyButton.textContent = original; }, 1400);
             };

@@ -1,0 +1,5 @@
+# WordPress runtime configuration — keep database credentials off GitHub
+/wordpress/wp-config.php
+
+# WordPress user uploads
+/wordpress/wp-content/uploads/

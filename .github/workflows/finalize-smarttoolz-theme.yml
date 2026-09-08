@@ -1,0 +1,55 @@
+name: Finalize SmartToolz theme
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove retired theme framework
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="wordpress/wp-content/themes/smarttoolz-theme"
+          test -f "$ROOT/functions.php"
+          test -f "$ROOT/style.css"
+
+          # The current SmartToolz theme is intentionally self-contained.
+          # Retire the old admin/inc framework that was responsible for
+          # stale runtime dependencies and duplicate bootstrap paths.
+          rm -rf "$ROOT/admin" "$ROOT/inc"
+
+      - name: Validate theme files
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="wordpress/wp-content/themes/smarttoolz-theme"
+          test ! -d "$ROOT/admin"
+          test ! -d "$ROOT/inc"
+          find "$ROOT" -type f -name '*.php' -print0 | while IFS= read -r -d '' file; do
+            php -l "$file" >/dev/null || { echo "PHP syntax error: $file"; exit 1; }
+          done
+          grep -Rni --exclude-dir='.git' -E 'Astra_Menu|astra_is_white_labelled|ASTRA_THEME_DIR|ASTRA_THEME_URI|Astra_Ext_Extension' "$ROOT" && exit 1 || true
+
+      - name: Commit finalized theme
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$ROOT" 2>/dev/null || true
+          git add -A "$ROOT"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Finalize clean standalone SmartToolz theme'
+          git push origin HEAD:main

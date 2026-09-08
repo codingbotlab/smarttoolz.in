@@ -1,0 +1,1 @@
+(function(){'use strict';document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.st-video-player video').forEach(function(video){video.addEventListener('play',function(){video.closest('.st-video-player').classList.add('is-playing');},{once:true});});});})();

@@ -1,39 +1,6 @@
 <?php
-/**
- * The template for displaying 404 pages (not found).
- *
- * @link https://codex.wordpress.org/Creating_an_Error_404_Page
- *
- * @package SmartToolz
- * @since 1.0.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
-
-get_header(); ?>
-
-<?php if ( smarttoolz_page_layout() === 'left-sidebar' ) { ?>
-
-	<?php get_sidebar(); ?>
-
-<?php } ?>
-
-	<div id="primary" <?php smarttoolz_primary_class(); ?>>
-
-		<?php smarttoolz_primary_content_top(); ?>
-
-		<?php smarttoolz_404_content_template(); ?>		
-
-		<?php smarttoolz_primary_content_bottom(); ?>
-
-	</div><!-- #primary -->
-
-<?php if ( smarttoolz_page_layout() === 'right-sidebar' ) { ?>
-
-	<?php get_sidebar(); ?>
-
-<?php } ?>
-
+/** SmartToolz 404 template. */
+get_header();
+?>
+<section class="st-entry"><div class="st-card"><span class="st-eyebrow">404</span><h1 class="st-entry-title"><?php esc_html_e( 'Page not found.', 'smarttoolz' ); ?></h1><p><?php esc_html_e( 'The page you requested does not exist or may have moved.', 'smarttoolz' ); ?></p><div class="st-actions"><a class="st-button" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Back to home', 'smarttoolz' ); ?></a></div></div></section>
 <?php get_footer(); ?>

@@ -1,0 +1,85 @@
+name: Fix SmartToolz Theme
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove upstream theme runtime leftovers
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="wordpress/wp-content/themes/smarttoolz-theme"
+          test -d "$ROOT"
+
+          # Rename remaining class/function/constant identifiers that survived the first pass.
+          find "$ROOT" -type f \( -name '*.php' -o -name '*.css' -o -name '*.js' -o -name '*.json' -o -name '*.xml' -o -name '*.html' -o -name '*.txt' -o -name '*.md' \) -print0 | while IFS= read -r -d '' f; do
+            file -b --mime "$f" | grep -qi 'text' || continue
+            python3 - "$f" <<'PY'
+import pathlib, re, sys
+p = pathlib.Path(sys.argv[1])
+s = p.read_text(errors='ignore')
+# Word-boundary-safe replacements for PHP identifiers and human-facing labels.
+repls = [
+    (r'\\bAstra_Ext_Extension\\b', 'SmartToolz_Ext_Extension'),
+    (r'\\bAstra_Menu\\b', 'SmartToolz_Menu'),
+    (r'\\bAstra_Admin_Loader\\b', 'SmartToolz_Admin_Loader'),
+    (r'\\bAstra_Global_Palette\\b', 'SmartToolz_Global_Palette'),
+    (r'\\bAstra_Dynamic_CSS\\b', 'SmartToolz_Dynamic_CSS'),
+    (r'\\bAstra_Theme_Options\\b', 'SmartToolz_Theme_Options'),
+    (r'\\bastra_is_white_labelled\\b', 'smarttoolz_is_white_labelled'),
+    (r'\\bASTRA_EXT_VER\\b', 'SMARTTOOLZ_EXT_VER'),
+    (r'\\bASTRA_THEME_ORG_VERSION\\b', 'SMARTTOOLZ_THEME_ORG_VERSION'),
+    (r'\\bASTRA_THEME_DIR\\b', 'SMARTTOOLZ_THEME_DIR'),
+    (r'\\bASTRA_THEME_URI\\b', 'SMARTTOOLZ_THEME_URI'),
+    (r'\\bastra_admin_settings\\b', 'smarttoolz_admin_settings'),
+]
+for pat, rep in repls:
+    s = re.sub(pat, rep, s)
+p.write_text(s)
+PY
+          done
+
+          # Add the missing white-label helper if the rebranded menu needs it.
+          python3 - "$ROOT/admin/includes/class-smarttoolz-menu.php" <<'PY'
+from pathlib import Path
+p = Path(__import__('sys').argv[1])
+s = p.read_text()
+needle = "if ( ! defined( 'ABSPATH' ) ) {"
+if 'function smarttoolz_is_white_labelled()' not in s:
+    helper = "\nif ( ! function_exists( 'smarttoolz_is_white_labelled' ) ) {\n\tfunction smarttoolz_is_white_labelled() {\n\t\treturn false;\n\t}\n}\n"
+    s = s.replace(needle, needle + helper, 1)
+p.write_text(s)
+PY
+
+          # Correct theme metadata and descriptions without deleting third-party license notices.
+          if [ -f "$ROOT/style.css" ]; then
+            sed -i \
+              -e 's/^Theme Name:.*/Theme Name: SmartToolz Theme/' \
+              -e 's#^Theme URI:.*#Theme URI: https://smarttoolz.in/#' \
+              -e 's/^Author:.*/Author: SmartToolz/' \
+              -e 's#^Author URI:.*#Author URI: https://smarttoolz.in/#' \
+              "$ROOT/style.css"
+          fi
+
+          # Confirm the fatal function is gone and SmartToolz helper is present.
+          ! grep -Rni --exclude-dir='.git' 'astra_is_white_labelled' "$ROOT"
+          grep -Rni 'function smarttoolz_is_white_labelled' "$ROOT/admin/includes/class-smarttoolz-menu.php"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No cleanup changes needed.'
+            exit 0
+          fi
+          git commit -m 'Fix remaining theme runtime branding references'
+          git push origin HEAD:main

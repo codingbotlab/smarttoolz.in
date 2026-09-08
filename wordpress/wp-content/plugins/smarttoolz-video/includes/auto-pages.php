@@ -47,8 +47,9 @@ function smarttoolz_video_create_managed_pages() {
         }
     }
     update_option( 'smarttoolz_video_page_ids', $ids, false );
-    update_option( 'smarttoolz_video_pages_version', '4.0.0', false );
+    update_option( 'smarttoolz_video_pages_version', '4.1.0', false );
     flush_rewrite_rules( true );
+    do_action( 'smarttoolz_video_after_pages_sync' );
 }
 
 register_activation_hook( SMARTTOOLZ_VIDEO_FILE, 'smarttoolz_video_create_managed_pages' );

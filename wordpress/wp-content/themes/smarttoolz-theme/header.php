@@ -18,8 +18,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     <nav class="st-menu" aria-label="<?php esc_attr_e( 'Primary Menu', 'smarttoolz' ); ?>">
       <?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'fallback_cb' => 'smarttoolz_fallback_menu', 'items_wrap' => '<ul class="st-nav-list">%3$s</ul>' ) ); ?>
     </nav>
-    <div class="st-header-search">
-      <?php get_search_form(); ?>
+    <div class="st-header-tools">
+      <div class="st-header-search"><?php get_search_form(); ?></div>
+      <?php if ( '1' === get_theme_mod( 'smarttoolz_dark_mode', '0' ) ) : ?>
+        <button type="button" class="st-theme-toggle" aria-pressed="false" aria-label="<?php esc_attr_e( 'Toggle dark mode', 'smarttoolz' ); ?>">◐ Dark</button>
+      <?php endif; ?>
     </div>
   </div>
 </header>

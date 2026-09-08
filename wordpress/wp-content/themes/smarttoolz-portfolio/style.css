@@ -1,0 +1,10 @@
+/*
+Theme Name: SmartToolz Portfolio
+Theme URI: https://smarttoolz.in/
+Author: SmartToolz
+Description: Bold creative portfolio theme for designers, developers, studios and freelancers.
+Version: 1.0.0
+Text Domain: smarttoolz-portfolio
+SmartToolz Category: Portfolio & Creative
+*/
+:root{--ink:#161616;--muted:#6b6b6b;--paper:#f2efe8;--accent:#ff5c35;--line:#d8d3c8}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.5}.container{width:min(1180px,calc(100% - 36px));margin:auto}.header{padding:25px 0}.header .container{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:950;font-size:1.25rem;text-decoration:none;color:var(--ink)}.nav{display:flex;gap:22px}.nav a{color:var(--ink);text-decoration:none}.hero{padding:90px 0 65px;border-bottom:2px solid var(--ink)}.hero small{font-weight:900;text-transform:uppercase;letter-spacing:.16em;color:var(--accent)}.hero h1{font-size:clamp(3.5rem,9vw,8rem);line-height:.88;letter-spacing:-.07em;max-width:1000px;margin:15px 0}.hero p{max-width:600px;font-size:1.2rem;color:var(--muted)}.work{padding:55px 0}.work-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}.project{min-height:270px;padding:30px;background:#fff;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end}.project span{color:var(--accent);font-weight:900}.project h2{font-size:2rem;margin:5px 0}.project p{color:var(--muted);margin:0}.footer{padding:35px 0;border-top:2px solid var(--ink)}@media(max-width:700px){.nav{display:none}.hero{padding:55px 0}.work-grid{grid-template-columns:1fr}.hero h1{font-size:4rem}}

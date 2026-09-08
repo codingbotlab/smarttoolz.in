@@ -101,6 +101,16 @@ if ( have_posts() ) :
                     </div>
                 </section>
             <?php endif; ?>
+
+            <?php if ( comments_open() || get_comments_number() ) : ?>
+                <section class="st-section st-comments-section">
+                    <div class="st-section-head">
+                        <h2><?php esc_html_e( 'Comments', 'smarttoolz' ); ?></h2>
+                        <p class="st-meta"><?php esc_html_e( 'Join the conversation.', 'smarttoolz' ); ?></p>
+                    </div>
+                    <?php comments_template(); ?>
+                </section>
+            <?php endif; ?>
         </article>
         <?php
     endwhile;

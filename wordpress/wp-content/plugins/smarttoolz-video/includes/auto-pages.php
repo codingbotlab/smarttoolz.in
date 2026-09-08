@@ -86,5 +86,6 @@ function smarttoolz_video_create_managed_pages() {
 
 register_activation_hook( SMARTTOOLZ_VIDEO_FILE, 'smarttoolz_video_create_managed_pages' );
 
-// Load frontend library page shortcodes on every normal plugin request.
+// Load frontend library/editor helpers on every normal plugin request.
 require_once dirname( __FILE__ ) . '/library-pages.php';
+require_once dirname( __FILE__ ) . '/edit-video.php';

@@ -6,6 +6,8 @@
         var saved = localStorage.getItem('smarttoolz-theme-mode');
         if (saved === 'dark') {
             document.documentElement.classList.add('st-dark');
+            button.setAttribute('aria-pressed', 'true');
+            button.textContent = '☀ Light';
         }
         button.addEventListener('click', function () {
             var dark = document.documentElement.classList.toggle('st-dark');
@@ -14,6 +16,29 @@
             button.textContent = dark ? '☀ Light' : '◐ Dark';
         });
     }
+
+    document.querySelectorAll('.st-copy-link').forEach(function (copyButton) {
+        copyButton.addEventListener('click', function () {
+            var url = copyButton.getAttribute('data-copy-url');
+            if (!url) return;
+            var done = function () {
+                var original = copyButton.textContent;
+                copyButton.textContent = 'Copied!';
+                window.setTimeout(function () { copyButton.textContent = original; }, 1400);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(done);
+            } else {
+                var area = document.createElement('textarea');
+                area.value = url;
+                document.body.appendChild(area);
+                area.select();
+                document.execCommand('copy');
+                area.remove();
+                done();
+            }
+        });
+    });
 
     var top = document.querySelector('.st-back-top');
     if (top) {

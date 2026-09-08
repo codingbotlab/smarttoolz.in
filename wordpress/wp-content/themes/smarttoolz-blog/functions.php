@@ -45,8 +45,17 @@ add_filter('excerpt_length', 'smarttoolz_blog_excerpt_length', 999);
 function smarttoolz_blog_excerpt_more($more) { return '…'; }
 add_filter('excerpt_more', 'smarttoolz_blog_excerpt_more');
 
+function smarttoolz_blog_demo_image($slug) {
+    $images = array(
+        'technology' => 'https://picsum.photos/seed/smarttoolz-technology/1200/800',
+        'design' => 'https://picsum.photos/seed/smarttoolz-design/1200/800',
+        'culture' => 'https://picsum.photos/seed/smarttoolz-culture/1200/800',
+        'work' => 'https://picsum.photos/seed/smarttoolz-work/1200/800',
+    );
+    return isset($images[$slug]) ? $images[$slug] : 'https://picsum.photos/seed/smarttoolz-editorial/1200/800';
+}
+
 function smarttoolz_blog_seed_demo_content() {
-    if (get_option('smarttoolz_blog_demo_seeded')) return;
     $categories = array('Technology', 'Design', 'Culture', 'Work');
     $category_ids = array();
     foreach ($categories as $name) {
@@ -58,14 +67,23 @@ function smarttoolz_blog_seed_demo_content() {
         if (!term_exists($name, 'post_tag')) wp_insert_term($name, 'post_tag');
     }
     $posts = array(
-        array('Small tools, big impact', 'Technology', 'Practical workflows that help people work smarter without adding complexity.', array('WordPress','Productivity')),
-        array('Designing for clarity', 'Design', 'Good editorial design gets out of the way and lets the story do the talking.', array('Web Design','Creativity')),
-        array('Why simple ideas travel further', 'Culture', 'A thoughtful look at making complex subjects approachable and memorable.', array('Creativity','Business')),
-        array('A better way to build a habit', 'Work', 'Small systems, consistent practice and a little room for imperfection.', array('Productivity','Habits')),
+        array('Small tools, big impact', 'Technology', 'Practical workflows that help people work smarter without adding complexity.', array('WordPress','Productivity'), 'technology'),
+        array('Designing for clarity', 'Design', 'Good editorial design gets out of the way and lets the story do the talking.', array('Web Design','Creativity'), 'design'),
+        array('Why simple ideas travel further', 'Culture', 'A thoughtful look at making complex subjects approachable and memorable.', array('Creativity','Business'), 'culture'),
+        array('A better way to build a habit', 'Work', 'Small systems, consistent practice and a little room for imperfection.', array('Productivity','Habits'), 'work'),
     );
     foreach ($posts as $post) {
-        if (get_page_by_title($post[0], OBJECT, 'post')) continue;
-        $id = wp_insert_post(array('post_title'=>$post[0], 'post_content'=>'<p>'.esc_html($post[2]).'</p><p>This demo article is editable from WordPress Admin. The theme renders posts, categories and tags dynamically.</p>', 'post_status'=>'publish', 'post_type'=>'post', 'post_author'=>get_current_user_id() ?: 1, 'post_category'=>isset($category_ids[$post[1]]) ? array($category_ids[$post[1]]) : array()));
+        $image = smarttoolz_blog_demo_image($post[4]);
+        $content = '<figure class="wp-block-image size-large"><img src="' . esc_url($image) . '" alt="' . esc_attr($post[0]) . '" loading="lazy" /></figure>';
+        $content .= '<p>' . esc_html($post[2]) . '</p><p>This demo article is editable from WordPress Admin. The theme renders posts, categories, tags, images and widgets dynamically.</p>';
+        $existing = get_page_by_title($post[0], OBJECT, 'post');
+        if (!$existing) {
+            $id = wp_insert_post(array('post_title'=>$post[0], 'post_content'=>$content, 'post_status'=>'publish', 'post_type'=>'post', 'post_author'=>get_current_user_id() ?: 1, 'post_category'=>isset($category_ids[$post[1]]) ? array($category_ids[$post[1]]) : array()));
+        } else {
+            $id = $existing->ID;
+            if (strpos((string)$existing->post_content, 'picsum.photos') === false) wp_update_post(array('ID'=>$id, 'post_content'=>$content));
+            if (empty($existing->post_status) || $existing->post_status !== 'publish') wp_update_post(array('ID'=>$id, 'post_status'=>'publish'));
+        }
         if ($id && !is_wp_error($id)) wp_set_post_tags($id, $post[3]);
     }
     $pages = array(

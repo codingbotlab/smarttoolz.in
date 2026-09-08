@@ -18,12 +18,20 @@ function initPlayer(root){
  if(theater)theater.addEventListener('click',function(){root.classList.toggle('is-theater');document.body.classList.toggle('stv-theater-open',root.classList.contains('is-theater'));controls();});
  if(fullscreen)fullscreen.addEventListener('click',function(){if(document.fullscreenElement){document.exitFullscreen().catch(function(){});}else if(root.requestFullscreen){root.requestFullscreen().catch(function(){});}controls();});
  root.addEventListener('mousemove',controls);root.addEventListener('touchstart',controls,{passive:true});
- root.addEventListener('dblclick',function(){if(document.fullscreenElement){document.exitFullscreen().catch(function(){});}else if(root.requestFullscreen){root.requestFullscreen().catch(function(){});}});
+ root.addEventListener('dblclick',function(){if(document.fullscreenElement){document.exitFullscreen().catch(function(){});}else if(root.requestFullscreen){root.requestFullscreen().catch(function(){})}});
  root.addEventListener('keydown',function(e){if(e.target!==root&&e.target!==video)return;switch(e.key){case ' ':e.preventDefault();video.paused?video.play().catch(function(){}):video.pause();break;case 'ArrowRight':video.currentTime=Math.min(video.duration||0,video.currentTime+5);break;case 'ArrowLeft':video.currentTime=Math.max(0,video.currentTime-5);break;case 'ArrowUp':video.volume=Math.min(1,video.volume+.1);break;case 'ArrowDown':video.volume=Math.max(0,video.volume-.1);break;case 'm':case 'M':video.muted=!video.muted;break;case 'f':case 'F':if(fullscreen)fullscreen.click();break;}controls();});
  video.addEventListener('click',function(){video.paused?video.play().catch(function(){}):video.pause();controls();});
  update();
 }
 document.querySelectorAll('[data-stv-player]').forEach(initPlayer);
+
+document.addEventListener('change',function(e){
+ var input=e.target.closest('.stv-file-button input[type="file"]');
+ if(!input)return;
+ var out=document.querySelector('[data-stv-file-name]');
+ if(out){out.textContent=input.files&&input.files.length?input.files[0].name:'No file selected';}
+});
+
 document.addEventListener('click',function(e){
  var share=e.target.closest('[data-st-video-share],[data-stv-share]');
  if(share){e.preventDefault();var url=share.getAttribute('data-url')||window.location.href,title=share.getAttribute('data-title')||document.title;if(navigator.share){navigator.share({title:title,url:url}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){var old=share.textContent;share.textContent='Link copied';setTimeout(function(){share.textContent=old;},1400);});}return;}

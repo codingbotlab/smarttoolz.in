@@ -7,11 +7,42 @@ function smarttoolz_blog_assets() {
 add_action('wp_enqueue_scripts', 'smarttoolz_blog_assets');
 
 function smarttoolz_blog_setup() {
+    load_theme_textdomain('smarttoolz-blog', get_template_directory() . '/languages');
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
-    add_theme_support('html5', array('search-form', 'comment-form', 'comment-list', 'gallery', 'caption'));
+    add_theme_support('custom-logo', array('height' => 80, 'width' => 280, 'flex-height' => true, 'flex-width' => true));
+    add_theme_support('custom-background', array('default-color' => 'fbfaf6'));
+    add_theme_support('automatic-feed-links');
+    add_theme_support('responsive-embeds');
+    add_theme_support('align-wide');
+    add_theme_support('html5', array('search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script'));
+    add_theme_support('post-formats', array('aside', 'image', 'quote', 'video', 'audio', 'link'));
+    register_nav_menus(array(
+        'primary' => __('Primary Menu', 'smarttoolz-blog'),
+        'footer' => __('Footer Menu', 'smarttoolz-blog'),
+    ));
 }
 add_action('after_setup_theme', 'smarttoolz_blog_setup');
+
+function smarttoolz_blog_widgets() {
+    $common = array(
+        'before_widget' => '<section id="%1$s" class="widget %2$s">',
+        'after_widget' => '</section>',
+        'before_title' => '<h3 class="widget-title">',
+        'after_title' => '</h3>',
+    );
+    register_sidebar(array_merge($common, array('name' => __('Blog Sidebar', 'smarttoolz-blog'), 'id' => 'sidebar-1', 'description' => __('Main sidebar for posts, pages and archives.', 'smarttoolz-blog'))));
+    register_sidebar(array_merge($common, array('name' => __('Footer One', 'smarttoolz-blog'), 'id' => 'footer-1')));
+    register_sidebar(array_merge($common, array('name' => __('Footer Two', 'smarttoolz-blog'), 'id' => 'footer-2')));
+    register_sidebar(array_merge($common, array('name' => __('Footer Three', 'smarttoolz-blog'), 'id' => 'footer-3')));
+}
+add_action('widgets_init', 'smarttoolz_blog_widgets');
+
+function smarttoolz_blog_excerpt_length($length) { return 26; }
+add_filter('excerpt_length', 'smarttoolz_blog_excerpt_length', 999);
+
+function smarttoolz_blog_excerpt_more($more) { return '…'; }
+add_filter('excerpt_more', 'smarttoolz_blog_excerpt_more');
 
 function smarttoolz_blog_seed_demo_content() {
     if (get_option('smarttoolz_blog_demo_seeded')) return;
@@ -40,8 +71,7 @@ function smarttoolz_blog_seed_demo_content() {
         $id = wp_insert_post(array(
             'post_title' => $post[0],
             'post_content' => '<p>' . esc_html($post[2]) . '</p><p>This demo article is editable from WordPress Admin. The theme renders posts, categories and tags dynamically.</p>',
-            'post_status' => 'publish',
-            'post_type' => 'post',
+            'post_status' => 'publish', 'post_type' => 'post',
             'post_author' => get_current_user_id() ?: 1,
             'post_category' => isset($category_ids[$post[1]]) ? array($category_ids[$post[1]]) : array(),
         ));

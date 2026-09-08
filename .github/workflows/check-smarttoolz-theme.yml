@@ -1,0 +1,38 @@
+name: Check SmartToolz Theme
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  php-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Lint every theme PHP file
+        shell: bash
+        run: |
+          set -euo pipefail
+          find wordpress/wp-content/themes/smarttoolz-theme -type f -name '*.php' -print0 |
+          while IFS= read -r -d '' file; do
+            php -l "$file" >/dev/null || { echo "PHP syntax error: $file"; exit 1; }
+          done
+          echo 'All theme PHP files passed syntax validation.'
+      - name: Check required local includes
+        shell: bash
+        run: |
+          set -euo pipefail
+          php <<'PHP'
+          $root = __DIR__ . '/wordpress/wp-content/themes/smarttoolz-theme';
+          $fn = $root . '/functions.php';
+          $src = file_get_contents($fn);
+          preg_match_all("~(?:require_once|require|include_once|include)\\s+[^;]*?SMARTTOOLZ_THEME_DIR\\s*\\.\\s*['\\\"]([^'\\\"]+)['\\\"]~", $src, $m);
+          foreach ($m[1] as $relative) {
+              $path = $root . '/' . ltrim($relative, '/');
+              if (!is_file($path)) { fwrite(STDERR, "Missing include: $relative\\n"); exit(1); }
+          }
+          echo "Referenced local includes found.\\n";
+          PHP

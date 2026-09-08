@@ -6,7 +6,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'SMARTTOOLZ_VERSION', '2.1.0' );
+define( 'SMARTTOOLZ_VERSION', '2.2.0' );
 
 function smarttoolz_setup() {
     load_theme_textdomain( 'smarttoolz', get_template_directory() . '/languages' );
@@ -17,6 +17,7 @@ function smarttoolz_setup() {
     add_theme_support( 'align-wide' );
     add_theme_support( 'custom-logo', array( 'height' => 80, 'width' => 280, 'flex-height' => true, 'flex-width' => true ) );
     add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
+    add_theme_support( 'editor-styles' );
     add_post_type_support( 'post', 'post-formats' );
     register_nav_menus( array(
         'primary' => __( 'Primary Menu', 'smarttoolz' ),
@@ -49,11 +50,15 @@ add_action( 'widgets_init', 'smarttoolz_widgets' );
 
 function smarttoolz_assets() {
     wp_enqueue_style( 'smarttoolz-style', get_stylesheet_uri(), array(), SMARTTOOLZ_VERSION );
+    wp_enqueue_script( 'smarttoolz-theme', get_template_directory_uri() . '/assets/js/theme.js', array(), SMARTTOOLZ_VERSION, true );
 }
 add_action( 'wp_enqueue_scripts', 'smarttoolz_assets' );
 
 function smarttoolz_body_class( $classes ) {
     $classes[] = 'smarttoolz-theme';
+    if ( '1' === get_theme_mod( 'smarttoolz_dark_mode', '0' ) ) {
+        $classes[] = 'st-dark-enabled';
+    }
     return $classes;
 }
 add_filter( 'body_class', 'smarttoolz_body_class' );
@@ -75,29 +80,60 @@ function smarttoolz_customize_register( $wp_customize ) {
         'title'    => __( 'SmartToolz Theme', 'smarttoolz' ),
         'priority' => 30,
     ) );
-    $wp_customize->add_setting( 'smarttoolz_accent', array(
-        'default'           => '#4f46e5',
-        'sanitize_callback' => 'sanitize_hex_color',
-    ) );
+
+    $settings = array(
+        'smarttoolz_accent' => array( '#4f46e5', 'sanitize_hex_color' ),
+        'smarttoolz_hero_title' => array( 'Useful ideas, guides and technology worth knowing.', 'sanitize_text_field' ),
+        'smarttoolz_hero_subtitle' => array( 'Practical tools, useful content and a clean experience built for everyday use.', 'sanitize_text_field' ),
+    );
+    foreach ( $settings as $id => $setting ) {
+        $wp_customize->add_setting( $id, array( 'default' => $setting[0], 'sanitize_callback' => $setting[1] ) );
+    }
+
     $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'smarttoolz_accent', array(
-        'label'   => __( 'Accent Color', 'smarttoolz' ),
-        'section' => 'smarttoolz_theme_options',
+        'label' => __( 'Accent Color', 'smarttoolz' ), 'section' => 'smarttoolz_theme_options',
     ) ) );
-    $wp_customize->add_setting( 'smarttoolz_hero_title', array(
-        'default'           => __( 'Useful ideas, guides and technology worth knowing.', 'smarttoolz' ),
-        'sanitize_callback' => 'sanitize_text_field',
-    ) );
     $wp_customize->add_control( 'smarttoolz_hero_title', array(
-        'label'   => __( 'Homepage Hero Title', 'smarttoolz' ),
-        'section' => 'smarttoolz_theme_options',
-        'type'    => 'text',
+        'label' => __( 'Homepage Hero Title', 'smarttoolz' ), 'section' => 'smarttoolz_theme_options', 'type' => 'text',
+    ) );
+    $wp_customize->add_control( 'smarttoolz_hero_subtitle', array(
+        'label' => __( 'Homepage Hero Subtitle', 'smarttoolz' ), 'section' => 'smarttoolz_theme_options', 'type' => 'textarea',
+    ) );
+    $wp_customize->add_setting( 'smarttoolz_dark_mode', array(
+        'default' => '0', 'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'smarttoolz_dark_mode', array(
+        'label' => __( 'Enable Dark Mode Button', 'smarttoolz' ), 'section' => 'smarttoolz_theme_options', 'type' => 'checkbox',
     ) );
 }
 add_action( 'customize_register', 'smarttoolz_customize_register' );
 
 function smarttoolz_customizer_css() {
     $accent = get_theme_mod( 'smarttoolz_accent', '#4f46e5' );
-    if ( ! $accent ) { return; }
-    echo '<style id="smarttoolz-customizer-css">:root{--st-primary:' . esc_html( $accent ) . ';}</style>';
+    if ( $accent ) {
+        echo '<style id="smarttoolz-customizer-css">:root{--st-primary:' . esc_attr( $accent ) . ';}</style>';
+    }
 }
 add_action( 'wp_head', 'smarttoolz_customizer_css' );
+
+function smarttoolz_reading_time() {
+    $words = str_word_count( wp_strip_all_tags( get_the_content() ) );
+    $minutes = max( 1, (int) ceil( $words / 200 ) );
+    return sprintf( _n( '%d min read', '%d min read', $minutes, 'smarttoolz' ), $minutes );
+}
+
+function smarttoolz_breadcrumbs() {
+    if ( is_front_page() ) { return; }
+    echo '<nav class="st-breadcrumbs" aria-label="' . esc_attr__( 'Breadcrumbs', 'smarttoolz' ) . '">';
+    echo '<a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( 'Home', 'smarttoolz' ) . '</a><span aria-hidden="true">/</span>';
+    if ( is_category() ) {
+        echo '<span>' . esc_html( single_cat_title( '', false ) ) . '</span>';
+    } elseif ( is_single() ) {
+        $cats = get_the_category();
+        if ( ! empty( $cats ) ) { echo '<a href="' . esc_url( get_category_link( $cats[0]->term_id ) ) . '">' . esc_html( $cats[0]->name ) . '</a><span aria-hidden="true">/</span>'; }
+        echo '<span>' . esc_html( get_the_title() ) . '</span>';
+    } else {
+        echo '<span>' . esc_html( wp_get_document_title() ) . '</span>';
+    }
+    echo '</nav>';
+}

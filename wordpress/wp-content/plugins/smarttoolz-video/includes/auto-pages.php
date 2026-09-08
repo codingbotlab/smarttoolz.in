@@ -1,7 +1,6 @@
 <?php
 /**
- * SmartToolz Video automatic platform pages.
- * Pages are created only from the plugin activation hook; no database writes run on normal requests.
+ * SmartToolz Video automatic platform pages and safe navigation helpers.
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
@@ -19,6 +18,39 @@ function smarttoolz_video_auto_page_definitions() {
         'creator-studio'   => array( 'title' => 'Creator Studio', 'content' => '[smarttoolz_creator_dashboard]' ),
         'channel'          => array( 'title' => 'Channel', 'content' => '[smarttoolz_channel]' ),
     );
+}
+
+function smarttoolz_video_page_link( $slug ) {
+    $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
+    if ( ! empty( $ids[ $slug ] ) ) {
+        $url = get_permalink( (int) $ids[ $slug ] );
+        if ( $url ) { return $url; }
+    }
+    if ( 'video-library' === $slug ) {
+        $archive = get_post_type_archive_link( 'st_video' );
+        if ( $archive ) { return $archive; }
+        return home_url( '/videos/' );
+    }
+    return home_url( '/' . trim( $slug, '/' ) . '/' );
+}
+
+function smarttoolz_video_menu_items() {
+    $items = array(
+        'Video Home'       => smarttoolz_video_page_link( 'video-home' ),
+        'Videos'           => smarttoolz_video_page_link( 'video-library' ),
+        'Trending'         => smarttoolz_video_page_link( 'trending-videos' ),
+        'Categories'       => smarttoolz_video_page_link( 'video-categories' ),
+        'Search'           => smarttoolz_video_page_link( 'video-search' ),
+    );
+    if ( is_user_logged_in() ) {
+        $items['Subscriptions'] = smarttoolz_video_page_link( 'subscriptions' );
+        $items['Liked']         = smarttoolz_video_page_link( 'liked-videos' );
+        $items['History']       = smarttoolz_video_page_link( 'watch-history' );
+        $items['Upload']        = smarttoolz_video_page_link( 'video-upload' );
+        $items['Creator Studio'] = smarttoolz_video_page_link( 'creator-studio' );
+        $items['My Channel']    = smarttoolz_video_page_link( 'channel' );
+    }
+    return $items;
 }
 
 function smarttoolz_video_create_managed_pages() {
@@ -47,7 +79,7 @@ function smarttoolz_video_create_managed_pages() {
         }
     }
     update_option( 'smarttoolz_video_page_ids', $ids, false );
-    update_option( 'smarttoolz_video_pages_version', '4.1.0', false );
+    update_option( 'smarttoolz_video_pages_version', '4.2.0', false );
     flush_rewrite_rules( true );
     do_action( 'smarttoolz_video_after_pages_sync' );
 }

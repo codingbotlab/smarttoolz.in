@@ -4,21 +4,32 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+function smarttoolz_video_should_load_player_assets() {
+    if ( is_singular( 'st_video' ) ) { return true; }
+    if ( is_singular() ) {
+        $post = get_queried_object();
+        if ( $post instanceof WP_Post && has_shortcode( $post->post_content, 'smarttoolz_video_upload' ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function smarttoolz_video_enqueue_player_assets() {
-    if ( ! is_singular( 'st_video' ) ) { return; }
+    if ( ! smarttoolz_video_should_load_player_assets() ) { return; }
 
     wp_enqueue_style(
         'smarttoolz-video',
         SMARTTOOLZ_VIDEO_URL . 'assets/css/video.css',
         array(),
-        SMARTTOOLZ_VIDEO_VERSION . '.player1'
+        SMARTTOOLZ_VIDEO_VERSION . '.player2'
     );
 
     wp_enqueue_script(
         'smarttoolz-video',
         SMARTTOOLZ_VIDEO_URL . 'assets/js/video.js',
         array(),
-        SMARTTOOLZ_VIDEO_VERSION . '.player1',
+        SMARTTOOLZ_VIDEO_VERSION . '.player2',
         true
     );
 

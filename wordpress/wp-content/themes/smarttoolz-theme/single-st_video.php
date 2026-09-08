@@ -9,13 +9,20 @@ $channel_url  = add_query_arg( 'stv_channel', get_the_author_meta( 'user_nicenam
 $views        = (int) get_post_meta( $video_id, '_st_video_views', true );
 $likes        = (int) get_post_meta( $video_id, '_st_likes', true );
 $dislikes     = (int) get_post_meta( $video_id, '_st_dislikes', true );
-$video_source = function_exists( 'smarttoolz_video_render_player' ) ? get_post_meta( $video_id, '_st_video_source', true ) : '';
+$video_source = get_post_meta( $video_id, '_st_video_source', true );
 $video_path   = $video_source ? wp_parse_url( $video_source, PHP_URL_PATH ) : '';
 $video_ext    = strtolower( pathinfo( (string) $video_path, PATHINFO_EXTENSION ) );
 $native_video = $video_source && in_array( $video_ext, array( 'mp4', 'webm', 'ogg' ), true );
 $poster       = has_post_thumbnail() ? wp_get_attachment_image_url( get_post_thumbnail_id(), 'large' ) : '';
+$is_owner     = is_user_logged_in() && (int) $author_id === get_current_user_id();
+$is_editing   = $is_owner && isset( $_GET['stv_edit'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['stv_edit'] ) ) && function_exists( 'smarttoolz_video_edit_shortcode' );
 if ( function_exists( 'smarttoolz_video_content_filter' ) ) { remove_filter( 'the_content', 'smarttoolz_video_content_filter', 20 ); }
 ?>
+<?php if ( $is_editing ) : ?>
+  <main class="stv-watch-edit-shell">
+    <?php echo do_shortcode( '[smarttoolz_video_edit id="' . esc_attr( $video_id ) . '"]' ); ?>
+  </main>
+<?php else : ?>
 <div class="stv-watch-layout">
   <article class="stv-watch">
     <div class="stv-player-shell">
@@ -56,7 +63,11 @@ if ( function_exists( 'smarttoolz_video_content_filter' ) ) { remove_filter( 'th
       <?php endif; ?>
     </div>
 
-    <h1 class="stv-watch-title"><?php the_title(); ?></h1>
+    <div class="stv-watch-title-row">
+      <h1 class="stv-watch-title"><?php the_title(); ?></h1>
+      <?php if ( $is_owner ) : ?><a class="stv-edit-video-button" href="<?php echo esc_url( add_query_arg( 'stv_edit', '1', get_permalink( $video_id ) ) ); ?>">✎ Edit video</a><?php endif; ?>
+    </div>
+    <?php if ( isset( $_GET['stv_updated'] ) ) : ?><div class="stv-upload-success"><strong>Changes saved.</strong> Your video has been updated.</div><?php endif; ?>
     <div class="stv-watch-meta"><span><?php echo esc_html( number_format_i18n( $views ) ); ?> views</span><span><?php echo esc_html( get_the_date() ); ?></span></div>
     <div class="stv-video-actions stv-watch-actions">
       <?php if ( is_user_logged_in() ) : ?>
@@ -77,4 +88,5 @@ if ( function_exists( 'smarttoolz_video_content_filter' ) ) { remove_filter( 'th
     <?php echo function_exists( 'stv_render_feed' ) ? stv_render_feed( array( 'per_page' => 6, 'orderby' => 'views' ) ) : ''; ?>
   </aside>
 </div>
+<?php endif; ?>
 <?php endwhile; get_footer();

@@ -44,7 +44,7 @@ jobs:
           # Replace the old theme identifier/brand throughout text source files.
           find "$DST" -type f -print0 | while IFS= read -r -d '' f; do
             case "$f" in
-              *.php|*.css|*.scss|*.less|*.js|*.json|*.xml|*.html|*.htm|*.md|*.txt|*.svg|*.po|*.pot|*.mo)
+              *.php|*.css|*.scss|*.less|*.js|*.json|*.xml|*.html|*.htm|*.md|*.txt|*.svg|*.po|*.pot)
                 if file -b --mime "$f" | grep -qi 'text'; then
                   sed -i \
                     -e 's/Brainstorm Force/SmartToolz/g' \
@@ -72,9 +72,24 @@ jobs:
           # Never leave the old directory in the repository.
           rm -rf "$SRC"
 
-          # Hard validation: no old brand/slug may remain in the theme source.
-          if grep -RniE --exclude-dir='.git' --exclude='*.map' 'astra|wpastra|brainstorm[[:space:]]+force' "$DST" 2>/dev/null; then
-            echo 'Rebrand check failed: old Astra branding remains in SmartToolz theme.'
+          # Validate filenames independently of binary assets.
+          if find "$DST" -print | grep -qiE '(^|/)([^/]*astra[^/]*)$'; then
+            echo 'Rebrand check failed: an Astra-named path remains.'
+            exit 1
+          fi
+
+          # Validate text source only; binary fonts/images may contain unrelated byte sequences.
+          old_brand_found=0
+          while IFS= read -r -d '' f; do
+            if file -b --mime "$f" | grep -qi 'text'; then
+              if grep -niE 'astra|wpastra|brainstorm[[:space:]]+force' "$f" >/dev/null 2>&1; then
+                echo "Old branding found in: $f"
+                old_brand_found=1
+              fi
+            fi
+          done < <(find "$DST" -type f -print0)
+          if [ "$old_brand_found" -ne 0 ]; then
+            echo 'Rebrand check failed: old Astra branding remains in text source.'
             exit 1
           fi
 

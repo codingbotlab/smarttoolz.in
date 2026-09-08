@@ -25,18 +25,37 @@ function initPlayer(root){
 }
 document.querySelectorAll('[data-stv-player]').forEach(initPlayer);
 
+function generateThumbnail(videoFile, hiddenInput, preview){
+ if(!videoFile||!hiddenInput||!/^video\/(mp4|webm|ogg)$/i.test(videoFile.type))return;
+ var url=URL.createObjectURL(videoFile),video=document.createElement('video'),canvas=document.createElement('canvas');
+ video.preload='metadata';video.muted=true;video.playsInline=true;video.src=url;
+ var done=false;
+ function cleanup(){URL.revokeObjectURL(url);video.removeAttribute('src');video.load();}
+ function capture(){if(done)return;done=true;var w=video.videoWidth||640,h=video.videoHeight||360,max=1280,scale=Math.min(1,max/w);canvas.width=Math.max(320,Math.round(w*scale));canvas.height=Math.max(180,Math.round(h*scale));var ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,canvas.width,canvas.height);try{hiddenInput.value=canvas.toDataURL('image/jpeg',0.86);if(preview){preview.src=hiddenInput.value;preview.closest('[data-stv-thumbnail-preview]')?.removeAttribute('hidden');}}catch(e){hiddenInput.value='';}cleanup();}
+ video.addEventListener('loadedmetadata',function(){var target=video.duration>2?Math.min(2,video.duration*0.15):0;try{video.currentTime=target;}catch(e){capture();}}, {once:true});
+ video.addEventListener('seeked',capture,{once:true});
+ video.addEventListener('error',cleanup,{once:true});
+ video.load();
+}
+
 document.addEventListener('change',function(e){
- var input=e.target.closest('.stv-file-button input[type="file"]');
- if(!input)return;
- var out=document.querySelector('[data-stv-file-name]');
- if(out){out.textContent=input.files&&input.files.length?input.files[0].name:'No file selected';}
+ var input=e.target.closest('[data-stv-video-upload]');
+ if(input){
+   var out=document.querySelector('[data-stv-file-name]');
+   if(out){out.textContent=input.files&&input.files.length?input.files[0].name:'No file selected';}
+   var hidden=document.querySelector('[data-stv-thumbnail-data]'),preview=document.querySelector('[data-stv-auto-thumbnail-preview]');
+   if(input.files&&input.files[0]&&hidden){hidden.value='';generateThumbnail(input.files[0],hidden,preview);}
+   return;
+ }
+ var custom=e.target.closest('input[name="st_video_thumbnail_file"]');
+ if(custom){var label=document.querySelector('[data-stv-custom-thumbnail-name]');if(label){label.textContent=custom.files&&custom.files.length?custom.files[0].name:'No custom thumbnail selected';}}
 });
 
 document.addEventListener('click',function(e){
  var share=e.target.closest('[data-st-video-share],[data-stv-share]');
  if(share){e.preventDefault();var url=share.getAttribute('data-url')||window.location.href,title=share.getAttribute('data-title')||document.title;if(navigator.share){navigator.share({title:title,url:url}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){var old=share.textContent;share.textContent='Link copied';setTimeout(function(){share.textContent=old;},1400);});}return;}
  var reaction=e.target.closest('[data-stv-reaction]');
- if(reaction){e.preventDefault();if(!window.stvPlatform){return;}post({action:'stv_reaction',nonce:window.stvPlatform.nonce,video_id:reaction.getAttribute('data-video'),type:reaction.getAttribute('data-stv-reaction')}).then(function(res){if(!res.success){alert(res.data&&res.data.message==='login'?'Please log in first.':'Could not update reaction.');return;}var wrap=reaction.closest('.stv-video-actions');if(wrap){var l=wrap.querySelector('[data-stv-likes]'),d=wrap.querySelector('[data-stv-dislikes]');if(l)l.textContent=Number(res.data.likes).toLocaleString();if(d)d.textContent=Number(res.data.dislikes).toLocaleString();wrap.querySelectorAll('[data-stv-reaction]').forEach(function(b){b.classList.remove('is-active');});if(res.data.liked){wrap.querySelector('[data-stv-reaction="like"]').classList.add('is-active');}if(res.data.disliked){wrap.querySelector('[data-stv-reaction="dislike"]').classList.add('is-active');}}}).catch(function(){});return;}
+ if(reaction){e.preventDefault();if(!window.stvPlatform){return;}post({action:'stv_reaction',nonce:window.stvPlatform.nonce,video_id:reaction.getAttribute('data-video'),type:reaction.getAttribute('data-stv-reaction')}).then(function(res){if(!res.success){alert(res.data&&res.data.message==='login'?'Please log in first.':'Could not update reaction.');return;}var wrap=reaction.closest('.stv-video-actions');if(wrap){var l=wrap.querySelector('[data-stv-likes]'),d=wrap.querySelector('[data-stv-dislikes]');if(l)l.textContent=Number(res.data.likes).toLocaleString();if(d)d.textContent=Number(res.data.dislikes).toLocaleString();wrap.querySelectorAll('[data-stv-reaction]').forEach(function(b){b.classList.remove('is-active');});if(res.data.liked){var lb=wrap.querySelector('[data-stv-reaction="like"]');if(lb)lb.classList.add('is-active');}if(res.data.disliked){var db=wrap.querySelector('[data-stv-reaction="dislike"]');if(db)db.classList.add('is-active');}}}).catch(function(){});return;}
  var sub=e.target.closest('.stv-subscribe');
  if(sub){e.preventDefault();post({action:'stv_subscribe',nonce:window.stvPlatform.nonce,author_id:sub.getAttribute('data-author')}).then(function(res){if(!res.success){alert(res.data&&res.data.message==='login'?'Please log in first.':'Could not update subscription.');return;}sub.textContent=res.data.subscribed?'Subscribed':'Subscribe';var p=sub.closest('.stv-channel-head,.stv-channel-mini');if(p){var text=p.querySelector('p,.stv-channel-mini-count');if(text){text.textContent=text.textContent.replace(/[0-9,]+ subscribers/i,Number(res.data.count).toLocaleString()+' subscribers');}}}).catch(function(){});}
 });

@@ -21,9 +21,17 @@ function smarttoolz_video_page_definitions() {
 }
 
 function smarttoolz_video_sync_pages( $force = false ) {
-    $version = '3.2.0';
+    $version = '3.3.0';
     if ( ! $force && get_option( 'smarttoolz_video_pages_version' ) === $version ) { return; }
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
+
+    // Older builds could create a page called /videos/, which conflicts with the video archive.
+    $legacy_videos = get_page_by_path( 'videos', OBJECT, 'page' );
+    if ( $legacy_videos && get_post_meta( $legacy_videos->ID, '_smarttoolz_video_managed', true ) ) {
+        wp_delete_post( $legacy_videos->ID, true );
+        unset( $ids['videos'] );
+    }
+
     foreach ( smarttoolz_video_page_definitions() as $slug => $page ) {
         $page_obj = ! empty( $ids[ $slug ] ) ? get_post( (int) $ids[ $slug ] ) : get_page_by_path( $slug, OBJECT, 'page' );
         $data = array(
@@ -52,6 +60,7 @@ function smarttoolz_video_sync_pages( $force = false ) {
     }
     update_option( 'smarttoolz_video_page_ids', $ids, false );
     update_option( 'smarttoolz_video_pages_version', $version, false );
+    flush_rewrite_rules( false );
 }
 
 function smarttoolz_video_activate_pages() {

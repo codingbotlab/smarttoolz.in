@@ -1,1 +1,9 @@
-<?php if(!defined('ABSPATH'))exit; ?><!doctype html><html <?php language_attributes(); ?>><head><meta charset="<?php bloginfo('charset'); ?>"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php the_title(); ?> · <?php bloginfo('name'); ?></title><?php wp_head(); ?></head><body <?php body_class(); ?>><?php wp_body_open(); ?><header class="header"><div class="container"><a class="brand" href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a><nav class="nav"><a href="<?php echo esc_url(home_url('/')); ?>">Home</a></nav></div></header><main class="stories"><div class="container"><?php while(have_posts()):the_post(); ?><article class="single-post"><h1><?php the_title(); ?></h1><div class="entry-content"><?php the_content(); ?></div></article><?php endwhile; ?></div></main><footer class="footer"><div class="container">© <?php echo date('Y'); ?> <?php bloginfo('name'); ?></div></footer><?php wp_footer(); ?></body></html>
+<?php get_header(); ?>
+<main class="page-wrap"><div class="container single-grid"><article class="single-post">
+<?php while (have_posts()) : the_post(); ?>
+<h1 class="page-title"><?php the_title(); ?></h1>
+<?php if (has_post_thumbnail()) : ?><figure class="featured"><?php the_post_thumbnail('full'); ?></figure><?php endif; ?>
+<div class="entry-content"><?php the_content(); wp_link_pages(array('before'=>'<div class="page-links">Pages: ','after'=>'</div>')); ?></div>
+<?php endwhile; ?>
+</article><?php get_sidebar(); ?></div></main>
+<?php get_footer(); ?>

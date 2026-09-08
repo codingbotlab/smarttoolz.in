@@ -27,3 +27,5 @@ function stv_creator_dashboard_shortcode(){if(!is_user_logged_in())return '<div 
 add_shortcode('smarttoolz_creator_dashboard','stv_creator_dashboard_shortcode');
 function stv_platform_assets(){if(is_singular('st_video')||is_post_type_archive('st_video')||is_tax('st_video_category')||is_page())wp_localize_script('smarttoolz-video','stvPlatform',array('ajax'=>admin_url('admin-ajax.php'),'nonce'=>wp_create_nonce('stv_platform')));}
 add_action('wp_enqueue_scripts','stv_platform_assets',20);
+
+require_once dirname(__FILE__) . '/pages.php';

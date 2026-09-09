@@ -33,15 +33,29 @@ function smarttoolz_video_runtime_upload_guard() {
 }
 add_action( 'template_redirect', 'smarttoolz_video_runtime_upload_guard', 0 );
 
-/** Preserve settings from other tabs and correctly persist unchecked checkboxes. */
-function smarttoolz_video_settings_preserve_tab_values( $value, $option ) {
-    if ( 'smarttoolz_video_settings' !== $option || ! is_array( $value ) ) { return $value; }
+/**
+ * Settings tabs submit only their own fields. WordPress sanitizes the submitted
+ * array before updating the option, so a pre_update filter is too late to
+ * reconstruct fields that were already replaced by defaults. This filter runs
+ * with the original unsanitized value and merges it with the currently saved
+ * option before applying the plugin's normal sanitizer.
+ */
+function smarttoolz_video_settings_preserve_tab_values( $value, $option, $original_value ) {
+    if ( 'smarttoolz_video_settings' !== $option || ! is_array( $original_value ) ) { return $value; }
+
     $existing = (array) get_option( $option, array() );
     $defaults = function_exists( 'smarttoolz_video_default_settings' ) ? smarttoolz_video_default_settings() : array();
     $merged = wp_parse_args( $existing, $defaults );
-    $active = isset( $_POST['smarttoolz_video_settings_tab'] ) ? sanitize_key( wp_unslash( $_POST['smarttoolz_video_settings_tab'] ) ) : '';
 
-    foreach ( $value as $key => $setting ) { $merged[ $key ] = $setting; }
+    foreach ( $original_value as $key => $setting ) {
+        if ( is_string( $key ) && 'smarttoolz_video_settings_tab' !== $key ) {
+            $merged[ $key ] = $setting;
+        }
+    }
+
+    $active = isset( $_POST['smarttoolz_video_settings_tab'] )
+        ? sanitize_key( wp_unslash( $_POST['smarttoolz_video_settings_tab'] ) )
+        : '';
 
     $tab_bools = array(
         'general'  => array( 'frontend_profile' ),
@@ -52,14 +66,18 @@ function smarttoolz_video_settings_preserve_tab_values( $value, $option ) {
         'features' => array( 'likes_enabled', 'dislikes_enabled', 'subscriptions_enabled', 'history_enabled', 'sharing_enabled', 'comments_enabled' ),
         'pages'    => array(),
     );
+
     if ( isset( $tab_bools[ $active ] ) ) {
         foreach ( $tab_bools[ $active ] as $key ) {
-            if ( ! array_key_exists( $key, $value ) ) { $merged[ $key ] = 0; }
+            if ( ! array_key_exists( $key, $original_value ) ) {
+                $merged[ $key ] = 0;
+            }
         }
     }
+
     return smarttoolz_video_sanitize_settings( $merged );
 }
-add_filter( 'pre_update_option_smarttoolz_video_settings', 'smarttoolz_video_settings_preserve_tab_values', 10, 2 );
+add_filter( 'sanitize_option_smarttoolz_video_settings', 'smarttoolz_video_settings_preserve_tab_values', 10, 3 );
 
 /** Add active tab marker to the existing Settings API form. */
 function smarttoolz_video_settings_active_tab_field() {

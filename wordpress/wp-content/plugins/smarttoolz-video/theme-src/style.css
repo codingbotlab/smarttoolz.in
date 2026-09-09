@@ -2,36 +2,36 @@
 Theme Name: SmartToolz Video Theme
 Theme URI: https://smarttoolz.in/
 Description: YouTube-inspired video-sharing theme for SmartToolz.
-Version: 1.2.0
+Version: 1.2.3
 Author: SmartToolz
 Text Domain: smarttoolz-video-theme
 */
 
-:root{--stv-bg:#0f0f0f;--stv-surface:#181818;--stv-surface-hover:#272727;--stv-text:#f1f1f1;--stv-muted:#aaa;--stv-border:#303030;--stv-accent:#ff0033;--stv-white:#fff;--stv-max:1480px}
+:root{--stv-bg:#0f0f0f;--stv-surface:#181818;--stv-surface-hover:#272727;--stv-text:#f1f1f1;--stv-muted:#aaa;--stv-border:#303030;--stv-accent:#ff0033;--stv-white:#fff;--stv-max:none}
 *{box-sizing:border-box}
 html{background:var(--stv-bg);scroll-behavior:smooth}
-body{margin:0;background:var(--stv-bg);color:var(--stv-text);font-family:Roboto,Arial,Helvetica,sans-serif;line-height:1.5}
+body{margin:0;background:var(--stv-bg);color:var(--stv-text);font-family:Roboto,Arial,Helvetica,sans-serif;line-height:1.5;width:100%;min-width:0}
 a{color:inherit;text-decoration:none}
 button,input{font:inherit}
 img{max-width:100%;height:auto}
-.stv-site{min-height:100vh;background:var(--stv-bg)}
-.stv-header{position:sticky;top:0;z-index:100;background:rgba(15,15,15,.98);border-bottom:1px solid var(--stv-border)}
-.stv-header__inner{height:62px;max-width:var(--stv-max);margin:0 auto;padding:0 22px;display:grid;grid-template-columns:220px minmax(300px,720px) 220px;align-items:center;gap:24px}
-.stv-brand-wrap{display:flex;align-items:center;gap:4px}
+.stv-site{min-height:100vh;width:100%;background:var(--stv-bg)}
+.stv-header{position:sticky;top:0;z-index:100;background:rgba(15,15,15,.98);border-bottom:1px solid var(--stv-border);width:100%}
+.stv-header__inner{height:62px;width:100%;max-width:none;margin:0;padding:0 22px;display:grid;grid-template-columns:240px minmax(240px,1fr) auto;align-items:center;gap:24px}
+.stv-brand-wrap{display:flex;align-items:center;gap:4px;min-width:0}
 .stv-brand{display:flex;align-items:center;gap:10px;width:max-content;font-size:21px;font-weight:800;letter-spacing:-.4px}
 .stv-brand__menu{width:38px;height:38px;border:0;border-radius:50%;display:grid;place-items:center;background:transparent;color:#ddd;font-size:22px;cursor:pointer}
 .stv-brand__menu:hover{background:var(--stv-surface-hover)}
 .stv-brand__mark{width:30px;height:21px;border-radius:6px;background:var(--stv-accent);display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;box-shadow:0 0 0 1px rgba(255,255,255,.05) inset}
 .stv-brand__text{color:#fff}
-.stv-search{display:flex;height:40px;margin:0 auto;width:100%}
+.stv-search{display:flex;height:40px;margin:0;width:100%;min-width:0}
 .stv-search input{flex:1;min-width:0;height:40px;padding:0 18px;border:1px solid #3a3a3a;border-right:0;border-radius:22px 0 0 22px;background:#121212;color:#fff;outline:none}
 .stv-search input:focus{border-color:#555}
 .stv-search button{width:62px;height:40px;border:1px solid #3a3a3a;border-radius:0 22px 22px 0;background:#222;color:#fff;cursor:pointer;font-size:16px}
 .stv-search button:hover{background:#292929}
-.stv-header__actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.stv-header__actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap;min-width:max-content}
 .stv-header__icon{width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:#eee;display:grid;place-items:center;cursor:pointer;font-size:20px}
 .stv-header__icon:hover{background:var(--stv-surface-hover)}
-.stv-header__button{padding:8px 15px;border:1px solid #444;border-radius:20px;background:transparent;color:#fff;font-size:14px;font-weight:600}
+.stv-header__button{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;padding:8px 15px;border:1px solid #444;border-radius:20px;background:transparent;color:#fff;font-size:14px;font-weight:600}
 .stv-header__button:hover{background:var(--stv-surface-hover)}
 .stv-header__button--primary{background:#fff;color:#111;border-color:#fff}
 .stv-header__button--primary:hover{background:#eee}
@@ -45,7 +45,7 @@ img{max-width:100%;height:auto}
 .stv-account-menu__identity span{margin-top:3px;color:#aaa;font-size:12px;overflow:hidden;text-overflow:ellipsis;max-width:240px}
 .stv-account-menu__panel>a{display:block;padding:11px 12px;border-radius:8px;font-size:14px}
 .stv-account-menu__panel>a:hover{background:#303030}
-.stv-layout{display:grid;grid-template-columns:220px minmax(0,1fr);max-width:var(--stv-max);margin:0 auto}
+.stv-layout{display:grid;grid-template-columns:220px minmax(0,1fr);width:100%;max-width:none;margin:0}
 .stv-sidebar{position:sticky;top:62px;height:calc(100vh - 62px);padding:14px 10px;border-right:1px solid var(--stv-border);overflow:auto}
 .stv-sidebar__section{padding:8px 0 14px;border-bottom:1px solid var(--stv-border);margin-bottom:10px}
 .stv-sidebar__label{padding:8px 14px 7px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
@@ -53,7 +53,7 @@ img{max-width:100%;height:auto}
 .stv-sidebar__link:hover{background:var(--stv-surface-hover)}
 .stv-sidebar__link--active{background:#252525;font-weight:700}
 .stv-sidebar__icon{width:20px;text-align:center;font-size:17px;color:#ddd}
-.stv-main{min-width:0;padding:18px 28px 60px}
+.stv-main{min-width:0;width:100%;padding:18px 28px 60px}
 .stv-home{width:100%}
 .stv-page-title{margin:0;font-size:26px;line-height:1.15;letter-spacing:-.4px}
 .stv-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:4px 0 18px}
@@ -81,7 +81,7 @@ img{max-width:100%;height:auto}
 .stv-content{max-width:900px;margin:0 auto}
 .stv-content h1,.stv-content h2{line-height:1.15}
 .stv-footer{border-top:1px solid var(--stv-border);padding:25px 22px;color:#777;font-size:12px;margin-top:28px}
-.stv-footer__inner{max-width:var(--stv-max);margin:auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.stv-footer__inner{width:100%;max-width:none;margin:auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .stv-account-hero{display:flex;align-items:center;gap:20px;max-width:900px;margin:8px auto 26px;padding:24px;border:1px solid var(--stv-border);border-radius:16px;background:linear-gradient(135deg,#202020,#171717)}
 .stv-account-avatar{width:86px;height:86px;flex:0 0 86px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#4a4a4a,#242424);font-size:30px;font-weight:800}
 .stv-eyebrow{display:block;color:#aaa;font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:6px}
@@ -92,6 +92,6 @@ img{max-width:100%;height:auto}
 .stv-account-link:hover{background:#242424;border-color:#444;transform:translateY(-1px)}
 .stv-account-link strong{font-size:14px}
 .stv-account-link span{font-size:12px;color:#999;line-height:1.4}
-@media(max-width:1200px){.stv-header__inner{grid-template-columns:190px minmax(240px,1fr) 190px}.stv-layout{grid-template-columns:190px minmax(0,1fr)}.stv-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1200px){.stv-header__inner{grid-template-columns:200px minmax(200px,1fr) auto}.stv-layout{grid-template-columns:190px minmax(0,1fr)}.stv-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.stv-header__inner{grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:0 14px}.stv-brand__menu{display:none}.stv-brand{min-width:auto}.stv-search{max-width:none}.stv-layout{display:block}.stv-sidebar{display:none}.stv-main{padding:16px 14px 50px}.stv-video-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}.stv-header__actions .stv-header__button:not(.stv-header__button--primary){display:none}.stv-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stv-account-menu__panel{right:-8px;width:300px}}
 @media(max-width:620px){.stv-header__inner{grid-template-columns:auto 1fr auto}.stv-brand__text{display:none}.stv-search input{height:38px;padding:0 13px}.stv-search button{width:48px;height:38px}.stv-header__icon{width:36px;height:36px}.stv-header__button{padding:7px 11px}.stv-main{padding-left:12px;padding-right:12px}.stv-video-grid{grid-template-columns:1fr}.stv-page-title{font-size:22px}.stv-section-heading{align-items:center}.stv-account-hero{align-items:flex-start;padding:18px;gap:14px}.stv-account-avatar{width:64px;height:64px;flex-basis:64px;font-size:24px}.stv-account-grid{grid-template-columns:1fr}.stv-account-menu__panel{position:fixed;right:10px;top:56px;width:calc(100vw - 20px);max-width:330px}}

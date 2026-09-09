@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function smarttoolz_video_player_settings_defaults() {
     return array(
+        'player_mode'       => 'js',
         'autoplay'          => 0,
         'muted_autoplay'    => 0,
         'loop'              => 0,
@@ -22,6 +23,8 @@ function smarttoolz_video_player_settings() {
 function smarttoolz_video_player_sanitize_settings( $input ) {
     $d = smarttoolz_video_player_settings_defaults();
     $input = is_array( $input ) ? $input : array();
+    $mode = isset( $input['player_mode'] ) ? sanitize_key( $input['player_mode'] ) : $d['player_mode'];
+    if ( ! in_array( $mode, array( 'js', 'html' ), true ) ) { $mode = 'js'; }
     $speeds = isset( $input['playback_speeds'] ) ? preg_replace( '/[^0-9.,]/', '', (string) $input['playback_speeds'] ) : $d['playback_speeds'];
     $valid = array();
     foreach ( array_filter( array_map( 'trim', explode( ',', $speeds ) ) ) as $speed ) {
@@ -32,6 +35,7 @@ function smarttoolz_video_player_sanitize_settings( $input ) {
     }
     if ( ! in_array( '1', $valid, true ) ) { $valid[] = '1'; }
     return array(
+        'player_mode'       => $mode,
         'autoplay'          => empty( $input['autoplay'] ) ? 0 : 1,
         'muted_autoplay'    => empty( $input['muted_autoplay'] ) ? 0 : 1,
         'loop'              => empty( $input['loop'] ) ? 0 : 1,
@@ -57,10 +61,27 @@ function smarttoolz_video_player_settings_page() {
     ?>
     <div class="wrap">
         <h1>Player Settings</h1>
-        <p>Configure the custom HTML5 player used on public video watch pages.</p>
+        <p>Configure the video player used on public video watch pages.</p>
         <form method="post" action="options.php">
             <?php settings_fields( 'smarttoolz_video_player_group' ); ?>
             <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row">Player type</th>
+                    <td>
+                        <fieldset>
+                            <label>
+                                <input type="radio" name="smarttoolz_video_player_settings[player_mode]" value="js" <?php checked( $s['player_mode'], 'js' ); ?>>
+                                <strong>JS Player</strong>
+                            </label>
+                            <br>
+                            <label>
+                                <input type="radio" name="smarttoolz_video_player_settings[player_mode]" value="html" <?php checked( $s['player_mode'], 'html' ); ?>>
+                                <strong>HTML Player</strong>
+                            </label>
+                            <p class="description">JS Player uses the SmartToolz YouTube-style controls. HTML Player uses the browser's native HTML5 controls.</p>
+                        </fieldset>
+                    </td>
+                </tr>
                 <tr><th scope="row">Autoplay</th><td><label><input type="checkbox" name="smarttoolz_video_player_settings[autoplay]" value="1" <?php checked( $s['autoplay'], 1 ); ?>> Start videos automatically when the browser permits it</label></td></tr>
                 <tr><th scope="row">Muted autoplay</th><td><label><input type="checkbox" name="smarttoolz_video_player_settings[muted_autoplay]" value="1" <?php checked( $s['muted_autoplay'], 1 ); ?>> Use muted playback when autoplay is enabled</label></td></tr>
                 <tr><th scope="row">Loop</th><td><label><input type="checkbox" name="smarttoolz_video_player_settings[loop]" value="1" <?php checked( $s['loop'], 1 ); ?>> Loop the video</label></td></tr>
@@ -82,6 +103,7 @@ function smarttoolz_video_player_asset() {
         if ( $n >= 0.25 && $n <= 4 ) { $speeds[] = $n; }
     }
     return array(
+        'playerMode' => in_array( $s['player_mode'], array( 'html', 'js' ), true ) ? $s['player_mode'] : 'js',
         'autoplay' => ! empty( $s['autoplay'] ),
         'mutedAutoplay' => ! empty( $s['muted_autoplay'] ),
         'loop' => ! empty( $s['loop'] ),
@@ -131,7 +153,7 @@ function smarttoolz_video_player_render( $video_id ) {
 function smarttoolz_video_player_styles() {
     if ( 'watch' !== get_query_var( 'smarttoolz_video_route' ) ) { return; }
     echo '<style>
-    [hidden]{display:none!important}.stv-watch__player-wrap{width:100%;max-width:none}.stv-player{position:relative;width:100%;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;box-shadow:0 8px 30px rgba(0,0,0,.25)}.stv-player__video{width:100%;height:100%;display:block;object-fit:contain;background:#000}.stv-player__controls{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:7px;padding:42px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.9));opacity:0;transition:opacity .2s;z-index:7}.stv-player:hover .stv-player__controls,.stv-player:focus-within .stv-player__controls,.stv-player.is-playing:hover .stv-player__controls{opacity:1}.stv-player__controls button{border:0;background:transparent;color:#fff;font-size:16px;line-height:1;padding:6px;cursor:pointer}.stv-player__controls button:hover{background:rgba(255,255,255,.14);border-radius:5px}.stv-player__volume{width:80px}.stv-player__time{color:#fff;font-size:12px;white-space:nowrap}.stv-player__spacer{flex:1}.stv-player__loading,.stv-player__error{position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.25);z-index:6}.stv-player__error{background:rgba(0,0,0,.78);font-size:14px;padding:20px;text-align:center}.stv-player__ad{position:absolute;inset:0;z-index:5;background:#000;display:grid;place-items:center}.stv-player__ad-inner{position:relative;width:100%;height:100%;display:grid;grid-template-rows:1fr auto;align-items:end}.stv-player__ad-media{position:absolute;inset:0;display:grid;place-items:center}.stv-player__ad-media video,.stv-player__ad-media img{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}.stv-player__ad-copy{position:relative;z-index:2;padding:16px 18px 52px;background:linear-gradient(transparent,rgba(0,0,0,.9));display:flex;flex-direction:column;gap:4px;color:#fff}.stv-player__ad-label{position:absolute;z-index:3;top:12px;left:12px;background:rgba(0,0,0,.7);padding:4px 7px;border-radius:4px;color:#fff;font-size:11px}.stv-player__ad-title{font-size:17px}.stv-player__ad-text{font-size:13px;color:#ddd}.stv-player__ad-cta{display:inline-flex;align-self:flex-start;margin-top:7px;padding:7px 12px;border-radius:6px;background:#fff;color:#111;text-decoration:none;font-size:12px;font-weight:700}.stv-player__ad-skip{position:absolute;right:14px;bottom:14px;z-index:4;padding:9px 13px;border:1px solid rgba(255,255,255,.5);border-radius:5px;background:rgba(0,0,0,.75);color:#fff;cursor:pointer}.stv-player.is-theater{position:relative;width:100vw;max-width:1400px;margin-left:50%;transform:translateX(-50%);border-radius:0}.stv-player.is-ad-playing .stv-player__controls{display:none}@media(max-width:700px){.stv-player{border-radius:0}.stv-player__controls{padding-left:7px;padding-right:7px}.stv-player__volume{display:none}.stv-player__controls button{font-size:14px}.stv-player__time{font-size:11px}}
+    [hidden]{display:none!important}.stv-watch__player-wrap{width:100%;max-width:none}.stv-player{position:relative;width:100%;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;box-shadow:0 8px 30px rgba(0,0,0,.25)}.stv-player__video{width:100%;height:100%;display:block;object-fit:contain;background:#000}.stv-player__controls{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:7px;padding:42px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.9));opacity:0;transition:opacity .2s;z-index:7}.stv-player:hover .stv-player__controls,.stv-player:focus-within .stv-player__controls,.stv-player.is-playing:hover .stv-player__controls{opacity:1}.stv-player__controls button{border:0;background:transparent;color:#fff;font-size:16px;line-height:1;padding:6px;cursor:pointer}.stv-player__controls button:hover{background:rgba(255,255,255,.14);border-radius:5px}.stv-player__volume{width:80px}.stv-player__time{color:#fff;font-size:12px;white-space:nowrap}.stv-player__spacer{flex:1}.stv-player__loading,.stv-player__error{position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.25);z-index:6}.stv-player__error{background:rgba(0,0,0,.78);font-size:14px;padding:20px;text-align:center}.stv-player__ad{position:absolute;inset:0;z-index:5;background:#000;display:grid;place-items:center}.stv-player__ad-inner{position:relative;width:100%;height:100%;display:grid;grid-template-rows:1fr auto;align-items:end}.stv-player__ad-media{position:absolute;inset:0;display:grid;place-items:center}.stv-player__ad-media video,.stv-player__ad-media img{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}.stv-player__ad-copy{position:relative;z-index:2;padding:16px 18px 52px;background:linear-gradient(transparent,rgba(0,0,0,.9));display:flex;flex-direction:column;gap:4px;color:#fff}.stv-player__ad-label{position:absolute;z-index:3;top:12px;left:12px;background:rgba(0,0,0,.7);padding:4px 7px;border-radius:4px;color:#fff;font-size:11px}.stv-player__ad-title{font-size:17px}.stv-player__ad-text{font-size:13px;color:#ddd}.stv-player__ad-cta{display:inline-flex;align-self:flex-start;margin-top:7px;padding:7px 12px;border-radius:6px;background:#fff;color:#111;text-decoration:none;font-size:12px;font-weight:700}.stv-player__ad-skip{position:absolute;right:14px;bottom:14px;z-index:4;padding:9px 13px;border:1px solid rgba(255,255,255,.5);border-radius:5px;background:rgba(0,0,0,.75);color:#fff;cursor:pointer}.stv-player.is-theater{position:relative;width:100vw;max-width:1400px;margin-left:50%;transform:translateX(-50%);border-radius:0}.stv-player.is-ad-playing .stv-player__controls{display:none}.stv-player.stv-player--html .stv-player__controls{display:none!important}.stv-player.stv-player--html .stv-player__video{cursor:default}@media(max-width:700px){.stv-player{border-radius:0}.stv-player__controls{padding-left:7px;padding-right:7px}.stv-player__volume{display:none}.stv-player__controls button{font-size:14px}.stv-player__time{font-size:11px}}
     </style>';
 }
 add_action( 'wp_head', 'smarttoolz_video_player_styles', 31 );
@@ -147,6 +169,10 @@ function smarttoolz_video_player_scripts() {
         var video=root.querySelector('.stv-player__video'),s={},ads={};
         try{s=JSON.parse(root.dataset.settings||'{}')}catch(e){}
         try{ads=JSON.parse(root.dataset.ads||'{}')}catch(e){}
+        var isHtmlPlayer=s.playerMode==='html';
+        root.classList.toggle('stv-player--html',isHtmlPlayer);
+        root.classList.toggle('stv-player--js',!isHtmlPlayer);
+        if(isHtmlPlayer){video.controls=true;}
         var play=root.querySelector('[data-action="play"]'),mute=root.querySelector('[data-action="mute"]'),volume=root.querySelector('[data-action="volume"]'),speed=root.querySelector('[data-action="speed"]'),current=root.querySelector('[data-current]'),duration=root.querySelector('[data-duration]'),theater=root.querySelector('[data-action="theater"]'),pip=root.querySelector('[data-action="pip"]'),fs=root.querySelector('[data-action="fullscreen"]'),loading=root.querySelector('.stv-player__loading'),errorBox=root.querySelector('.stv-player__error');
         var ad=root.querySelector('.stv-player__ad'),adMedia=root.querySelector('.stv-player__ad-media'),adTitle=root.querySelector('.stv-player__ad-title'),adText=root.querySelector('.stv-player__ad-text'),adCta=root.querySelector('.stv-player__ad-cta'),adSkip=root.querySelector('.stv-player__ad-skip');
         var adState={active:false,kind:'',skipTimer:null,finishTimer:null,adVideo:null};

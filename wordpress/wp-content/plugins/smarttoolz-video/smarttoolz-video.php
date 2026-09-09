@@ -60,14 +60,95 @@ function smarttoolz_video_admin_menu() {
 }
 add_action( 'admin_menu', 'smarttoolz_video_admin_menu' );
 
+function smarttoolz_video_dashboard_action_notice( $message, $success = true ) {
+    return '<div class="notice ' . ( $success ? 'notice-success' : 'notice-error' ) . ' is-dismissible"><p>' . esc_html( $message ) . '</p></div>';
+}
+
 function smarttoolz_video_dashboard_page() {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
+
+    $notice = '';
+
+    if ( isset( $_POST['stv_dashboard_action'], $_POST['stv_dashboard_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_dashboard_nonce'] ) ), 'stv_dashboard_action' ) ) {
+        $action = sanitize_key( wp_unslash( $_POST['stv_dashboard_action'] ) );
+
+        if ( 'install_theme' === $action ) {
+            $result = smarttoolz_video_install_theme();
+            $notice = is_wp_error( $result ) ? smarttoolz_video_dashboard_action_notice( $result->get_error_message(), false ) : smarttoolz_video_dashboard_action_notice( 'SmartToolz Video Theme installed successfully.' );
+        } elseif ( 'activate_theme' === $action ) {
+            $result = smarttoolz_video_activate_theme();
+            $notice = is_wp_error( $result ) ? smarttoolz_video_dashboard_action_notice( $result->get_error_message(), false ) : smarttoolz_video_dashboard_action_notice( 'SmartToolz Video Theme activated and homepage synchronized.' );
+        } elseif ( 'set_home' === $action ) {
+            $result = smarttoolz_video_set_static_homepage();
+            $notice = $result ? smarttoolz_video_dashboard_action_notice( 'SmartToolz Home is now the static homepage.' ) : smarttoolz_video_dashboard_action_notice( 'Could not set SmartToolz Home as the static homepage.', false );
+        } elseif ( 'repair_pages' === $action ) {
+            smarttoolz_video_sync_pages();
+            $notice = smarttoolz_video_dashboard_action_notice( 'All SmartToolz pages were synchronized and repaired.' );
+        }
+    }
+
+    $installed = smarttoolz_video_theme_installed();
+    $active = smarttoolz_video_theme_is_active();
+    $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
+    $home_id = isset( $ids['home'] ) ? absint( $ids['home'] ) : 0;
+    $static_home = 'page' === get_option( 'show_on_front', 'posts' ) && $home_id && absint( get_option( 'page_on_front', 0 ) ) === $home_id;
     ?>
     <div class="wrap">
-        <h1>SmartToolz</h1>
-        <p>SmartToolz Video platform dashboard.</p>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 20px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#ff0033;color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;box-shadow:0 6px 18px rgba(255,0,51,.2);">▶</div>
+            <div>
+                <h1 style="margin:0;">SmartToolz</h1>
+                <p style="margin:3px 0 0;color:#646970;">Video-sharing platform control center</p>
+            </div>
+        </div>
+
+        <?php echo $notice; ?>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1100px;">
+            <div style="background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+                <h2 style="margin-top:0;">Recommended Actions</h2>
+                <p style="color:#646970;">Complete the SmartToolz setup for the best video-site experience.</p>
+
+                <form method="post" style="margin:0 0 10px;">
+                    <?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?>
+                    <input type="hidden" name="stv_dashboard_action" value="install_theme">
+                    <button type="submit" class="button button-secondary" style="width:100%;text-align:left;">Install SmartToolz Theme</button>
+                </form>
+
+                <form method="post" style="margin:0 0 10px;">
+                    <?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?>
+                    <input type="hidden" name="stv_dashboard_action" value="activate_theme">
+                    <button type="submit" class="button button-primary" style="width:100%;text-align:left;">Activate SmartToolz Theme</button>
+                </form>
+
+                <form method="post" style="margin:0 0 10px;">
+                    <?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?>
+                    <input type="hidden" name="stv_dashboard_action" value="set_home">
+                    <button type="submit" class="button" style="width:100%;text-align:left;">Set SmartToolz Home as Homepage</button>
+                </form>
+
+                <form method="post" style="margin:0;">
+                    <?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?>
+                    <input type="hidden" name="stv_dashboard_action" value="repair_pages">
+                    <button type="submit" class="button" style="width:100%;text-align:left;">Repair &amp; Sync Pages</button>
+                </form>
+            </div>
+
+            <div style="background:#111827;color:#fff;border-radius:12px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.14);">
+                <h2 style="margin-top:0;color:#fff;">SmartToolz Status</h2>
+                <p style="margin:8px 0;"><strong>Theme:</strong> <?php echo $active ? 'Active' : ( $installed ? 'Installed' : 'Not installed' ); ?></p>
+                <p style="margin:8px 0;"><strong>Static Home:</strong> <?php echo $static_home ? 'Active' : 'Not set'; ?></p>
+                <p style="margin:8px 0;"><strong>Pages:</strong> <?php echo count( smarttoolz_video_page_definitions() ); ?> managed sections</p>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-pages' ) ); ?>" class="button button-secondary" style="margin-top:10px;">Open Page Settings</a>
+            </div>
+        </div>
+
+        <div style="margin-top:18px;max-width:1100px;background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:18px 20px;">
+            <h2 style="margin-top:0;">Branding</h2>
+            <p style="margin:0;color:#646970;">SmartToolz branding is built into the video theme header, including the SmartToolz mark, search and creator actions.</p>
+        </div>
     </div>
     <?php
 }
@@ -104,7 +185,7 @@ function smarttoolz_video_page_settings() {
 
         <div style="margin:16px 0;padding:16px 18px;background:#fff;border:1px solid #ccd0d4;max-width:900px;">
             <h2 style="margin-top:0;">Static Homepage</h2>
-            <p style="margin-bottom:12px;">Set the managed <strong>Home</strong> page as the site's front page in one click.</p>
+            <p style="margin-bottom:12px;">SmartToolz Home is kept as the site's static front page.</p>
             <?php if ( $is_static_home ) : ?>
                 <p><strong style="color:#008a20;">Active:</strong> SmartToolz Home is currently the static homepage.</p>
             <?php else : ?>
@@ -137,7 +218,7 @@ function smarttoolz_video_page_settings() {
             <?php foreach ( $definitions as $key => $page ) :
                 $id = isset( $ids[ $key ] ) ? absint( $ids[ $key ] ) : 0;
                 $valid = $id && 'page' === get_post_type( $id ) && 'trash' !== get_post_status( $id );
-                $url = $valid ? get_permalink( $id ) : home_url( '/' . trim( $page['slug'], '/' ) . '/' );
+                $url = $valid ? get_permalink( $id ) : home_url( '/' . trim( smarttoolz_video_page_path( $key, $definitions ), '/' ) . '/' );
                 ?>
                 <tr>
                     <td><?php echo esc_html( $page['title'] ); ?></td>

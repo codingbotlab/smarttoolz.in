@@ -2,8 +2,9 @@
 /**
  * SmartToolz Video - watch sidebar ad bridge.
  *
- * Keeps sidebar ads independent from the player-wide "Video ads" switch.
- * Multiple active creatives in the same placement are rotated randomly.
+ * The watch-page sidebar must render ONLY creatives assigned to the
+ * "Sidebar ad" placement. Player placements such as pre-roll, bumper,
+ * mid-roll, post-roll and pause ads must never be copied into the sidebar.
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -28,28 +29,60 @@ function smarttoolz_video_watch_sidebar_ad_output( $html ) {
 
     $settings = smarttoolz_video_ads_settings();
 
-    // Sidebar placement has its own switch. Do not require the player-wide
-    // video-ad switch, because image/video sidebar ads are independent.
-    if ( empty( $settings['sidebar'] ) ) {
+    // Locate the watch sidebar and replace only its ad area. This removes any
+    // ad that may have been rendered there by older watch-page code, including
+    // pre-roll/bumpers/mid-roll/post-roll/pause creatives.
+    $aside_open = '<aside class="stv-watch-sidebar">';
+    $next_marker = '<div class="stv-watch-sidebar__heading"';
+    $aside_pos = strpos( $html, $aside_open );
+
+    if ( false === $aside_pos ) {
         return $html;
     }
 
-    // Collect every active creative for this placement. If several ads exist,
-    // choose one at random for this page view instead of always showing the
-    // first row in the admin list.
+    $next_pos = strpos( $html, $next_marker, $aside_pos + strlen( $aside_open ) );
+    if ( false === $next_pos ) {
+        return $html;
+    }
+
+    // If Sidebar ads are disabled, leave only the Next-video section.
+    if ( empty( $settings['sidebar'] ) ) {
+        $html = substr_replace(
+            $html,
+            '',
+            $aside_pos + strlen( $aside_open ),
+            $next_pos - ( $aside_pos + strlen( $aside_open ) )
+        );
+        return $html;
+    }
+
+    // IMPORTANT: only read from the sidebar placement. Never fall back to
+    // another placement when no sidebar creative exists.
     $active_ads = array();
-    if ( ! empty( $settings['creatives']['sidebar'] ) && is_array( $settings['creatives']['sidebar'] ) ) {
-        foreach ( $settings['creatives']['sidebar'] as $ad ) {
-            if ( ! empty( $ad['active'] ) && ! empty( $ad['src'] ) ) {
-                $active_ads[] = $ad;
-            }
+    $sidebar_ads = isset( $settings['creatives']['sidebar'] ) && is_array( $settings['creatives']['sidebar'] )
+        ? $settings['creatives']['sidebar']
+        : array();
+
+    foreach ( $sidebar_ads as $ad ) {
+        if ( ! empty( $ad['active'] ) && ! empty( $ad['src'] ) ) {
+            $active_ads[] = $ad;
         }
     }
 
+    // No active Sidebar ad: remove the ad area completely rather than showing
+    // a creative belonging to another placement.
     if ( empty( $active_ads ) ) {
+        $html = substr_replace(
+            $html,
+            '',
+            $aside_pos + strlen( $aside_open ),
+            $next_pos - ( $aside_pos + strlen( $aside_open ) )
+        );
         return $html;
     }
 
+    // Multiple Sidebar ads are rotated randomly, but only within this
+    // placement.
     $creative = $active_ads[ wp_rand( 0, count( $active_ads ) - 1 ) ];
 
     $src     = esc_url( $creative['src'] );
@@ -84,13 +117,19 @@ function smarttoolz_video_watch_sidebar_ad_output( $html ) {
 
     $ad_html .= '</div>';
 
-    // Hide the old placeholder and insert the randomly selected active ad
-    // immediately before the Next-video list.
-    $html = preg_replace(
-        '/(<div[^>]+class=["\'][^"\']*stv-watch-sidebar__next[^"\']*["\'][^>]*>)/i',
-        '<style>.stv-watch-sidebar__ad--placeholder{display:none!important}.stv-watch-sidebar__ad--live{display:block!important}.stv-watch-sidebar__ad--live img,.stv-watch-sidebar__ad--live video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}</style>' . $ad_html . '$1',
+    $styles = '<style>
+        .stv-watch-sidebar__ad--placeholder{display:none!important}
+        .stv-watch-sidebar__ad--live{display:block!important}
+        .stv-watch-sidebar__ad--live img,.stv-watch-sidebar__ad--live video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+    </style>';
+
+    // Replace the complete existing sidebar-ad area immediately before Next.
+    $replacement = $styles . $ad_html;
+    $html = substr_replace(
         $html,
-        1
+        $replacement,
+        $aside_pos + strlen( $aside_open ),
+        $next_pos - ( $aside_pos + strlen( $aside_open ) )
     );
 
     return is_string( $html ) ? $html : '';

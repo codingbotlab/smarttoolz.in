@@ -23,6 +23,77 @@ function smarttoolz_video_runtime_frontend_css() {
 }
 add_action( 'wp_head', 'smarttoolz_video_runtime_frontend_css', 60 );
 
+/**
+ * When the optional icon library is disabled, keep the video account menu
+ * fully styled and usable. The header's detailed account styles are normally
+ * printed only when the icon library is enabled, so this lightweight fallback
+ * owns the same layout without depending on Font Awesome.
+ */
+function smarttoolz_video_runtime_no_icon_library_css() {
+    if ( ! function_exists( 'smarttoolz_is_video_context' ) || ! smarttoolz_is_video_context() ) { return; }
+    if ( function_exists( 'smarttoolz_video_setting' ) && smarttoolz_video_setting( 'icon_enabled', 1 ) ) { return; }
+    echo '<style id="smarttoolz-video-no-icon-library-css">
+    body.smarttoolz-video-platform .st-header-controls{flex:1;min-width:0;display:flex;align-items:center}
+    body.smarttoolz-video-platform .st-video-header .st-header-tools{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-left:0}
+    body.smarttoolz-video-platform .st-video-header .st-header-search{width:min(560px,52vw);min-width:260px}
+    body.smarttoolz-video-platform .st-video-header .st-search-form{display:flex;align-items:center;gap:0;margin:0}
+    body.smarttoolz-video-platform .st-video-header .st-search-field{height:42px;border:1px solid #d3d3d3;border-right:0;border-radius:999px 0 0 999px;padding:0 17px;background:#fff;color:#0f0f0f}
+    body.smarttoolz-video-platform .st-video-header .st-search-submit{width:48px;height:42px;border:1px solid #d3d3d3;border-left:0;border-radius:0 999px 999px 0;background:#f8f8f8;color:#0f0f0f;cursor:pointer}
+    body.smarttoolz-video-platform .st-video-header .st-search-submit i{display:inline-block;font-style:normal;font-family:inherit;font-size:21px;line-height:1}
+    body.smarttoolz-video-platform .st-video-header .st-search-submit i::before{content:"⌕"}
+    body.smarttoolz-video-platform .st-video-header .st-theme-toggle{height:42px;border:1px solid #ddd;border-radius:999px;padding:0 12px;background:#fff;color:#111;font-weight:700;white-space:nowrap;cursor:pointer}
+    body.smarttoolz-video-platform .stv-account-menu{position:relative;z-index:1000;flex:0 0 auto}
+    body.smarttoolz-video-platform .stv-account-trigger{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:3px 9px 3px 4px;border:1px solid #e5e5e5;border-radius:999px;background:#fff;color:#0f0f0f;cursor:pointer;list-style:none;white-space:nowrap;user-select:none}
+    body.smarttoolz-video-platform .stv-account-trigger::-webkit-details-marker{display:none}
+    body.smarttoolz-video-platform .stv-account-trigger:focus-visible{outline:2px solid #065fd4;outline-offset:2px}
+    body.smarttoolz-video-platform .stv-account-avatar{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;overflow:hidden;background:#f2f2f2;color:#0f0f0f;font-weight:800;flex:0 0 36px}
+    body.smarttoolz-video-platform .stv-account-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+    body.smarttoolz-video-platform .stv-account-avatar-lg{width:52px;height:52px;flex-basis:52px}
+    body.smarttoolz-video-platform .stv-guest-avatar{font-size:17px}
+    body.smarttoolz-video-platform .stv-guest-avatar i{font-style:normal;font-family:inherit;display:inline-block;line-height:1}
+    body.smarttoolz-video-platform .stv-guest-avatar i::before{content:"○"}
+    body.smarttoolz-video-platform .stv-account-name{max-width:145px;overflow:hidden;text-overflow:ellipsis;font-size:.88rem;font-weight:700}
+    body.smarttoolz-video-platform .stv-account-chevron{font-size:18px;line-height:1;transform:translateY(-1px)}
+    body.smarttoolz-video-platform .stv-account-menu[open] .stv-account-chevron{transform:rotate(180deg)}
+    body.smarttoolz-video-platform .stv-account-dropdown{position:absolute;right:0;top:calc(100% + 8px);width:310px;max-height:min(78vh,680px);overflow:auto;padding:8px;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.16)}
+    body.smarttoolz-video-platform .stv-account-dropdown a{display:flex;align-items:center;gap:11px;min-height:40px;padding:0 11px;border-radius:8px;color:#0f0f0f;text-decoration:none;font-size:.9rem;font-weight:600}
+    body.smarttoolz-video-platform .stv-account-dropdown a:hover{background:#f2f2f2}
+    body.smarttoolz-video-platform .stv-account-dropdown i{display:inline-flex;align-items:center;justify-content:center;width:18px;min-width:18px;height:18px;text-align:center;color:#606060;font-style:normal;font-family:inherit;font-size:16px;line-height:1}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-user::before{content:"●"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-tv::before{content:"▣"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-house::before{content:"⌂"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-video::before{content:"▶"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-fire::before{content:"♨"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-layer-group::before{content:"▦"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-magnifying-glass::before{content:"⌕"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-bell::before{content:"♢"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-thumbs-up::before{content:"+"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-clock-rotate-left::before{content:"◷"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-upload::before{content:"↑"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-chart-line::before{content:"↗"}
+    body.smarttoolz-video-platform .stv-account-dropdown .fa-right-from-bracket::before{content:"↪"}
+    body.smarttoolz-video-platform .stv-account-head{display:flex;align-items:center;gap:11px;padding:10px 9px 12px;border-bottom:1px solid #eee;margin-bottom:5px}
+    body.smarttoolz-video-platform .stv-account-head strong{display:block;font-size:.92rem}
+    body.smarttoolz-video-platform .stv-account-head small{display:block;margin-top:3px;color:#606060;font-size:.74rem;max-width:205px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    body.smarttoolz-video-platform .stv-account-section{padding:7px 11px 5px;color:#606060;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    body.smarttoolz-video-platform .stv-account-separator{height:1px;background:#eee;margin:7px 4px}
+    body.smarttoolz-video-platform .stv-account-dropdown .stv-account-logout{color:#c00}
+    body.smarttoolz-video-platform .stv-account-dropdown .stv-account-logout i{color:#c00}
+    body.smarttoolz-video-platform .stv-auth-dropdown{padding:14px 8px 8px;width:310px}
+    body.smarttoolz-video-platform .stv-auth-title{font-size:1.05rem;font-weight:800;margin:2px 4px 5px}
+    body.smarttoolz-video-platform .stv-auth-dropdown p{margin:0 4px 10px;color:#606060;font-size:.82rem;line-height:1.45}
+    body.smarttoolz-video-platform .stv-auth-dropdown a.stv-auth-primary,body.smarttoolz-video-platform .stv-auth-dropdown a.stv-auth-secondary{justify-content:flex-start;margin-top:5px;font-weight:800}
+    body.smarttoolz-video-platform .stv-auth-primary{background:#ff0000;color:#fff!important}
+    body.smarttoolz-video-platform .stv-auth-primary i,body.smarttoolz-video-platform .stv-auth-secondary i{color:inherit!important}
+    body.smarttoolz-video-platform .stv-auth-primary:hover{background:#cc0000!important}
+    body.smarttoolz-video-platform .stv-auth-secondary{border:1px solid #d5d5d5;background:#fff}
+    @media(max-width:900px){body.smarttoolz-video-platform .st-video-header .st-header-inner{gap:10px}.st-video-header .st-header-search{width:min(52vw,420px);min-width:180px}}
+    @media(max-width:700px){body.smarttoolz-video-platform .st-video-header .st-header-tools{justify-content:flex-end}.st-video-header .st-header-search{width:min(50vw,320px);min-width:0}.st-video-header .st-theme-toggle{display:none}body.smarttoolz-video-platform .stv-account-name{display:none}body.smarttoolz-video-platform .stv-account-dropdown,body.smarttoolz-video-platform .stv-auth-dropdown{position:fixed;right:12px;top:72px;width:min(310px,calc(100vw - 24px));max-height:calc(100vh - 90px)}}
+    @media(max-width:460px){body.smarttoolz-video-platform .st-video-header .st-header-search{width:calc(100vw - 120px)}body.smarttoolz-video-platform .st-video-header .st-header-inner{padding-inline:10px}}
+    </style>';
+}
+add_action( 'wp_head', 'smarttoolz_video_runtime_no_icon_library_css', 59 );
+
 function smarttoolz_video_runtime_upload_guard() {
     if ( empty( $_POST['st_video_frontend_action'] ) || ! function_exists( 'smarttoolz_video_setting' ) ) { return; }
     $max_mb = absint( smarttoolz_video_setting( 'upload_max_mb', 1024 ) );

@@ -10,45 +10,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 function smarttoolz_video_render_app() {
     $route = get_query_var( 'smarttoolz_video_route', 'home' );
     $id    = get_query_var( 'smarttoolz_video_id', '' );
+
+    get_header();
     ?>
-    <!doctype html>
-    <html <?php language_attributes(); ?>>
-    <head>
-        <meta charset="<?php bloginfo( 'charset' ); ?>">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title><?php echo esc_html( get_bloginfo( 'name' ) . ' — Video' ); ?></title>
-        <?php wp_head(); ?>
-        <style>
-            html,body{margin:0;padding:0;background:#0f0f0f;color:#fff}
-            body{font-family:Arial,Helvetica,sans-serif}
-            .stv-app{min-height:100vh}
-            .stv-app__header{height:64px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #262626;background:#111}
-            .stv-app__brand{font-size:20px;font-weight:700}
-            .stv-app__main{padding:32px}
-        </style>
-    </head>
-    <body <?php body_class( 'smarttoolz-video-app' ); ?>>
-        <?php wp_body_open(); ?>
-        <div class="stv-app">
-            <header class="stv-app__header">
-                <div class="stv-app__brand"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></div>
-            </header>
-            <main class="stv-app__main" data-route="<?php echo esc_attr( $route ); ?>" data-video-id="<?php echo esc_attr( $id ); ?>">
-                <?php
-                if ( 'home' === $route ) {
-                    echo '<h1>Video</h1>';
-                } elseif ( 'watch' === $route ) {
-                    echo '<h1>Watch</h1>';
-                } elseif ( 'upload' === $route ) {
-                    echo '<h1>Upload</h1>';
-                }
-                ?>
-            </main>
+        <div class="stv-app" data-route="<?php echo esc_attr( $route ); ?>" data-video-id="<?php echo esc_attr( $id ); ?>">
+            <div class="stv-chips">
+                <a class="stv-chip stv-chip--active" href="<?php echo esc_url( home_url( '/video/' ) ); ?>">All</a>
+                <a class="stv-chip" href="<?php echo esc_url( home_url( '/video/shorts/' ) ); ?>">Shorts</a>
+                <a class="stv-chip" href="<?php echo esc_url( home_url( '/video/trending/' ) ); ?>">Trending</a>
+                <a class="stv-chip" href="<?php echo esc_url( home_url( '/video/live/' ) ); ?>">Live</a>
+                <a class="stv-chip" href="<?php echo esc_url( home_url( '/video/subscriptions/' ) ); ?>">Subscriptions</a>
+            </div>
+
+            <?php if ( 'home' === $route ) : ?>
+                <h1 class="stv-page-title">SmartToolz Videos</h1>
+                <div class="stv-hero__box">
+                    <h2 style="margin-top:0">Your video-sharing home is ready.</h2>
+                    <p style="color:#aaa">The SmartToolz interface is installed and ready for the video features we build next.</p>
+                </div>
+            <?php elseif ( 'watch' === $route ) : ?>
+                <h1 class="stv-page-title">Watch</h1>
+                <div class="stv-empty">Video ID: <?php echo esc_html( $id ); ?></div>
+            <?php elseif ( 'upload' === $route ) : ?>
+                <h1 class="stv-page-title">Upload Video</h1>
+                <div class="stv-empty">Upload interface will be added here.</div>
+            <?php else : ?>
+                <h1 class="stv-page-title"><?php echo esc_html( ucwords( str_replace( '-', ' ', $route ) ) ); ?></h1>
+                <div class="stv-empty">This SmartToolz section is ready for its feature implementation.</div>
+            <?php endif; ?>
         </div>
-        <?php wp_footer(); ?>
-    </body>
-    </html>
     <?php
+    get_footer();
     exit;
 }
 

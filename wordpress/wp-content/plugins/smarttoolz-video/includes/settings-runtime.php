@@ -33,16 +33,10 @@ function smarttoolz_video_runtime_upload_guard() {
 }
 add_action( 'template_redirect', 'smarttoolz_video_runtime_upload_guard', 0 );
 
-function smarttoolz_video_runtime_remove_legacy_auth_submenu() {
-    remove_submenu_page( 'edit.php?post_type=st_video', 'smarttoolz-video-auth' );
-}
-add_action( 'admin_menu', 'smarttoolz_video_runtime_remove_legacy_auth_submenu', 99 );
-
 /**
- * Normalize tabbed settings before WordPress persists them. Each tab submits
- * only its own controls, so merge those controls into the already-saved option.
- * The third filter argument is the original value before sanitization, which
- * preserves the distinction between an unchecked checkbox and a missing field.
+ * Preserve values across tabbed settings and explicitly persist OFF states.
+ * Each tab posts only its own controls, so merge the submitted tab into the
+ * existing option rather than letting the absent controls reset to defaults.
  */
 function smarttoolz_video_settings_preserve_tab_values( $value, $option, $original_value ) {
     if ( 'smarttoolz_video_settings' !== $option || ! is_array( $original_value ) ) { return $value; }
@@ -57,28 +51,26 @@ function smarttoolz_video_settings_preserve_tab_values( $value, $option, $origin
         }
     }
 
-    $active = isset( $_POST['smarttoolz_video_settings_tab'] )
-        ? sanitize_key( wp_unslash( $_POST['smarttoolz_video_settings_tab'] ) )
-        : '';
+    // Determine the active tab from the fields that it necessarily submits.
+    $tab_bools = array();
+    if ( isset( $original_value['preload'] ) || isset( $original_value['volume'] ) || isset( $original_value['speed'] ) ) {
+        $tab_bools = array( 'autoplay', 'muted', 'loop', 'theater', 'pip', 'double_click_fullscreen' );
+    } elseif ( isset( $original_value['page_columns'] ) || isset( $original_value['accent_color'] ) || isset( $original_value['frontend_profile'] ) ) {
+        $tab_bools = array( 'frontend_profile' );
+    } elseif ( isset( $original_value['icon_cdn_url'] ) || isset( $original_value['icon_enabled'] ) ) {
+        $tab_bools = array( 'icon_enabled' );
+    } elseif ( isset( $original_value['google_client_id'] ) || isset( $original_value['google_enabled'] ) ) {
+        $tab_bools = array( 'google_enabled' );
+    } elseif ( isset( $original_value['upload_status'] ) || isset( $original_value['upload_max_mb'] ) || isset( $original_value['allowed_formats'] ) || isset( $original_value['uploads_enabled'] ) || isset( $original_value['require_thumbnail'] ) ) {
+        $tab_bools = array( 'uploads_enabled', 'require_thumbnail' );
+    } else {
+        // Features tab contains only booleans.
+        $tab_bools = array( 'likes_enabled', 'dislikes_enabled', 'subscriptions_enabled', 'history_enabled', 'sharing_enabled', 'comments_enabled' );
+    }
 
-    $tab_bools = array(
-        'general'  => array( 'frontend_profile' ),
-        'player'   => array( 'autoplay', 'muted', 'loop', 'theater', 'pip', 'double_click_fullscreen' ),
-        'icons'    => array( 'icon_enabled' ),
-        'auth'     => array( 'google_enabled' ),
-        'uploads'  => array( 'uploads_enabled', 'require_thumbnail' ),
-        'features' => array( 'likes_enabled', 'dislikes_enabled', 'subscriptions_enabled', 'history_enabled', 'sharing_enabled', 'comments_enabled' ),
-        'pages'    => array(),
-    );
-
-    // The submit-time helper below normally sends 0 for unchecked checkboxes.
-    // Keep this fallback for browsers or cached admin markup where that helper
-    // did not run before the request was submitted.
-    if ( isset( $tab_bools[ $active ] ) ) {
-        foreach ( $tab_bools[ $active ] as $key ) {
-            if ( ! array_key_exists( $key, $original_value ) ) {
-                $merged[ $key ] = 0;
-            }
+    foreach ( $tab_bools as $key ) {
+        if ( ! array_key_exists( $key, $original_value ) ) {
+            $merged[ $key ] = 0;
         }
     }
 
@@ -86,11 +78,7 @@ function smarttoolz_video_settings_preserve_tab_values( $value, $option, $origin
 }
 add_filter( 'sanitize_option_smarttoolz_video_settings', 'smarttoolz_video_settings_preserve_tab_values', 10, 3 );
 
-/**
- * Add the active tab marker and make unchecked checkboxes explicit 0 values at
- * submit time. This prevents an unchecked option from being indistinguishable
- * from a setting belonging to another tab.
- */
+/** Add active tab marker to the form. */
 function smarttoolz_video_settings_active_tab_field() {
     $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
     if ( ! $screen || false === strpos( (string) $screen->id, 'smarttoolz-video' ) ) { return; }
@@ -106,18 +94,6 @@ function smarttoolz_video_settings_active_tab_field() {
             i.value=' . wp_json_encode( $tab ) . ';
             f.appendChild(i);
         }
-        f.addEventListener("submit",function(){
-            f.querySelectorAll("input[type=checkbox][name]").forEach(function(cb){
-                if(cb.checked)return;
-                if(f.querySelector("input[type=hidden][data-stv-unchecked=\\\"1\\\"][name=\\\""+CSS.escape(cb.name)+"\\\"]"))return;
-                var h=document.createElement("input");
-                h.type="hidden";
-                h.name=cb.name;
-                h.value="0";
-                h.setAttribute("data-stv-unchecked","1");
-                f.appendChild(h);
-            });
-        });
     });
     </script>';
 }

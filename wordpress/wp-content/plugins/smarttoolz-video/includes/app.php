@@ -7,6 +7,15 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Return the WordPress site's configured name for frontend branding.
+ * SmartToolz remains only the product/attribution name in the footer.
+ */
+function smarttoolz_video_site_name() {
+    $name = trim( (string) get_bloginfo( 'name' ) );
+    return '' !== $name ? $name : 'Video';
+}
+
 function smarttoolz_video_account_card_link( $route, $label, $description ) {
     $url = smarttoolz_video_route_url( $route );
     return '<a class="stv-account-link" href="' . esc_url( $url ) . '"><strong>' . esc_html( $label ) . '</strong><span>' . esc_html( $description ) . '</span></a>';
@@ -15,6 +24,7 @@ function smarttoolz_video_account_card_link( $route, $label, $description ) {
 function smarttoolz_video_render_app() {
     $route = get_query_var( 'smarttoolz_video_route', 'home' );
     $id    = get_query_var( 'smarttoolz_video_id', '' );
+    $site_name = smarttoolz_video_site_name();
 
     get_header();
     ?>
@@ -30,7 +40,7 @@ function smarttoolz_video_render_app() {
             <?php if ( 'home' === $route ) : ?>
                 <section class="stv-home">
                     <div class="stv-section-heading">
-                        <div><h1 class="stv-page-title">SmartToolz Videos</h1><p class="stv-section-subtitle">Discover videos from creators on SmartToolz.</p></div>
+                        <div><h1 class="stv-page-title"><?php echo esc_html( $site_name ); ?> Videos</h1><p class="stv-section-subtitle">Discover videos from creators on <?php echo esc_html( $site_name ); ?>.</p></div>
                         <?php if ( is_user_logged_in() && smarttoolz_video_route_enabled( 'your-videos' ) ) : ?><a class="stv-view-link" href="<?php echo esc_url( smarttoolz_video_route_url( 'your-videos' ) ); ?>">Your uploads</a><?php endif; ?>
                     </div>
                     <div class="stv-video-grid">
@@ -75,7 +85,7 @@ function smarttoolz_video_render_app() {
                             <div class="stv-account-avatar"><?php echo esc_html( $initial ); ?></div>
                         <?php endif; ?>
                         <div class="stv-account-identity">
-                            <span class="stv-eyebrow">SmartToolz Account</span>
+                            <span class="stv-eyebrow"><?php echo esc_html( $site_name ); ?> Account</span>
                             <h1 class="stv-page-title"><?php echo esc_html( $user->display_name ?: $user->user_login ); ?></h1>
                             <p>@<?php echo esc_html( $handle ); ?></p>
                             <div class="stv-account-actions">
@@ -86,7 +96,7 @@ function smarttoolz_video_render_app() {
                     </div>
 
                     <div class="stv-account-section-heading">
-                        <h2>Your SmartToolz</h2>
+                        <h2>Your <?php echo esc_html( $site_name ); ?></h2>
                         <p>Manage your channel and personal video activity.</p>
                     </div>
                     <section class="stv-account-grid">
@@ -98,7 +108,7 @@ function smarttoolz_video_render_app() {
                         echo smarttoolz_video_account_card_link( 'watch-later', 'Watch Later', 'Videos you saved to watch later' );
                         echo smarttoolz_video_account_card_link( 'liked-videos', 'Liked Videos', 'Videos you have liked' );
                         echo smarttoolz_video_account_card_link( 'playlists', 'Playlists', 'Manage your saved collections' );
-                        echo smarttoolz_video_account_card_link( 'settings', 'Settings', 'Manage your SmartToolz preferences' );
+                        echo smarttoolz_video_account_card_link( 'settings', 'Settings', 'Manage your ' . $site_name . ' preferences' );
                         ?>
                     </section>
                 </section>
@@ -109,7 +119,7 @@ function smarttoolz_video_render_app() {
                 <div class="stv-empty">This account section is ready for its feature implementation.</div>
             <?php else : ?>
                 <h1 class="stv-page-title"><?php echo esc_html( ucwords( str_replace( '-', ' ', $route ) ) ); ?></h1>
-                <div class="stv-empty">This SmartToolz section is ready for its feature implementation.</div>
+                <div class="stv-empty">This <?php echo esc_html( $site_name ); ?> section is ready for its feature implementation.</div>
             <?php endif; ?>
         </div>
     <?php

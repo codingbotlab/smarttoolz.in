@@ -36,10 +36,12 @@ function smarttoolz_video_handle_uploaded_file( $field_name, $existing_attachmen
     require_once ABSPATH . 'wp-admin/includes/image.php';
     $allowed = array('video/mp4'=>'mp4','video/webm'=>'webm','video/ogg'=>'ogv','video/quicktime'=>'mov','video/x-msvideo'=>'avi','video/x-matroska'=>'mkv');
     add_filter( 'upload_mimes', 'smarttoolz_video_upload_mimes' );
+    add_filter( 'wp_check_filetype_and_ext', 'smarttoolz_video_check_filetype_and_ext', 10, 5 );
     $upload = wp_handle_upload( $_FILES[ $field_name ], array('test_form'=>false,'mimes'=>$allowed) );
+    remove_filter( 'wp_check_filetype_and_ext', 'smarttoolz_video_check_filetype_and_ext', 10 );
     remove_filter( 'upload_mimes', 'smarttoolz_video_upload_mimes' );
     if ( isset( $upload['error'] ) ) return new WP_Error( 'upload_error', $upload['error'] );
-    $filetype = wp_check_filetype( basename( $upload['file'] ), null );
+    $filetype = wp_check_filetype( basename( $upload['file'] ), $allowed );
     $attachment_id = wp_insert_attachment(array('post_mime_type'=>$filetype['type'] ?: 'video/mp4','post_title'=>sanitize_text_field(pathinfo($upload['file'],PATHINFO_FILENAME)),'post_content'=>'','post_status'=>'inherit'), $upload['file']);
     if ( is_wp_error( $attachment_id ) ) { @unlink( $upload['file'] ); return $attachment_id; }
     wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
@@ -49,6 +51,28 @@ function smarttoolz_video_handle_uploaded_file( $field_name, $existing_attachmen
 
 function smarttoolz_video_upload_mimes( $mimes ) {
     $mimes['mp4']='video/mp4'; $mimes['webm']='video/webm'; $mimes['ogv']='video/ogg'; $mimes['mov']='video/quicktime'; $mimes['avi']='video/x-msvideo'; $mimes['mkv']='video/x-matroska'; return $mimes;
+}
+
+/**
+ * WordPress can reject video uploads when the server-reported MIME type is
+ * missing or differs from the browser-provided MIME. For this plugin we
+ * explicitly allow only the video extensions declared above.
+ */
+function smarttoolz_video_check_filetype_and_ext( $data, $file, $filename, $mimes, $real_mime ) {
+    $extension = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+    $allowed = array(
+        'mp4'  => 'video/mp4',
+        'webm' => 'video/webm',
+        'ogv'  => 'video/ogg',
+        'mov'  => 'video/quicktime',
+        'avi'  => 'video/x-msvideo',
+        'mkv'  => 'video/x-matroska',
+    );
+    if ( isset( $allowed[ $extension ] ) ) {
+        $data['ext']  = $extension;
+        $data['type'] = $allowed[ $extension ];
+    }
+    return $data;
 }
 
 function smarttoolz_video_creator_styles() {

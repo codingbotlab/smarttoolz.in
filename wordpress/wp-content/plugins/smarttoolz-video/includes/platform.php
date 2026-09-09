@@ -37,3 +37,4 @@ add_action('wp_enqueue_scripts','stv_platform_assets',20);
 
 // Page automation is activation-only. It is intentionally not loaded during normal requests.
 require_once dirname(__FILE__) . '/auto-pages.php';
+require_once dirname(__FILE__) . '/admin-video-columns.php';

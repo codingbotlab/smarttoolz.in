@@ -22,7 +22,7 @@ function smarttoolz_video_theme_target_dir() {
 }
 
 function smarttoolz_video_theme_source_version() {
-    return '1.1.0';
+    return '1.2.0';
 }
 
 function smarttoolz_video_theme_source_files() {

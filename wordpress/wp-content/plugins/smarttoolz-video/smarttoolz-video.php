@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SmartToolz Video
  * Description: SmartToolz Video platform. WordPress core remains untouched; application behavior is provided by this plugin.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: SmartToolz
  * Text Domain: smarttoolz-video
  */
@@ -11,10 +11,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'SMARTTOOLZ_VIDEO_VERSION', '1.3.1' );
+define( 'SMARTTOOLZ_VIDEO_VERSION', '1.3.2' );
 define( 'SMARTTOOLZ_VIDEO_FILE', __FILE__ );
 define( 'SMARTTOOLZ_VIDEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
+
+// Hide the native WordPress admin bar from ordinary SmartToolz users.
+// Administrators retain the normal WordPress admin bar.
+function smarttoolz_video_show_admin_bar( $show ) {
+    return current_user_can( 'manage_options' ) ? $show : false;
+}
+add_filter( 'show_admin_bar', 'smarttoolz_video_show_admin_bar', 99 );
 
 // Load each application module exactly once, independent of theme state.
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/videos.php';

@@ -20,14 +20,18 @@ function smarttoolz_video_should_load_player_assets() {
 
 function smarttoolz_video_enqueue_player_assets() {
     if ( ! smarttoolz_video_should_load_player_assets() ) { return; }
-    wp_enqueue_style( 'smarttoolz-video', SMARTTOOLZ_VIDEO_URL . 'assets/css/video.css', array(), SMARTTOOLZ_VIDEO_VERSION . '.player5' );
-    wp_enqueue_style( 'smarttoolz-video-thumbnails', SMARTTOOLZ_VIDEO_URL . 'assets/css/thumbnails.css', array( 'smarttoolz-video' ), SMARTTOOLZ_VIDEO_VERSION . '.thumb3' );
-    wp_enqueue_style( 'smarttoolz-video-youtube-ui', SMARTTOOLZ_VIDEO_URL . 'assets/css/youtube-ui.css', array( 'smarttoolz-video-thumbnails' ), SMARTTOOLZ_VIDEO_VERSION . '.yt2' );
-    wp_enqueue_script( 'smarttoolz-video', SMARTTOOLZ_VIDEO_URL . 'assets/js/video.js', array(), SMARTTOOLZ_VIDEO_VERSION . '.player5', true );
+    wp_enqueue_style( 'smarttoolz-video', SMARTTOOLZ_VIDEO_URL . 'assets/css/video.css', array(), SMARTTOOLZ_VIDEO_VERSION . '.player6' );
+    wp_enqueue_style( 'smarttoolz-video-thumbnails', SMARTTOOLZ_VIDEO_URL . 'assets/css/thumbnails.css', array( 'smarttoolz-video' ), SMARTTOOLZ_VIDEO_VERSION . '.thumb4' );
+    wp_enqueue_style( 'smarttoolz-video-youtube-ui', SMARTTOOLZ_VIDEO_URL . 'assets/css/youtube-ui.css', array( 'smarttoolz-video-thumbnails' ), SMARTTOOLZ_VIDEO_VERSION . '.yt3' );
+    wp_enqueue_script( 'smarttoolz-video', SMARTTOOLZ_VIDEO_URL . 'assets/js/video.js', array(), SMARTTOOLZ_VIDEO_VERSION . '.player6', true );
     $settings = function_exists( 'smarttoolz_video_settings' ) ? smarttoolz_video_settings() : array();
     wp_localize_script( 'smarttoolz-video', 'stvPlatform', array(
         'ajax' => admin_url( 'admin-ajax.php' ),
         'nonce' => wp_create_nonce( 'stv_platform' ),
+        'shareEnabled' => ! empty( $settings['sharing_enabled'] ),
+        'likesEnabled' => ! empty( $settings['likes_enabled'] ),
+        'dislikesEnabled' => ! empty( $settings['dislikes_enabled'] ),
+        'subscriptionsEnabled' => ! empty( $settings['subscriptions_enabled'] ),
         'player' => array(
             'autoplay' => ! empty( $settings['autoplay'] ),
             'muted' => ! empty( $settings['muted'] ),

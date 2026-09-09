@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/videos.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/routing.php';
 
 function smarttoolz_video_page_definitions() {
     return array(
@@ -102,11 +103,37 @@ function smarttoolz_video_page_sync_cron() {
 add_action( 'smarttoolz_video_page_sync_event', 'smarttoolz_video_sync_pages' );
 
 function smarttoolz_video_register_routes() {
-    add_rewrite_rule( '^video/?$', 'index.php?smarttoolz_video_route=home', 'top' );
-    add_rewrite_rule( '^video/watch/([^/]+)/?$', 'index.php?smarttoolz_video_route=watch&smarttoolz_video_id=$matches[1]', 'top' );
-    add_rewrite_rule( '^video/account/(edit-profile|comments|badges|podcasts|privacy)/?$', 'index.php?smarttoolz_video_route=account-$matches[1]', 'top' );
-    add_rewrite_rule( '^video/(shorts|subscriptions|search|channel|playlists|watch-later|history|liked|your-videos|trending|explore|live|memberships|purchases|account|login|signup|forgot-password|settings|notifications|upload)/?$', 'index.php?smarttoolz_video_route=$matches[1]', 'top' );
-    add_rewrite_rule( '^video/channel/(videos|shorts|live)/?$', 'index.php?smarttoolz_video_route=channel-$matches[1]', 'top' );
+    $settings = smarttoolz_video_route_settings();
+    $path = function( $key ) use ( $settings ) { return smarttoolz_video_routing_preview_path( $key, $settings ); };
+
+    if ( smarttoolz_video_route_enabled( 'home' ) ) {
+        add_rewrite_rule( '^' . preg_quote( $path( 'home' ), '/' ) . '/?$', 'index.php?smarttoolz_video_route=home', 'top' );
+    }
+    if ( smarttoolz_video_route_enabled( 'watch' ) ) {
+        add_rewrite_rule( '^' . preg_quote( $path( 'watch' ), '/' ) . '/([^/]+)/?$', 'index.php?smarttoolz_video_route=watch&smarttoolz_video_id=$matches[1]', 'top' );
+    }
+
+    foreach ( smarttoolz_video_route_defaults() as $key => $route ) {
+        if ( in_array( $key, array( 'home', 'watch', 'channel-videos', 'channel-shorts', 'channel-live', 'edit-profile', 'comments', 'badges', 'podcasts', 'privacy' ), true ) ) { continue; }
+        if ( ! smarttoolz_video_route_enabled( $key ) ) { continue; }
+        $route_path = $path( $key );
+        if ( '' !== $route_path ) {
+            add_rewrite_rule( '^' . preg_quote( $route_path, '/' ) . '/?$', 'index.php?smarttoolz_video_route=' . $key, 'top' );
+        }
+    }
+
+    if ( smarttoolz_video_route_enabled( 'channel' ) ) {
+        foreach ( array( 'channel-videos', 'channel-shorts', 'channel-live' ) as $key ) {
+            if ( ! smarttoolz_video_route_enabled( $key ) ) { continue; }
+            add_rewrite_rule( '^' . preg_quote( $path( $key ), '/' ) . '/?$', 'index.php?smarttoolz_video_route=' . $key, 'top' );
+        }
+    }
+    if ( smarttoolz_video_route_enabled( 'account' ) ) {
+        foreach ( array( 'edit-profile', 'comments', 'badges', 'podcasts', 'privacy' ) as $key ) {
+            if ( ! smarttoolz_video_route_enabled( $key ) ) { continue; }
+            add_rewrite_rule( '^' . preg_quote( $path( $key ), '/' ) . '/?$', 'index.php?smarttoolz_video_route=account-' . $key, 'top' );
+        }
+    }
 }
 add_action( 'init', 'smarttoolz_video_register_routes' );
 
@@ -114,10 +141,20 @@ function smarttoolz_video_register_query_vars( $vars ) { $vars[] = 'smarttoolz_v
 add_filter( 'query_vars', 'smarttoolz_video_register_query_vars' );
 function smarttoolz_video_is_route() { return (bool) get_query_var( 'smarttoolz_video_route' ); }
 function smarttoolz_video_route_url( $route = 'home', $id = '' ) {
-    $base = home_url( '/video/' );
-    if ( 'watch' === $route && '' !== $id ) { return trailingslashit( $base . 'watch/' . rawurlencode( (string) $id ) ); }
-    if ( 'home' !== $route ) { return trailingslashit( $base . trim( str_replace( '-', '/', (string) $route ), '/' ) . '/' ); }
-    return $base;
+    $settings = smarttoolz_video_route_settings();
+    $base = home_url( '/' . trim( $settings['home']['slug'], '/' ) . '/' );
+    if ( 'watch' === $route && '' !== $id ) {
+        return trailingslashit( $base . trim( $settings['watch']['slug'], '/' ) . '/' . rawurlencode( (string) $id ) );
+    }
+    if ( isset( $settings[ $route ] ) ) {
+        return trailingslashit( home_url( '/' . smarttoolz_video_routing_preview_path( $route, $settings ) . '/' ) );
+    }
+    // Backward-compatible support for the existing account-card route strings.
+    $legacy = array( 'account/edit-profile' => 'edit-profile', 'account/comments' => 'comments', 'account/badges' => 'badges', 'account/podcasts' => 'podcasts', 'account/privacy' => 'privacy' );
+    if ( isset( $legacy[ $route ] ) && isset( $settings[ $legacy[ $route ] ] ) ) {
+        return trailingslashit( home_url( '/' . smarttoolz_video_routing_preview_path( $legacy[ $route ], $settings ) . '/' ) );
+    }
+    return trailingslashit( $base . trim( str_replace( '-', '/', (string) $route ), '/' ) . '/' );
 }
 
 function smarttoolz_video_activate_plugin() {

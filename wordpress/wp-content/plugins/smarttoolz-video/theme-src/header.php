@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
                 <button class="stv-brand__menu" type="button" aria-label="Open menu">☰</button>
                 <a class="stv-brand" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>">
                     <span class="stv-brand__mark">▶</span>
-                    <span class="stv-brand__text">SmartToolz</span>
+                    <span class="stv-brand__text"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
                 </a>
             </div>
             <form class="stv-search" method="get" action="<?php echo esc_url( smarttoolz_video_theme_search_url() ); ?>">

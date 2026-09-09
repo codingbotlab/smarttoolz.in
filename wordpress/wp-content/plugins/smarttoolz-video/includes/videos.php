@@ -61,7 +61,7 @@ function smarttoolz_video_creator_styles() {
 add_action( 'wp_head', 'smarttoolz_video_creator_styles', 30 );
 
 function smarttoolz_video_manage_page() {
-    if ( ! is_user_logged_in() ) { wp_safe_redirect( wp_login_url( smarttoolz_video_route_url( 'your-videos' ) ) ); exit; }
+    if ( ! is_user_logged_in() ) { wp_safe_redirect( smarttoolz_video_route_url( 'login' ) ); exit; }
     $user_id=get_current_user_id(); $notice=''; $error='';
     if ( isset($_POST['stv_delete_video'],$_POST['stv_delete_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stv_delete_nonce'])),'stv_delete_video') ) { $result=smarttoolz_video_delete_owned_video(absint($_POST['stv_delete_video'])); if(is_wp_error($result)){$error=$result->get_error_message();}else{$notice='Video deleted successfully.';} }
     if ( isset($_POST['stv_save_video'],$_POST['stv_video_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stv_video_nonce'])),'stv_save_video') ) {

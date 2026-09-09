@@ -9,53 +9,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function smarttoolz_video_page_definitions() {
     return array(
-        'home' => array( 'title' => 'Home', 'slug' => 'video' ),
-        'shorts' => array( 'title' => 'Shorts', 'slug' => 'video/shorts' ),
-        'subscriptions' => array( 'title' => 'Subscriptions', 'slug' => 'video/subscriptions' ),
-        'search' => array( 'title' => 'Search Results', 'slug' => 'video/search' ),
-        'channel' => array( 'title' => 'Channel', 'slug' => 'video/channel' ),
-        'channel-videos' => array( 'title' => 'Channel Videos', 'slug' => 'video/channel/videos' ),
-        'channel-shorts' => array( 'title' => 'Channel Shorts', 'slug' => 'video/channel/shorts' ),
-        'channel-live' => array( 'title' => 'Channel Live', 'slug' => 'video/channel/live' ),
-        'playlists' => array( 'title' => 'Playlists', 'slug' => 'video/playlists' ),
-        'watch-later' => array( 'title' => 'Watch Later', 'slug' => 'video/watch-later' ),
-        'history' => array( 'title' => 'History', 'slug' => 'video/history' ),
-        'liked-videos' => array( 'title' => 'Liked Videos', 'slug' => 'video/liked' ),
-        'your-videos' => array( 'title' => 'Your Videos', 'slug' => 'video/your-videos' ),
-        'trending' => array( 'title' => 'Trending', 'slug' => 'video/trending' ),
-        'explore' => array( 'title' => 'Explore', 'slug' => 'video/explore' ),
-        'live' => array( 'title' => 'Live', 'slug' => 'video/live' ),
-        'memberships' => array( 'title' => 'Memberships', 'slug' => 'video/memberships' ),
-        'purchases' => array( 'title' => 'Purchases', 'slug' => 'video/purchases' ),
-        'login' => array( 'title' => 'Login', 'slug' => 'video/login' ),
-        'signup' => array( 'title' => 'Sign Up', 'slug' => 'video/signup' ),
-        'forgot-password' => array( 'title' => 'Forgot Password', 'slug' => 'video/forgot-password' ),
-        'settings' => array( 'title' => 'Settings', 'slug' => 'video/settings' ),
-        'notifications' => array( 'title' => 'Notifications', 'slug' => 'video/notifications' ),
-        'upload' => array( 'title' => 'Upload Video', 'slug' => 'video/upload' ),
+        'home' => array( 'title' => 'Home', 'slug' => 'video', 'parent' => '' ),
+        'shorts' => array( 'title' => 'Shorts', 'slug' => 'shorts', 'parent' => 'home' ),
+        'subscriptions' => array( 'title' => 'Subscriptions', 'slug' => 'subscriptions', 'parent' => 'home' ),
+        'search' => array( 'title' => 'Search Results', 'slug' => 'search', 'parent' => 'home' ),
+        'channel' => array( 'title' => 'Channel', 'slug' => 'channel', 'parent' => 'home' ),
+        'channel-videos' => array( 'title' => 'Channel Videos', 'slug' => 'videos', 'parent' => 'channel' ),
+        'channel-shorts' => array( 'title' => 'Channel Shorts', 'slug' => 'shorts', 'parent' => 'channel' ),
+        'channel-live' => array( 'title' => 'Channel Live', 'slug' => 'live', 'parent' => 'channel' ),
+        'playlists' => array( 'title' => 'Playlists', 'slug' => 'playlists', 'parent' => 'home' ),
+        'watch-later' => array( 'title' => 'Watch Later', 'slug' => 'watch-later', 'parent' => 'home' ),
+        'history' => array( 'title' => 'History', 'slug' => 'history', 'parent' => 'home' ),
+        'liked-videos' => array( 'title' => 'Liked Videos', 'slug' => 'liked', 'parent' => 'home' ),
+        'your-videos' => array( 'title' => 'Your Videos', 'slug' => 'your-videos', 'parent' => 'home' ),
+        'trending' => array( 'title' => 'Trending', 'slug' => 'trending', 'parent' => 'home' ),
+        'explore' => array( 'title' => 'Explore', 'slug' => 'explore', 'parent' => 'home' ),
+        'live' => array( 'title' => 'Live', 'slug' => 'live', 'parent' => 'home' ),
+        'memberships' => array( 'title' => 'Memberships', 'slug' => 'memberships', 'parent' => 'home' ),
+        'purchases' => array( 'title' => 'Purchases', 'slug' => 'purchases', 'parent' => 'home' ),
+        'login' => array( 'title' => 'Login', 'slug' => 'login', 'parent' => 'home' ),
+        'signup' => array( 'title' => 'Sign Up', 'slug' => 'signup', 'parent' => 'home' ),
+        'forgot-password' => array( 'title' => 'Forgot Password', 'slug' => 'forgot-password', 'parent' => 'home' ),
+        'settings' => array( 'title' => 'Settings', 'slug' => 'settings', 'parent' => 'home' ),
+        'notifications' => array( 'title' => 'Notifications', 'slug' => 'notifications', 'parent' => 'home' ),
+        'upload' => array( 'title' => 'Upload Video', 'slug' => 'upload', 'parent' => 'home' ),
     );
+}
+
+function smarttoolz_video_page_path( $key, $definitions = null ) {
+    $definitions = is_array( $definitions ) ? $definitions : smarttoolz_video_page_definitions();
+    if ( ! isset( $definitions[ $key ] ) ) {
+        return '';
+    }
+
+    $page = $definitions[ $key ];
+    if ( empty( $page['parent'] ) ) {
+        return trim( $page['slug'], '/' );
+    }
+
+    $parent_path = smarttoolz_video_page_path( $page['parent'], $definitions );
+    return trim( $parent_path . '/' . trim( $page['slug'], '/' ), '/' );
 }
 
 function smarttoolz_video_sync_pages() {
     $pages = smarttoolz_video_page_definitions();
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     $changed = false;
+    $resolving = array();
 
     foreach ( $pages as $key => $page ) {
         $page_id = isset( $ids[ $key ] ) ? absint( $ids[ $key ] ) : 0;
         $valid = $page_id && 'page' === get_post_type( $page_id ) && 'trash' !== get_post_status( $page_id );
 
         if ( ! $valid ) {
-            $existing = get_page_by_path( $page['slug'], OBJECT, 'page' );
+            $path = smarttoolz_video_page_path( $key, $pages );
+            $existing = get_page_by_path( $path, OBJECT, 'page' );
             if ( $existing && 'trash' !== get_post_status( $existing->ID ) ) {
                 $page_id = $existing->ID;
             } else {
                 $page_id = wp_insert_post(
                     array(
-                        'post_title' => $page['title'],
-                        'post_name' => basename( $page['slug'] ),
-                        'post_status' => 'publish',
-                        'post_type' => 'page',
+                        'post_title'   => $page['title'],
+                        'post_name'    => $page['slug'],
+                        'post_parent'  => 0,
+                        'post_status'  => 'publish',
+                        'post_type'    => 'page',
                         'post_content' => '<!-- SmartToolz Video page: ' . esc_html( $key ) . ' -->',
                     ),
                     true
@@ -68,15 +86,49 @@ function smarttoolz_video_sync_pages() {
             $ids[ $key ] = absint( $page_id );
             $changed = true;
         }
+
+        if ( ! $page_id || in_array( $key, $resolving, true ) ) {
+            continue;
+        }
+
+        $resolving[] = $key;
+        $parent_id = 0;
+        if ( ! empty( $page['parent'] ) && isset( $ids[ $page['parent'] ] ) ) {
+            $parent_id = absint( $ids[ $page['parent'] ] );
+        }
+
+        $updates = array();
+        if ( absint( get_post_field( 'post_parent', $page_id ) ) !== $parent_id ) {
+            $updates['ID'] = $page_id;
+            $updates['post_parent'] = $parent_id;
+        }
+        if ( get_post_field( 'post_name', $page_id ) !== $page['slug'] ) {
+            $updates['ID'] = $page_id;
+            $updates['post_name'] = $page['slug'];
+        }
+        if ( get_the_title( $page_id ) !== $page['title'] ) {
+            $updates['ID'] = $page_id;
+            $updates['post_title'] = $page['title'];
+        }
+
+        if ( ! empty( $updates ) ) {
+            wp_update_post( $updates );
+            $changed = true;
+        }
     }
 
     if ( $changed || ! get_option( 'smarttoolz_video_page_ids', false ) ) {
         update_option( 'smarttoolz_video_page_ids', $ids, false );
     }
+
+    smarttoolz_video_set_static_homepage( false );
 }
 
-function smarttoolz_video_set_static_homepage() {
-    smarttoolz_video_sync_pages();
+function smarttoolz_video_set_static_homepage( $sync = true ) {
+    if ( $sync ) {
+        smarttoolz_video_sync_pages();
+    }
+
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     $home_id = isset( $ids['home'] ) ? absint( $ids['home'] ) : 0;
 
@@ -84,8 +136,15 @@ function smarttoolz_video_set_static_homepage() {
         return false;
     }
 
-    update_option( 'show_on_front', 'page' );
-    update_option( 'page_on_front', $home_id );
+    $updated = false;
+    if ( 'page' !== get_option( 'show_on_front', 'posts' ) ) {
+        update_option( 'show_on_front', 'page' );
+        $updated = true;
+    }
+    if ( absint( get_option( 'page_on_front', 0 ) ) !== $home_id ) {
+        update_option( 'page_on_front', $home_id );
+        $updated = true;
+    }
 
     return true;
 }
@@ -134,6 +193,7 @@ function smarttoolz_video_activate_plugin() {
     smarttoolz_video_register_routes();
     smarttoolz_video_sync_pages();
     smarttoolz_video_page_sync_cron();
+    smarttoolz_video_set_static_homepage( false );
     flush_rewrite_rules();
 }
 

@@ -33,29 +33,22 @@ function smarttoolz_video_ads_settings() {
     $saved = get_option( 'smarttoolz_video_ads_settings', array() );
     $settings = wp_parse_args( is_array( $saved ) ? $saved : array(), smarttoolz_video_ads_defaults() );
     $defaults = smarttoolz_video_ads_defaults();
-
     foreach ( $defaults['creatives'] as $kind => $unused ) {
         if ( empty( $settings['creatives'][ $kind ] ) || ! is_array( $settings['creatives'][ $kind ] ) ) {
             $settings['creatives'][ $kind ] = array();
         }
     }
-
     return $settings;
 }
 
 function smarttoolz_video_ads_register_settings() {
-    register_setting(
-        'smarttoolz_video_ads_group',
-        'smarttoolz_video_ads_settings',
-        array( 'sanitize_callback' => 'smarttoolz_video_ads_sanitize_settings' )
-    );
+    register_setting( 'smarttoolz_video_ads_group', 'smarttoolz_video_ads_settings', array( 'sanitize_callback' => 'smarttoolz_video_ads_sanitize_settings' ) );
 }
 add_action( 'admin_init', 'smarttoolz_video_ads_register_settings' );
 
 function smarttoolz_video_ads_sanitize_settings( $input ) {
     $old = smarttoolz_video_ads_settings();
     $input = is_array( $input ) ? $input : array();
-
     return array(
         'enabled' => empty( $input['enabled'] ) ? 0 : 1,
         'pre_roll' => empty( $input['pre_roll'] ) ? 0 : 1,
@@ -72,33 +65,24 @@ function smarttoolz_video_ads_sanitize_settings( $input ) {
 }
 
 function smarttoolz_video_ads_admin_menu() {
-    add_submenu_page(
-        'smarttoolz',
-        'Ads Setup',
-        'Ads Setup',
-        'manage_options',
-        'smarttoolz-video-ads',
-        'smarttoolz_video_ads_settings_page'
-    );
+    add_submenu_page( 'smarttoolz', 'Ads Setup', 'Ads Setup', 'manage_options', 'smarttoolz-video-ads', 'smarttoolz_video_ads_settings_page' );
 }
 add_action( 'admin_menu', 'smarttoolz_video_ads_admin_menu', 27 );
 
-/**
- * Allow the ad formats in WordPress uploads as well as in the ad uploader.
- */
+/** Allow ad formats in WordPress uploads and the ad uploader. */
 function smarttoolz_video_ads_upload_mimes( $mimes ) {
-    $mimes['mp4']  = 'video/mp4';
-    $mimes['m4v']  = 'video/mp4';
+    $mimes['mp4'] = 'video/mp4';
+    $mimes['m4v'] = 'video/mp4';
     $mimes['webm'] = 'video/webm';
-    $mimes['ogv']  = 'video/ogg';
-    $mimes['ogg']  = 'video/ogg';
-    $mimes['mov']  = 'video/quicktime';
-    $mimes['avi']  = 'video/x-msvideo';
-    $mimes['jpg']  = 'image/jpeg';
+    $mimes['ogv'] = 'video/ogg';
+    $mimes['ogg'] = 'video/ogg';
+    $mimes['mov'] = 'video/quicktime';
+    $mimes['avi'] = 'video/x-msvideo';
+    $mimes['jpg'] = 'image/jpeg';
     $mimes['jpeg'] = 'image/jpeg';
-    $mimes['png']  = 'image/png';
+    $mimes['png'] = 'image/png';
     $mimes['webp'] = 'image/webp';
-    $mimes['gif']  = 'image/gif';
+    $mimes['gif'] = 'image/gif';
     return $mimes;
 }
 add_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes', 20 );
@@ -111,12 +95,10 @@ function smarttoolz_video_ads_check_filetype( $types, $file, $filename, $mimes, 
         'avi' => 'video/x-msvideo', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
         'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif',
     );
-
     if ( isset( $allowed[ $extension ] ) && ( empty( $types['type'] ) || empty( $types['ext'] ) ) ) {
         $types['ext'] = $extension;
         $types['type'] = $allowed[ $extension ];
     }
-
     return $types;
 }
 add_filter( 'wp_check_filetype_and_ext', 'smarttoolz_video_ads_check_filetype', 20, 5 );
@@ -125,7 +107,6 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
     if ( empty( $_FILES[ $field ]['name'] ) ) {
         return null;
     }
-
     if ( ! empty( $_FILES[ $field ]['error'] ) ) {
         return new WP_Error( 'ad_upload_error', 'Upload failed. Please choose a valid video or image file.' );
     }
@@ -133,31 +114,28 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
     require_once ABSPATH . 'wp-admin/includes/file.php';
     require_once ABSPATH . 'wp-admin/includes/image.php';
 
+    // IMPORTANT: wp_handle_upload() expects extension => MIME, not MIME => extension.
     $allowed = array(
-        'video/mp4' => 'mp4',
-        'video/webm' => 'webm',
-        'video/ogg' => 'ogv',
-        'video/quicktime' => 'mov',
-        'video/x-msvideo' => 'avi',
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
-        'image/gif' => 'gif',
+        'mp4' => 'video/mp4',
+        'm4v' => 'video/mp4',
+        'webm' => 'video/webm',
+        'ogv' => 'video/ogg',
+        'ogg' => 'video/ogg',
+        'mov' => 'video/quicktime',
+        'avi' => 'video/x-msvideo',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'webp' => 'image/webp',
+        'gif' => 'image/gif',
     );
 
-    $extension = strtolower( pathinfo( sanitize_file_name( $_FILES[ $field ]['name'] ), PATHINFO_EXTENSION ) );
-    $extension_map = array(
-        'mp4' => 'video/mp4', 'm4v' => 'video/mp4', 'webm' => 'video/webm',
-        'ogv' => 'video/ogg', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime',
-        'avi' => 'video/x-msvideo', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
-        'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif',
-    );
-
-    if ( ! isset( $extension_map[ $extension ] ) ) {
-        return new WP_Error( 'ad_upload_type', 'Unsupported ad file type. Use MP4, WebM, OGV, MOV, AVI, JPG, PNG, WebP or GIF.' );
+    $filename = sanitize_file_name( $_FILES[ $field ]['name'] );
+    $extension = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+    if ( ! isset( $allowed[ $extension ] ) ) {
+        return new WP_Error( 'ad_upload_type', 'Unsupported ad file type. Use MP4, M4V, WebM, OGV, OGG, MOV, AVI, JPG, PNG, WebP or GIF.' );
     }
 
-    add_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes', 30 );
     $upload = wp_handle_upload(
         $_FILES[ $field ],
         array(
@@ -165,13 +143,12 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
             'mimes' => $allowed,
         )
     );
-    remove_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes', 30 );
 
     if ( isset( $upload['error'] ) ) {
         return new WP_Error( 'ad_upload_error', $upload['error'] );
     }
 
-    $mime = $extension_map[ $extension ];
+    $mime = $allowed[ $extension ];
     $is_image = 0 === strpos( $mime, 'image/' );
     $attachment = wp_insert_attachment(
         array(
@@ -291,22 +268,24 @@ function smarttoolz_video_ads_settings_page() {
 
         <hr>
         <h2>Active Ads</h2>
-        <p>All uploaded creatives are listed here. Use Activate/Deactivate to control which ads can be shown.</p>
+        <p>Currently active creatives that can be displayed to visitors.</p>
         <table class="widefat striped" style="margin-bottom:30px">
             <thead><tr><th>Ad</th><th>Placement</th><th>Type</th><th>Status</th><th>Duration</th><th>Action</th></tr></thead>
             <tbody>
             <?php
-            $has_ads = false;
+            $active_count = 0;
             foreach ( $kinds as $kind => $label ) :
                 foreach ( $s['creatives'][ $kind ] as $i => $ad ) :
-                    $has_ads = true;
-                    $active = ! empty( $ad['active'] );
+                    if ( empty( $ad['active'] ) ) {
+                        continue;
+                    }
+                    $active_count++;
                     ?>
                     <tr>
                         <td><strong><?php echo esc_html( $ad['title'] ?: basename( parse_url( $ad['src'], PHP_URL_PATH ) ) ); ?></strong></td>
                         <td><?php echo esc_html( $label ); ?></td>
                         <td><?php echo esc_html( ucfirst( $ad['type'] ?? 'video' ) ); ?></td>
-                        <td><strong><?php echo $active ? 'Active' : 'Inactive'; ?></strong></td>
+                        <td><strong>Active</strong></td>
                         <td><?php echo esc_html( absint( $ad['duration'] ?? 10 ) ); ?>s</td>
                         <td>
                             <form method="post" style="display:inline-block">
@@ -314,27 +293,20 @@ function smarttoolz_video_ads_settings_page() {
                                 <input type="hidden" name="stv_ads_action" value="toggle">
                                 <input type="hidden" name="stv_ad_kind" value="<?php echo esc_attr( $kind ); ?>">
                                 <input type="hidden" name="stv_ad_index" value="<?php echo esc_attr( $i ); ?>">
-                                <button class="button" type="submit"><?php echo $active ? 'Deactivate' : 'Activate'; ?></button>
-                            </form>
-                            <form method="post" style="display:inline-block;margin-left:5px">
-                                <?php wp_nonce_field( 'stv_ads_save', 'stv_ads_nonce' ); ?>
-                                <input type="hidden" name="stv_ads_action" value="delete">
-                                <input type="hidden" name="stv_ad_kind" value="<?php echo esc_attr( $kind ); ?>">
-                                <input type="hidden" name="stv_ad_index" value="<?php echo esc_attr( $i ); ?>">
-                                <button class="button-link-delete" type="submit">Delete</button>
+                                <button class="button" type="submit">Deactivate</button>
                             </form>
                         </td>
                     </tr>
                 <?php endforeach;
             endforeach;
-            if ( ! $has_ads ) : ?>
-                <tr><td colspan="6">No ad creatives uploaded yet.</td></tr>
+            if ( ! $active_count ) : ?>
+                <tr><td colspan="6">No active ads yet.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
 
-        <h2>Upload Ad Creative</h2>
-        <p>Choose the placement below. Both video and image creatives are supported. No external ad URL is required.</p>
+        <h2>Ad Creatives</h2>
+        <p>Upload video or image creatives and choose where they will appear. No external ad URL is required.</p>
 
         <?php foreach ( $kinds as $kind => $label ) : ?>
             <div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px;margin:14px 0">
@@ -359,7 +331,6 @@ function smarttoolz_video_ads_settings_page() {
 
 function smarttoolz_video_ads_runtime_config() {
     $s = smarttoolz_video_ads_settings();
-
     if ( empty( $s['enabled'] ) ) {
         return array( 'enabled' => false );
     }
@@ -370,9 +341,8 @@ function smarttoolz_video_ads_runtime_config() {
         if ( empty( $s['creatives'][ $kind ] ) ) {
             continue;
         }
-
         foreach ( (array) $s['creatives'][ $kind ] as $ad ) {
-            if ( empty( $ad['src'] ) || isset( $ad['active'] ) && ! $ad['active'] ) {
+            if ( empty( $ad['src'] ) || ( isset( $ad['active'] ) && ! $ad['active'] ) ) {
                 continue;
             }
             $creatives[ $kind ][] = array(

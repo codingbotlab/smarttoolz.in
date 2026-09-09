@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function smarttoolz_video_account_card_link( $route, $label, $description ) {
-    $url = home_url( '/video/' . trim( str_replace( '-', '/', $route ), '/' ) . '/' );
+    $url = smarttoolz_video_route_url( $route );
     return '<a class="stv-account-link" href="' . esc_url( $url ) . '"><strong>' . esc_html( $label ) . '</strong><span>' . esc_html( $description ) . '</span></a>';
 }
 
@@ -20,18 +20,18 @@ function smarttoolz_video_render_app() {
     ?>
         <div class="stv-app" data-route="<?php echo esc_attr( $route ); ?>" data-video-id="<?php echo esc_attr( $id ); ?>">
             <div class="stv-chips">
-                <a class="stv-chip <?php echo 'home' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( home_url( '/video/' ) ); ?>">All</a>
-                <a class="stv-chip <?php echo 'shorts' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( home_url( '/video/shorts/' ) ); ?>">Shorts</a>
-                <a class="stv-chip <?php echo 'trending' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( home_url( '/video/trending/' ) ); ?>">Trending</a>
-                <a class="stv-chip <?php echo 'live' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( home_url( '/video/live/' ) ); ?>">Live</a>
-                <a class="stv-chip <?php echo 'subscriptions' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( home_url( '/video/subscriptions/' ) ); ?>">Subscriptions</a>
+                <?php if ( smarttoolz_video_route_enabled( 'home' ) ) : ?><a class="stv-chip <?php echo 'home' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( smarttoolz_video_route_url( 'home' ) ); ?>">All</a><?php endif; ?>
+                <?php if ( smarttoolz_video_route_enabled( 'shorts' ) ) : ?><a class="stv-chip <?php echo 'shorts' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( smarttoolz_video_route_url( 'shorts' ) ); ?>">Shorts</a><?php endif; ?>
+                <?php if ( smarttoolz_video_route_enabled( 'trending' ) ) : ?><a class="stv-chip <?php echo 'trending' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( smarttoolz_video_route_url( 'trending' ) ); ?>">Trending</a><?php endif; ?>
+                <?php if ( smarttoolz_video_route_enabled( 'live' ) ) : ?><a class="stv-chip <?php echo 'live' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( smarttoolz_video_route_url( 'live' ) ); ?>">Live</a><?php endif; ?>
+                <?php if ( smarttoolz_video_route_enabled( 'subscriptions' ) ) : ?><a class="stv-chip <?php echo 'subscriptions' === $route ? 'stv-chip--active' : ''; ?>" href="<?php echo esc_url( smarttoolz_video_route_url( 'subscriptions' ) ); ?>">Subscriptions</a><?php endif; ?>
             </div>
 
             <?php if ( 'home' === $route ) : ?>
                 <section class="stv-home">
                     <div class="stv-section-heading">
                         <div><h1 class="stv-page-title">SmartToolz Videos</h1><p class="stv-section-subtitle">Discover videos from creators on SmartToolz.</p></div>
-                        <?php if ( is_user_logged_in() ) : ?><a class="stv-view-link" href="<?php echo esc_url( smarttoolz_video_route_url( 'your-videos' ) ); ?>">Your uploads</a><?php endif; ?>
+                        <?php if ( is_user_logged_in() && smarttoolz_video_route_enabled( 'your-videos' ) ) : ?><a class="stv-view-link" href="<?php echo esc_url( smarttoolz_video_route_url( 'your-videos' ) ); ?>">Your uploads</a><?php endif; ?>
                     </div>
                     <div class="stv-video-grid">
                         <?php
@@ -61,12 +61,12 @@ function smarttoolz_video_render_app() {
                 <section class="stv-account-hero">
                     <?php if ( is_user_logged_in() ) : ?>
                         <div class="stv-account-avatar"><?php echo esc_html( strtoupper( substr( $user->display_name ?: $user->user_login, 0, 1 ) ) ); ?></div>
-                        <div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Hi, <?php echo esc_html( $user->display_name ?: $user->user_login ); ?></h1><p><?php echo esc_html( $user->user_email ); ?></p><a class="stv-button" href="<?php echo esc_url( home_url( '/video/account/edit-profile/' ) ); ?>">Edit profile</a></div>
-                    <?php else : ?><div class="stv-account-avatar">?</div><div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Sign in to SmartToolz</h1><p>Access your channel, subscriptions, playlists, history and personal settings.</p><a class="stv-button" href="<?php echo esc_url( home_url( '/video/login/' ) ); ?>">Sign in</a></div><?php endif; ?>
+                        <div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Hi, <?php echo esc_html( $user->display_name ?: $user->user_login ); ?></h1><p><?php echo esc_html( $user->user_email ); ?></p><a class="stv-button" href="<?php echo esc_url( smarttoolz_video_route_url( 'edit-profile' ) ); ?>">Edit profile</a></div>
+                    <?php else : ?><div class="stv-account-avatar">?</div><div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Sign in to SmartToolz</h1><p>Access your channel, subscriptions, playlists, history and personal settings.</p><a class="stv-button" href="<?php echo esc_url( smarttoolz_video_route_url( 'login' ) ); ?>">Sign in</a></div><?php endif; ?>
                 </section>
                 <section class="stv-account-grid">
                     <?php
-                    echo smarttoolz_video_account_card_link( 'account/edit-profile', 'Edit Profile', 'Name, avatar and profile details' );
+                    echo smarttoolz_video_account_card_link( 'edit-profile', 'Edit Profile', 'Name, avatar and profile details' );
                     echo smarttoolz_video_account_card_link( 'channel', 'Your Channel', 'Channel home, videos and live content' );
                     echo smarttoolz_video_account_card_link( 'subscriptions', 'Subscriptions', 'Channels and creators you follow' );
                     echo smarttoolz_video_account_card_link( 'playlists', 'Playlists', 'Manage your saved collections' );
@@ -74,10 +74,10 @@ function smarttoolz_video_render_app() {
                     echo smarttoolz_video_account_card_link( 'watch-later', 'Watch Later', 'Videos you saved for later' );
                     echo smarttoolz_video_account_card_link( 'liked-videos', 'Liked Videos', 'Videos you have liked' );
                     echo smarttoolz_video_account_card_link( 'your-videos', 'Your Videos', 'Manage the videos you publish' );
-                    echo smarttoolz_video_account_card_link( 'account/comments', 'Comments & Activity', 'Your comments and account activity' );
-                    echo smarttoolz_video_account_card_link( 'account/podcasts', 'Your Podcasts', 'Podcasts associated with your account' );
-                    echo smarttoolz_video_account_card_link( 'account/badges', 'Badges', 'Achievements and earned badges' );
-                    echo smarttoolz_video_account_card_link( 'account/privacy', 'Privacy & Your Data', 'Privacy and personal data controls' );
+                    echo smarttoolz_video_account_card_link( 'comments', 'Comments & Activity', 'Your comments and account activity' );
+                    echo smarttoolz_video_account_card_link( 'podcasts', 'Your Podcasts', 'Podcasts associated with your account' );
+                    echo smarttoolz_video_account_card_link( 'badges', 'Badges', 'Achievements and earned badges' );
+                    echo smarttoolz_video_account_card_link( 'privacy', 'Privacy & Your Data', 'Privacy and personal data controls' );
                     echo smarttoolz_video_account_card_link( 'settings', 'Settings', 'General SmartToolz preferences' );
                     echo smarttoolz_video_account_card_link( 'notifications', 'Notifications', 'Manage alerts and activity' );
                     ?>

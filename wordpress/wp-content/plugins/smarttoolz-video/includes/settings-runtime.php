@@ -32,3 +32,8 @@ function smarttoolz_video_runtime_upload_guard() {
     }
 }
 add_action( 'template_redirect', 'smarttoolz_video_runtime_upload_guard', 0 );
+
+function smarttoolz_video_runtime_remove_legacy_auth_submenu() {
+    remove_submenu_page( 'edit.php?post_type=st_video', 'smarttoolz-video-auth' );
+}
+add_action( 'admin_menu', 'smarttoolz_video_runtime_remove_legacy_auth_submenu', 99 );

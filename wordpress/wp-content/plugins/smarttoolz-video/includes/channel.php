@@ -213,6 +213,14 @@ function smarttoolz_video_channel_register_about_route() {
 }
 add_action( 'init', 'smarttoolz_video_channel_register_about_route', 11 );
 
+function smarttoolz_video_channel_about_route_flush() {
+    if ( get_option( 'smarttoolz_video_channel_about_route_version' ) !== '1' ) {
+        flush_rewrite_rules( false );
+        update_option( 'smarttoolz_video_channel_about_route_version', '1', false );
+    }
+}
+add_action( 'init', 'smarttoolz_video_channel_about_route_flush', 20 );
+
 function smarttoolz_video_channel_banner_url( $id ) {
     $u = get_user_meta( $id, 'smarttoolz_channel_banner_url', true );
     if ( $u ) { return esc_url( $u ); }
@@ -249,12 +257,16 @@ function smarttoolz_video_channel_render( $route ) {
     $videos = get_posts( array( 'post_type' => 'stv_video', 'post_status' => 'publish', 'author' => $u->ID, 'posts_per_page' => 24, 'orderby' => 'date', 'order' => 'DESC' ) );
     $count = count( get_posts( array( 'post_type' => 'stv_video', 'post_status' => 'publish', 'author' => $u->ID, 'posts_per_page' => -1, 'fields' => 'ids' ) ) );
     $subs = smarttoolz_video_channel_subscribers( $u->ID );
+    $route_settings = smarttoolz_video_route_settings();
+    $base = trim( $route_settings['home']['slug'], '/' );
+    $about_slug = isset( $route_settings['channel-about']['slug'] ) ? trim( $route_settings['channel-about']['slug'], '/' ) : 'about';
+    $handle = sanitize_title( ltrim( $profile['handle'], '@' ) );
     $tabs = array(
         'channel' => array( 'Home', smarttoolz_video_route_url( 'channel', $profile['handle'] ) ),
         'channel-videos' => array( 'Videos', smarttoolz_video_route_url( 'channel-videos', $profile['handle'] ) ),
         'channel-shorts' => array( 'Shorts', smarttoolz_video_route_url( 'channel-shorts', $profile['handle'] ) ),
         'channel-live' => array( 'Live', smarttoolz_video_route_url( 'channel-live', $profile['handle'] ) ),
-        'channel-about' => array( 'About', trailingslashit( home_url( '/' . trim( smarttoolz_video_route_settings()['home']['slug'], '/' ) . '/@' . sanitize_title( ltrim( $profile['handle'], '@' ) ) . '/' . trim( smarttoolz_video_route_settings()['channel-about']['slug'], '/' ) ) ) ),
+        'channel-about' => array( 'About', trailingslashit( home_url( '/' . $base . '/@' . $handle . '/' . $about_slug ) ) ),
     );
     ?>
     <section class="stv-channel">

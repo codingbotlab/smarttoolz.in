@@ -58,22 +58,50 @@ function smarttoolz_video_page_settings() {
         return;
     }
 
+    $notice = '';
     if ( isset( $_POST['stv_sync_pages'], $_POST['stv_sync_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_sync_nonce'] ) ), 'stv_sync_pages' ) ) {
         smarttoolz_video_sync_pages();
-        echo '<div class="notice notice-success is-dismissible"><p>SmartToolz Video pages synced successfully.</p></div>';
+        $notice = '<div class="notice notice-success is-dismissible"><p>SmartToolz Video pages synced successfully.</p></div>';
+    }
+
+    if ( isset( $_POST['stv_set_home'], $_POST['stv_home_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_home_nonce'] ) ), 'stv_set_home' ) ) {
+        if ( smarttoolz_video_set_static_homepage() ) {
+            $notice = '<div class="notice notice-success is-dismissible"><p>SmartToolz Home is now the static homepage.</p></div>';
+        } else {
+            $notice = '<div class="notice notice-error is-dismissible"><p>Could not set SmartToolz Home as the static homepage.</p></div>';
+        }
     }
 
     $definitions = smarttoolz_video_page_definitions();
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
+    $home_id = isset( $ids['home'] ) ? absint( $ids['home'] ) : 0;
+    $is_static_home = 'page' === get_option( 'show_on_front', 'posts' ) && $home_id && absint( get_option( 'page_on_front', 0 ) ) === $home_id;
     ?>
     <div class="wrap">
         <h1>Page Settings</h1>
-        <p>Manage and repair all SmartToolz Video pages. WordPress core files are not modified.</p>
+        <p>Manage and repair all SmartToolz pages. WordPress core files are not modified.</p>
+
+        <?php echo $notice; ?>
+
+        <div style="margin:16px 0;padding:16px 18px;background:#fff;border:1px solid #ccd0d4;max-width:900px;">
+            <h2 style="margin-top:0;">Static Homepage</h2>
+            <p style="margin-bottom:12px;">Set the managed <strong>Home</strong> page as the site's front page in one click.</p>
+            <?php if ( $is_static_home ) : ?>
+                <p><strong style="color:#008a20;">Active:</strong> SmartToolz Home is currently the static homepage.</p>
+            <?php else : ?>
+                <p><strong>Current:</strong> <?php echo esc_html( 'page' === get_option( 'show_on_front', 'posts' ) ? 'Another static page' : 'Latest posts' ); ?></p>
+            <?php endif; ?>
+            <form method="post">
+                <?php wp_nonce_field( 'stv_set_home', 'stv_home_nonce' ); ?>
+                <input type="hidden" name="stv_set_home" value="1">
+                <?php submit_button( $is_static_home ? 'Home Page Already Set' : 'Set SmartToolz Home as Homepage', 'primary', 'submit', false, $is_static_home ? array( 'disabled' => 'disabled' ) : array() ); ?>
+            </form>
+        </div>
 
         <form method="post">
             <?php wp_nonce_field( 'stv_sync_pages', 'stv_sync_nonce' ); ?>
             <input type="hidden" name="stv_sync_pages" value="1">
-            <?php submit_button( 'Sync / Repair Pages', 'primary', 'submit', false ); ?>
+            <?php submit_button( 'Sync / Repair Pages', 'secondary', 'submit', false ); ?>
         </form>
 
         <h2>Managed Pages</h2>

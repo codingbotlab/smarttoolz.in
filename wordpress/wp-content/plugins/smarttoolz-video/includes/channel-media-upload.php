@@ -1,7 +1,7 @@
 <?php
 /**
  * SmartToolz Video channel image uploads.
- * Adds real multipart file inputs for creator profile/banner images and
+ * Adds real multipart file inputs for creator profile/banner/watermark images and
  * processes them before the existing channel profile save handler runs.
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
@@ -37,8 +37,10 @@ function smarttoolz_video_channel_process_uploaded_images( $input, $files ) {
     $map = array(
         'stv_channel_avatar'       => 'stv_channel_avatar',
         'stv_channel_banner'       => 'stv_channel_banner',
+        'stv_channel_watermark'    => 'stv_channel_watermark',
         'stv_admin_channel_avatar' => 'stv_admin_channel_avatar',
         'stv_admin_channel_banner' => 'stv_admin_channel_banner',
+        'stv_admin_channel_watermark' => 'stv_admin_channel_watermark',
     );
     foreach ( $map as $file_key => $post_key ) {
         if ( empty( $files[ $file_key ]['name'] ) ) { continue; }
@@ -85,10 +87,11 @@ function smarttoolz_video_channel_upload_fields_frontend() {
             var nonce = form.querySelector('input[name="stv_channel_settings_nonce"]');
             if (!nonce) return;
 
-            function addFileInput(urlName, fileName, label) {
+            function addFileInput(urlName, fileName, label, helpText) {
                 if (form.querySelector('input[type="file"][name="' + fileName + '"]')) return;
                 var urlInput = form.querySelector('input[name="' + urlName + '"]');
                 if (!urlInput) return;
+                var container = urlInput.closest('tr') || urlInput.parentNode;
                 var wrap = document.createElement('div');
                 wrap.className = 'stv-channel-settings__upload';
                 wrap.style.marginTop = '10px';
@@ -111,10 +114,24 @@ function smarttoolz_video_channel_upload_fields_frontend() {
                 input.style.color = '#fff';
                 wrap.appendChild(title);
                 wrap.appendChild(input);
-                urlInput.parentNode.appendChild(wrap);
+                if ( helpText ) {
+                    var help = document.createElement('div');
+                    help.textContent = helpText;
+                    help.style.fontSize = '12px';
+                    help.style.marginTop = '6px';
+                    help.style.color = '#888';
+                    wrap.appendChild(help);
+                }
+                if ( container.parentNode ) {
+                    container.parentNode.insertBefore(wrap, container.nextSibling);
+                    if ( 'stv_channel_watermark' === urlName ) container.style.display = 'none';
+                } else {
+                    urlInput.parentNode.appendChild(wrap);
+                }
             }
-            addFileInput('stv_channel_avatar', 'stv_channel_avatar', 'Upload profile picture from device');
-            addFileInput('stv_channel_banner', 'stv_channel_banner', 'Upload banner image from device');
+            addFileInput('stv_channel_avatar', 'stv_channel_avatar', 'Upload profile picture from device', 'Recommended: 800 × 800 pixels (1:1).');
+            addFileInput('stv_channel_banner', 'stv_channel_banner', 'Upload banner image from device', 'Recommended: 2560 × 1440 pixels (16:9).');
+            addFileInput('stv_channel_watermark', 'stv_channel_watermark', 'Upload watermark image from device', 'Recommended: 150 × 150 pixels.');
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
         else setup();
@@ -137,23 +154,40 @@ function smarttoolz_video_channel_upload_fields_admin() {
             if (!form) return;
             form.setAttribute('enctype', 'multipart/form-data');
             form.encoding = 'multipart/form-data';
-            function addFileInput(urlName, fileName, label) {
+            function addFileInput(urlName, fileName, label, helpText) {
                 if (form.querySelector('input[type="file"][name="' + fileName + '"]')) return;
                 var urlInput = form.querySelector('input[name="' + urlName + '"]');
                 if (!urlInput) return;
-                var wrap = document.createElement('p');
+                var container = urlInput.closest('tr') || urlInput.parentNode;
+                var wrap = document.createElement('div');
+                wrap.className = 'stv-channel-settings__upload';
+                wrap.style.marginTop = '10px';
                 var text = document.createElement('strong');
-                text.textContent = label + ': ';
+                text.textContent = label;
                 var input = document.createElement('input');
                 input.type = 'file';
                 input.name = fileName;
                 input.accept = '.jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp';
+                input.style.display = 'block';
+                input.style.marginTop = '6px';
                 wrap.appendChild(text);
                 wrap.appendChild(input);
-                urlInput.parentNode.appendChild(wrap);
+                if ( helpText ) {
+                    var help = document.createElement('span');
+                    help.textContent = ' ' + helpText;
+                    help.style.color = '#646970';
+                    wrap.appendChild(help);
+                }
+                if ( container.parentNode ) {
+                    container.parentNode.insertBefore(wrap, container.nextSibling);
+                    if ( 'stv_admin_channel_watermark' === urlName ) container.style.display = 'none';
+                } else {
+                    urlInput.parentNode.appendChild(wrap);
+                }
             }
-            addFileInput('stv_admin_channel_avatar', 'stv_admin_channel_avatar', 'Upload profile picture');
-            addFileInput('stv_admin_channel_banner', 'stv_admin_channel_banner', 'Upload banner image');
+            addFileInput('stv_admin_channel_avatar', 'stv_admin_channel_avatar', 'Upload profile picture', 'Recommended: 800 × 800 pixels (1:1).');
+            addFileInput('stv_admin_channel_banner', 'stv_admin_channel_banner', 'Upload banner image', 'Recommended: 2560 × 1440 pixels (16:9).');
+            addFileInput('stv_admin_channel_watermark', 'stv_admin_channel_watermark', 'Upload watermark image', 'Recommended: 150 × 150 pixels.');
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
         else setup();

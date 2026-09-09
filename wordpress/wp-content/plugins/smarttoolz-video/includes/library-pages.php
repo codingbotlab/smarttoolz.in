@@ -59,11 +59,6 @@ function smarttoolz_video_home_shortcode() {
                 <h1>Watch, share and create.</h1>
                 <p>Discover videos and follow creators on SmartToolz.</p>
             </div>
-            <?php if ( is_user_logged_in() ) : ?>
-                <div class="stv-home-actions">
-                    <a class="stv-upload-cta" href="<?php echo esc_url( smarttoolz_video_page_link( 'video-upload' ) ); ?>">Upload video</a>
-                </div>
-            <?php endif; ?>
         </section>
 
         <section class="stv-home-section">

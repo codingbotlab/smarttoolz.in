@@ -22,6 +22,14 @@ function smarttoolz_video_admin_bar_visibility( $show ) {
 }
 add_filter( 'show_admin_bar', 'smarttoolz_video_admin_bar_visibility', 99 );
 
+/* Load the public creator-channel renderer bundled with the plugin. */
+if ( defined( 'SMARTTOOLZ_VIDEO_DIR' ) ) {
+    $smarttoolz_channel_file = SMARTTOOLZ_VIDEO_DIR . 'includes/channel.php';
+    if ( file_exists( $smarttoolz_channel_file ) ) {
+        require_once $smarttoolz_channel_file;
+    }
+}
+
 function smarttoolz_video_theme_page_url( $key, $fallback = '' ) {
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     $page_id = isset( $ids[ $key ] ) ? absint( $ids[ $key ] ) : 0;

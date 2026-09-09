@@ -22,11 +22,13 @@ function smarttoolz_video_theme_target_dir() {
 }
 
 function smarttoolz_video_theme_source_files() {
-    return array( 'style.css', 'functions.php', 'header.php', 'footer.php', 'index.php', 'front-page.php' );
+    return array( 'style.css', 'functions.php', 'header.php', 'footer.php', 'index.php', 'front-page.php', 'page.php' );
 }
 
 function smarttoolz_video_theme_installed() {
-    return file_exists( smarttoolz_video_theme_target_dir() . 'style.css' ) && file_exists( smarttoolz_video_theme_target_dir() . 'functions.php' );
+    return file_exists( smarttoolz_video_theme_target_dir() . 'style.css' )
+        && file_exists( smarttoolz_video_theme_target_dir() . 'functions.php' )
+        && file_exists( smarttoolz_video_theme_target_dir() . 'page.php' );
 }
 
 function smarttoolz_video_install_theme() {

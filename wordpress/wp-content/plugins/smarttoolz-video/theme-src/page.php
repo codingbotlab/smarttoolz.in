@@ -4,11 +4,11 @@ get_header();
 ?>
 <section class="stv-home">
     <div class="stv-chips">
-        <a class="stv-chip stv-chip--active" href="#">All</a>
-        <a class="stv-chip" href="<?php echo esc_url( home_url( '/shorts/' ) ); ?>">Shorts</a>
-        <a class="stv-chip" href="<?php echo esc_url( home_url( '/trending/' ) ); ?>">Trending</a>
-        <a class="stv-chip" href="<?php echo esc_url( home_url( '/live/' ) ); ?>">Live</a>
-        <a class="stv-chip" href="<?php echo esc_url( home_url( '/subscriptions/' ) ); ?>">Subscriptions</a>
+        <a class="stv-chip stv-chip--active" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>">All</a>
+        <a class="stv-chip" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'shorts', home_url( '/video/shorts/' ) ) ); ?>">Shorts</a>
+        <a class="stv-chip" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'trending', home_url( '/video/trending/' ) ) ); ?>">Trending</a>
+        <a class="stv-chip" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'live', home_url( '/video/live/' ) ) ); ?>">Live</a>
+        <a class="stv-chip" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'subscriptions', home_url( '/video/subscriptions/' ) ) ); ?>">Subscriptions</a>
     </div>
 
     <div class="stv-section-heading">
@@ -16,7 +16,7 @@ get_header();
             <h1 class="stv-page-title">SmartToolz Videos</h1>
             <p class="stv-section-subtitle">Discover videos from creators on SmartToolz.</p>
         </div>
-        <a class="stv-view-link" href="<?php echo esc_url( home_url( '/trending/' ) ); ?>">Explore more</a>
+        <a class="stv-view-link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'trending', home_url( '/video/trending/' ) ) ); ?>">Explore more</a>
     </div>
 
     <div class="stv-video-grid stv-video-grid--showcase">
@@ -32,7 +32,7 @@ get_header();
         foreach ( $cards as $card ) :
             ?>
             <article class="stv-video-card stv-video-card--placeholder">
-                <a class="stv-video-card__thumb" href="#" aria-label="<?php echo esc_attr( $card['title'] ); ?>">
+                <a class="stv-video-card__thumb" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>" aria-label="<?php echo esc_attr( $card['title'] ); ?>">
                     <span class="stv-video-card__play">▶</span>
                     <span class="stv-video-card__duration"><?php echo esc_html( $card['duration'] ); ?></span>
                 </a>

@@ -30,15 +30,31 @@ function smarttoolz_video_ads_defaults() {
 }
 
 function smarttoolz_video_ads_settings() {
-    $saved = get_option( 'smarttoolz_video_ads_settings', array() );
-    $settings = wp_parse_args( is_array( $saved ) ? $saved : array(), smarttoolz_video_ads_defaults() );
     $defaults = smarttoolz_video_ads_defaults();
+    $saved = get_option( 'smarttoolz_video_ads_settings', array() );
+    $settings = wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults );
+
+    // Keep creatives in their own option so saving the settings form can never
+    // accidentally replace or clear uploaded ads.
+    $saved_creatives = get_option( 'smarttoolz_video_ads_creatives', null );
+    if ( is_array( $saved_creatives ) ) {
+        $settings['creatives'] = $saved_creatives;
+    }
+
     foreach ( $defaults['creatives'] as $kind => $unused ) {
         if ( empty( $settings['creatives'][ $kind ] ) || ! is_array( $settings['creatives'][ $kind ] ) ) {
             $settings['creatives'][ $kind ] = array();
         }
     }
+
     return $settings;
+}
+
+function smarttoolz_video_ads_save_creatives( $creatives ) {
+    if ( ! is_array( $creatives ) ) {
+        return false;
+    }
+    return update_option( 'smarttoolz_video_ads_creatives', $creatives, false );
 }
 
 function smarttoolz_video_ads_register_settings() {
@@ -114,7 +130,7 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
     require_once ABSPATH . 'wp-admin/includes/file.php';
     require_once ABSPATH . 'wp-admin/includes/image.php';
 
-    // IMPORTANT: wp_handle_upload() expects extension => MIME, not MIME => extension.
+    // wp_handle_upload() expects extension => MIME.
     $allowed = array(
         'mp4' => 'video/mp4',
         'm4v' => 'video/mp4',
@@ -217,6 +233,7 @@ function smarttoolz_video_ads_settings_page() {
                     wp_delete_attachment( absint( $ad['attachment_id'] ), true );
                 }
                 array_splice( $s['creatives'][ $kind ], $index, 1 );
+                smarttoolz_video_ads_save_creatives( $s['creatives'] );
                 update_option( 'smarttoolz_video_ads_settings', $s, false );
                 $notice = smarttoolz_video_ads_page_notice( 'Ad creative deleted.' );
             }
@@ -224,6 +241,7 @@ function smarttoolz_video_ads_settings_page() {
             $index = absint( $_POST['stv_ad_index'] ?? -1 );
             if ( isset( $s['creatives'][ $kind ][ $index ] ) ) {
                 $s['creatives'][ $kind ][ $index ]['active'] = empty( $s['creatives'][ $kind ][ $index ]['active'] ) ? 1 : 0;
+                smarttoolz_video_ads_save_creatives( $s['creatives'] );
                 update_option( 'smarttoolz_video_ads_settings', $s, false );
                 $notice = smarttoolz_video_ads_page_notice( 'Ad status updated.' );
             }
@@ -233,12 +251,15 @@ function smarttoolz_video_ads_settings_page() {
                 $notice = smarttoolz_video_ads_page_notice( $new->get_error_message(), true );
             } elseif ( $new ) {
                 $s['creatives'][ $kind ][] = $new;
+                smarttoolz_video_ads_save_creatives( $s['creatives'] );
                 update_option( 'smarttoolz_video_ads_settings', $s, false );
                 $notice = smarttoolz_video_ads_page_notice( 'Ad creative uploaded successfully.' );
             }
         } else {
             $s = smarttoolz_video_ads_sanitize_settings( $_POST['smarttoolz_video_ads_settings'] ?? array() );
             update_option( 'smarttoolz_video_ads_settings', $s, false );
+            // Explicitly preserve creatives when settings are saved.
+            smarttoolz_video_ads_save_creatives( $s['creatives'] );
             $notice = smarttoolz_video_ads_page_notice( 'Ads settings saved.' );
         }
     }

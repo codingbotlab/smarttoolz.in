@@ -5,7 +5,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function smarttoolz_video_theme_assets() {
-    wp_enqueue_style( 'smarttoolz-video-theme', get_stylesheet_uri(), array(), '1.1.0' );
+    wp_enqueue_style( 'smarttoolz-video-theme', get_stylesheet_uri(), array(), '1.2.4' );
 }
 add_action( 'wp_enqueue_scripts', 'smarttoolz_video_theme_assets' );
 
@@ -15,6 +15,12 @@ function smarttoolz_video_theme_setup() {
     add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
 }
 add_action( 'after_setup_theme', 'smarttoolz_video_theme_setup' );
+
+/* Only WordPress administrators should see the native WP admin bar. */
+function smarttoolz_video_admin_bar_visibility( $show ) {
+    return current_user_can( 'manage_options' );
+}
+add_filter( 'show_admin_bar', 'smarttoolz_video_admin_bar_visibility', 99 );
 
 function smarttoolz_video_theme_page_url( $key, $fallback = '' ) {
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );

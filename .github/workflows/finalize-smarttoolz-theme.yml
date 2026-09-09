@@ -6,33 +6,23 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   finalize:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Remove retired theme framework
+      - name: Validate bundled theme
         shell: bash
         run: |
           set -euo pipefail
-          ROOT="wordpress/wp-content/themes/smarttoolz-theme"
+          ROOT="wordpress/wp-content/plugins/smarttoolz-video/theme-src"
           test -f "$ROOT/functions.php"
           test -f "$ROOT/style.css"
-          rm -rf "$ROOT/admin" "$ROOT/inc"
-
-      - name: Validate theme files
-        shell: bash
-        run: |
-          set -euo pipefail
-          ROOT="wordpress/wp-content/themes/smarttoolz-theme"
-          test ! -d "$ROOT/admin"
-          test ! -d "$ROOT/inc"
+          test -f "$ROOT/header.php"
+          test -f "$ROOT/footer.php"
           find "$ROOT" -type f -name '*.php' -print0 | while IFS= read -r -d '' file; do
             php -l "$file" >/dev/null || { echo "PHP syntax error: $file"; exit 1; }
           done
@@ -40,15 +30,4 @@ jobs:
             echo 'Retired runtime identifiers remain.'
             exit 1
           fi
-
-      - name: Commit finalized theme
-        shell: bash
-        run: |
-          set -euo pipefail
-          ROOT="wordpress/wp-content/themes/smarttoolz-theme"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A "$ROOT"
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Finalize clean standalone SmartToolz theme'
-          git push origin HEAD:main
+          echo 'Bundled SmartToolz Video theme passed validation.'

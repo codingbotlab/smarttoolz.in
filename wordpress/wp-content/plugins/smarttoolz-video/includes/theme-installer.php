@@ -5,8 +5,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-require_once SMARTTOOLZ_VIDEO_DIR . 'video-settings.php';
-
 function smarttoolz_video_theme_name() {
     return 'SmartToolz Video Theme';
 }
@@ -24,7 +22,7 @@ function smarttoolz_video_theme_target_dir() {
 }
 
 function smarttoolz_video_theme_source_version() {
-    return '1.2.0';
+    return '1.2.1';
 }
 
 function smarttoolz_video_theme_source_files() {

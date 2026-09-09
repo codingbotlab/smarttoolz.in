@@ -62,13 +62,17 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
             </div>
             <div class="stv-sidebar__section">
                 <div class="stv-sidebar__label">You</div>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'account', home_url( '/video/account/' ) ) ); ?>"><span class="stv-sidebar__icon">◎</span><span>Your account</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_channel_url() ); ?>"><span class="stv-sidebar__icon">◉</span><span>Your channel</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'history', home_url( '/video/history/' ) ) ); ?>"><span class="stv-sidebar__icon">◷</span><span>History</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'liked-videos', home_url( '/video/liked/' ) ) ); ?>"><span class="stv-sidebar__icon">♡</span><span>Liked videos</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'playlists', home_url( '/video/playlists/' ) ) ); ?>"><span class="stv-sidebar__icon">☷</span><span>Playlists</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'watch-later', home_url( '/video/watch-later/' ) ) ); ?>"><span class="stv-sidebar__icon">◴</span><span>Watch later</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'your-videos', home_url( '/video/your-videos/' ) ) ); ?>"><span class="stv-sidebar__icon">▸</span><span>Your videos</span></a>
+                <?php if ( is_user_logged_in() ) : ?>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'account', home_url( '/video/account/' ) ) ); ?>"><span class="stv-sidebar__icon">◎</span><span>Your account</span></a>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_channel_url() ); ?>"><span class="stv-sidebar__icon">◉</span><span>Your channel</span></a>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'history', home_url( '/video/history/' ) ) ); ?>"><span class="stv-sidebar__icon">◷</span><span>History</span></a>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'liked-videos', home_url( '/video/liked/' ) ) ); ?>"><span class="stv-sidebar__icon">♡</span><span>Liked videos</span></a>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'playlists', home_url( '/video/playlists/' ) ) ); ?>"><span class="stv-sidebar__icon">☷</span><span>Playlists</span></a>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'watch-later', home_url( '/video/watch-later/' ) ) ); ?>"><span class="stv-sidebar__icon">◴</span><span>Watch later</span></a>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'your-videos', home_url( '/video/your-videos/' ) ) ); ?>"><span class="stv-sidebar__icon">▸</span><span>Your videos</span></a>
+                <?php else : ?>
+                    <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'login', home_url( '/video/login/' ) ) ); ?>"><span class="stv-sidebar__icon">◎</span><span>Sign in</span></a>
+                <?php endif; ?>
             </div>
             <div class="stv-sidebar__section">
                 <div class="stv-sidebar__label">Explore</div>

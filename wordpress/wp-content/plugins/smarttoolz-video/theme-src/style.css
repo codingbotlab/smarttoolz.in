@@ -2,7 +2,7 @@
 Theme Name: SmartToolz Video Theme
 Theme URI: https://smarttoolz.in/
 Description: YouTube-inspired video-sharing theme for WordPress sites.
-Version: 1.3.0
+Version: 1.3.1
 Author: SmartToolz
 Text Domain: smarttoolz-video-theme
 */
@@ -13,5 +13,6 @@ Text Domain: smarttoolz-video-theme
 @media(max-width:900px){.stv-header__inner{grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:0 14px}.stv-brand__menu{display:none}.stv-brand{min-width:auto}.stv-search{max-width:none}.stv-layout{display:block}.stv-sidebar{display:none}.stv-main{padding:16px 14px 50px}.stv-video-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}.stv-header__actions .stv-header__button:not(.stv-header__button--primary){display:none}.stv-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stv-account-menu__panel{right:-8px;width:300px}}
 @media(max-width:620px){.stv-header__inner{grid-template-columns:auto 1fr auto}.stv-brand__text{display:none}.stv-search input{height:38px;padding:0 13px}.stv-search button{width:48px;height:38px}.stv-header__icon{width:36px;height:36px}.stv-header__button{padding:7px 11px}.stv-main{padding-left:12px;padding-right:12px}.stv-video-grid{grid-template-columns:1fr}.stv-page-title{font-size:22px}.stv-section-heading{align-items:center}.stv-account-hero{align-items:flex-start;padding:18px;gap:14px}.stv-account-avatar{width:64px;height:64px;flex-basis:64px;font-size:24px}.stv-account-grid{grid-template-columns:1fr}.stv-account-menu__panel{position:fixed;right:10px;top:56px;width:calc(100vw - 20px);max-width:330px}}
 
-/* Channel customization uses the full available content width. */
-.stv-channel-settings{width:100%;max-width:none;margin:0 auto}
+/* Channel customization must use the full available content width. */
+.stv-channel-settings{width:100%;max-width:none !important;margin:0}
+.stv-channel-settings__panel{width:100%;max-width:none !important}

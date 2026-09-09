@@ -21,18 +21,39 @@ require_once SMARTTOOLZ_VIDEO_DIR . 'includes/app.php';
 
 function smarttoolz_video_admin_menu() {
     add_menu_page(
-        'SmartToolz Video',
-        'SmartToolz Video',
+        'SmartToolz',
+        'SmartToolz',
         'manage_options',
-        'smarttoolz-video',
-        'smarttoolz_video_admin_page',
+        'smarttoolz',
+        'smarttoolz_video_dashboard_page',
         'dashicons-video-alt3',
         25
+    );
+
+    add_submenu_page(
+        'smarttoolz',
+        'Page Settings',
+        'Page Settings',
+        'manage_options',
+        'smarttoolz-video-pages',
+        'smarttoolz_video_page_settings'
     );
 }
 add_action( 'admin_menu', 'smarttoolz_video_admin_menu' );
 
-function smarttoolz_video_admin_page() {
+function smarttoolz_video_dashboard_page() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    ?>
+    <div class="wrap">
+        <h1>SmartToolz</h1>
+        <p>SmartToolz Video platform dashboard.</p>
+    </div>
+    <?php
+}
+
+function smarttoolz_video_page_settings() {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
@@ -46,8 +67,8 @@ function smarttoolz_video_admin_page() {
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     ?>
     <div class="wrap">
-        <h1>SmartToolz Video</h1>
-        <p>All video-platform pages are managed by this plugin. WordPress core files are not modified.</p>
+        <h1>Page Settings</h1>
+        <p>Manage and repair all SmartToolz Video pages. WordPress core files are not modified.</p>
 
         <form method="post">
             <?php wp_nonce_field( 'stv_sync_pages', 'stv_sync_nonce' ); ?>
@@ -57,7 +78,14 @@ function smarttoolz_video_admin_page() {
 
         <h2>Managed Pages</h2>
         <table class="widefat striped">
-            <thead><tr><th>Section</th><th>Page ID</th><th>Status</th><th>URL</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Section</th>
+                    <th>Page ID</th>
+                    <th>Status</th>
+                    <th>URL</th>
+                </tr>
+            </thead>
             <tbody>
             <?php foreach ( $definitions as $key => $page ) :
                 $id = isset( $ids[ $key ] ) ? absint( $ids[ $key ] ) : 0;

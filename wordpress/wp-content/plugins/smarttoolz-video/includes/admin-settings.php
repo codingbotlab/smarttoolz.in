@@ -6,14 +6,14 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function smarttoolz_video_platform_settings_defaults() {
     return array(
-        'custom_login_enabled'       => 1,
-        'custom_registration_enabled'=> 1,
-        'google_login_enabled'       => 1,
-        'default_role'               => 'subscriber',
-        'minimum_password_length'    => 8,
-        'allow_username_login'       => 1,
-        'allow_email_login'          => 1,
-        'show_admin_bar_for_users'   => 0,
+        'custom_login_enabled'        => 1,
+        'custom_registration_enabled' => 1,
+        'google_login_enabled'        => 1,
+        'default_role'                => 'subscriber',
+        'minimum_password_length'     => 8,
+        'allow_username_login'        => 1,
+        'allow_email_login'           => 1,
+        'show_admin_bar_for_users'    => 0,
     );
 }
 
@@ -95,3 +95,43 @@ function smarttoolz_video_platform_auth_gate() {
     }
 }
 add_action( 'template_redirect', 'smarttoolz_video_platform_auth_gate', 1 );
+
+function smarttoolz_video_platform_auth_form_gate() {
+    if ( ! isset( $_POST['stv_auth_action'] ) ) { return; }
+    $action = sanitize_key( wp_unslash( $_POST['stv_auth_action'] ) );
+    $route = get_query_var( 'smarttoolz_video_route', '' );
+    $s = smarttoolz_video_platform_settings();
+    if ( 'login' === $action && 'login' === $route ) {
+        $identifier = isset( $_POST['stv_login_identifier'] ) ? sanitize_text_field( wp_unslash( $_POST['stv_login_identifier'] ) ) : '';
+        if ( is_email( $identifier ) && empty( $s['allow_email_login'] ) ) {
+            wp_safe_redirect( add_query_arg( 'stv_auth_error', 'email_login_disabled', smarttoolz_video_route_url( 'login' ) ) );
+            exit;
+        }
+        if ( ! is_email( $identifier ) && empty( $s['allow_username_login'] ) ) {
+            wp_safe_redirect( add_query_arg( 'stv_auth_error', 'username_login_disabled', smarttoolz_video_route_url( 'login' ) ) );
+            exit;
+        }
+    }
+    if ( 'register' === $action && 'signup' === $route ) {
+        $password = isset( $_POST['stv_register_password'] ) ? (string) wp_unslash( $_POST['stv_register_password'] ) : '';
+        if ( strlen( $password ) < absint( $s['minimum_password_length'] ) ) {
+            wp_safe_redirect( add_query_arg( 'stv_auth_error', 'weak_password', smarttoolz_video_route_url( 'signup' ) ) );
+            exit;
+        }
+    }
+}
+add_action( 'init', 'smarttoolz_video_platform_auth_form_gate', 1 );
+
+function smarttoolz_video_platform_filter_default_role( $value ) {
+    $s = smarttoolz_video_platform_settings();
+    return ! empty( $s['default_role'] ) ? $s['default_role'] : $value;
+}
+add_filter( 'option_default_role', 'smarttoolz_video_platform_filter_default_role' );
+
+function smarttoolz_video_platform_filter_google_auth_settings( $value ) {
+    $value = is_array( $value ) ? $value : array();
+    $s = smarttoolz_video_platform_settings();
+    $value['google_enabled'] = empty( $s['google_login_enabled'] ) ? 0 : 1;
+    return $value;
+}
+add_filter( 'option_smarttoolz_video_auth_settings', 'smarttoolz_video_platform_filter_google_auth_settings' );

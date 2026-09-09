@@ -27,6 +27,12 @@ function smarttoolz_video_page_definitions() {
         'live' => array( 'title' => 'Live', 'slug' => 'live', 'parent' => 'home' ),
         'memberships' => array( 'title' => 'Memberships', 'slug' => 'memberships', 'parent' => 'home' ),
         'purchases' => array( 'title' => 'Purchases', 'slug' => 'purchases', 'parent' => 'home' ),
+        'account' => array( 'title' => 'Your Account', 'slug' => 'account', 'parent' => 'home' ),
+        'edit-profile' => array( 'title' => 'Edit Profile', 'slug' => 'edit-profile', 'parent' => 'account' ),
+        'comments' => array( 'title' => 'Comments & Activity', 'slug' => 'comments', 'parent' => 'account' ),
+        'badges' => array( 'title' => 'Badges', 'slug' => 'badges', 'parent' => 'account' ),
+        'podcasts' => array( 'title' => 'Your Podcasts', 'slug' => 'podcasts', 'parent' => 'account' ),
+        'privacy' => array( 'title' => 'Privacy & Your Data', 'slug' => 'privacy', 'parent' => 'account' ),
         'login' => array( 'title' => 'Login', 'slug' => 'login', 'parent' => 'home' ),
         'signup' => array( 'title' => 'Sign Up', 'slug' => 'signup', 'parent' => 'home' ),
         'forgot-password' => array( 'title' => 'Forgot Password', 'slug' => 'forgot-password', 'parent' => 'home' ),
@@ -136,14 +142,11 @@ function smarttoolz_video_set_static_homepage( $sync = true ) {
         return false;
     }
 
-    $updated = false;
     if ( 'page' !== get_option( 'show_on_front', 'posts' ) ) {
         update_option( 'show_on_front', 'page' );
-        $updated = true;
     }
     if ( absint( get_option( 'page_on_front', 0 ) ) !== $home_id ) {
         update_option( 'page_on_front', $home_id );
-        $updated = true;
     }
 
     return true;
@@ -159,7 +162,8 @@ add_action( 'smarttoolz_video_page_sync_event', 'smarttoolz_video_sync_pages' );
 function smarttoolz_video_register_routes() {
     add_rewrite_rule( '^video/?$', 'index.php?smarttoolz_video_route=home', 'top' );
     add_rewrite_rule( '^video/watch/([^/]+)/?$', 'index.php?smarttoolz_video_route=watch&smarttoolz_video_id=$matches[1]', 'top' );
-    add_rewrite_rule( '^video/(shorts|subscriptions|search|channel|playlists|watch-later|history|liked|your-videos|trending|explore|live|memberships|purchases|login|signup|forgot-password|settings|notifications|upload)/?$', 'index.php?smarttoolz_video_route=$matches[1]', 'top' );
+    add_rewrite_rule( '^video/account/(edit-profile|comments|badges|podcasts|privacy)/?$', 'index.php?smarttoolz_video_route=account-$matches[1]', 'top' );
+    add_rewrite_rule( '^video/(shorts|subscriptions|search|channel|playlists|watch-later|history|liked|your-videos|trending|explore|live|memberships|purchases|account|login|signup|forgot-password|settings|notifications|upload)/?$', 'index.php?smarttoolz_video_route=$matches[1]', 'top' );
     add_rewrite_rule( '^video/channel/(videos|shorts|live)/?$', 'index.php?smarttoolz_video_route=channel-$matches[1]', 'top' );
 }
 add_action( 'init', 'smarttoolz_video_register_routes' );

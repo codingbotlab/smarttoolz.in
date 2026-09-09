@@ -33,7 +33,39 @@ function smarttoolz_video_runtime_upload_guard() {
 }
 add_action( 'template_redirect', 'smarttoolz_video_runtime_upload_guard', 0 );
 
-function smarttoolz_video_runtime_remove_legacy_auth_submenu() {
-    remove_submenu_page( 'edit.php?post_type=st_video', 'smarttoolz-video-auth' );
+/** Preserve settings from other tabs and correctly persist unchecked checkboxes. */
+function smarttoolz_video_settings_preserve_tab_values( $value, $option ) {
+    if ( 'smarttoolz_video_settings' !== $option || ! is_array( $value ) ) { return $value; }
+    $existing = (array) get_option( $option, array() );
+    $defaults = function_exists( 'smarttoolz_video_default_settings' ) ? smarttoolz_video_default_settings() : array();
+    $merged = wp_parse_args( $existing, $defaults );
+    $active = isset( $_POST['smarttoolz_video_settings_tab'] ) ? sanitize_key( wp_unslash( $_POST['smarttoolz_video_settings_tab'] ) ) : '';
+
+    foreach ( $value as $key => $setting ) { $merged[ $key ] = $setting; }
+
+    $tab_bools = array(
+        'general'  => array( 'frontend_profile' ),
+        'player'   => array( 'autoplay', 'muted', 'loop', 'theater', 'pip', 'double_click_fullscreen' ),
+        'icons'    => array( 'icon_enabled' ),
+        'auth'     => array( 'google_enabled' ),
+        'uploads'  => array( 'uploads_enabled', 'require_thumbnail' ),
+        'features' => array( 'likes_enabled', 'dislikes_enabled', 'subscriptions_enabled', 'history_enabled', 'sharing_enabled', 'comments_enabled' ),
+        'pages'    => array(),
+    );
+    if ( isset( $tab_bools[ $active ] ) ) {
+        foreach ( $tab_bools[ $active ] as $key ) {
+            if ( ! array_key_exists( $key, $value ) ) { $merged[ $key ] = 0; }
+        }
+    }
+    return smarttoolz_video_sanitize_settings( $merged );
 }
-add_action( 'admin_menu', 'smarttoolz_video_runtime_remove_legacy_auth_submenu', 99 );
+add_filter( 'pre_update_option_smarttoolz_video_settings', 'smarttoolz_video_settings_preserve_tab_values', 10, 2 );
+
+/** Add active tab marker to the existing Settings API form. */
+function smarttoolz_video_settings_active_tab_field() {
+    $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+    if ( ! $screen || false === strpos( (string) $screen->id, 'smarttoolz-video' ) ) { return; }
+    $tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+    echo '<script>document.addEventListener("DOMContentLoaded",function(){var f=document.querySelector("form[action*=options.php]");if(!f||f.querySelector("input[name=smarttoolz_video_settings_tab]"))return;var i=document.createElement("input");i.type="hidden";i.name="smarttoolz_video_settings_tab";i.value=' . wp_json_encode( $tab ) . ';f.appendChild(i);});</script>';
+}
+add_action( 'admin_footer', 'smarttoolz_video_settings_active_tab_field', 99 );

@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 get_header();
+$stv_site_name = function_exists( 'smarttoolz_video_theme_site_name' ) ? smarttoolz_video_theme_site_name() : get_bloginfo( 'name' );
 ?>
 <section class="stv-home">
     <div class="stv-chips">
@@ -13,8 +14,8 @@ get_header();
 
     <div class="stv-section-heading">
         <div>
-            <h1 class="stv-page-title">SmartToolz Videos</h1>
-            <p class="stv-section-subtitle">Discover videos from creators on SmartToolz.</p>
+            <h1 class="stv-page-title"><?php echo esc_html( $stv_site_name ); ?> Videos</h1>
+            <p class="stv-section-subtitle">Discover videos from creators on <?php echo esc_html( $stv_site_name ); ?>.</p>
         </div>
         <a class="stv-view-link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'trending', home_url( '/video/trending/' ) ) ); ?>">Explore more</a>
     </div>
@@ -22,12 +23,12 @@ get_header();
     <div class="stv-video-grid stv-video-grid--showcase">
         <?php
         $cards = array(
-            array( 'title' => 'Your personalized video feed will appear here', 'meta' => 'SmartToolz • Start by adding your first videos', 'duration' => '—' ),
-            array( 'title' => 'Create, share and grow your audience', 'meta' => 'SmartToolz Creator • New uploads', 'duration' => '—' ),
-            array( 'title' => 'Explore Shorts, Live and Trending', 'meta' => 'SmartToolz • Explore the platform', 'duration' => '—' ),
-            array( 'title' => 'Build your channel on SmartToolz', 'meta' => 'SmartToolz • Creator tools', 'duration' => '—' ),
-            array( 'title' => 'Watch later and keep your library organized', 'meta' => 'SmartToolz • Your Library', 'duration' => '—' ),
-            array( 'title' => 'Follow creators and never miss an upload', 'meta' => 'SmartToolz • Subscriptions', 'duration' => '—' ),
+            array( 'title' => 'Your personalized video feed will appear here', 'meta' => $stv_site_name . ' • Start by adding your first videos', 'duration' => '—' ),
+            array( 'title' => 'Create, share and grow your audience', 'meta' => $stv_site_name . ' Creator • New uploads', 'duration' => '—' ),
+            array( 'title' => 'Explore Shorts, Live and Trending', 'meta' => $stv_site_name . ' • Explore the platform', 'duration' => '—' ),
+            array( 'title' => 'Build your channel on ' . $stv_site_name, 'meta' => $stv_site_name . ' • Creator tools', 'duration' => '—' ),
+            array( 'title' => 'Watch later and keep your library organized', 'meta' => $stv_site_name . ' • Your Library', 'duration' => '—' ),
+            array( 'title' => 'Follow creators and never miss an upload', 'meta' => $stv_site_name . ' • Subscriptions', 'duration' => '—' ),
         );
         foreach ( $cards as $card ) :
             ?>

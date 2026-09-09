@@ -36,6 +36,7 @@ add_action( 'wp_head', 'smarttoolz_video_hide_admin_bar_css', 999 );
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/videos.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/creator-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/bootstrap.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/channel-media-upload.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/theme-installer.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/auth.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/admin-settings.php';

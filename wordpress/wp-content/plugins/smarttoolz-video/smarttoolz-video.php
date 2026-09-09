@@ -38,7 +38,6 @@ function smarttoolz_video_admin_menu() {
 
     add_submenu_page( 'smarttoolz', 'Dashboard', 'Dashboard', 'manage_options', 'smarttoolz', 'smarttoolz_video_dashboard_page' );
     add_submenu_page( 'smarttoolz', 'Page Settings', 'Page Settings', 'manage_options', 'smarttoolz-video-pages', 'smarttoolz_video_page_settings' );
-    add_submenu_page( 'smarttoolz', 'Account & Access', 'Account & Access', 'manage_options', 'smarttoolz-account-access', 'smarttoolz_video_platform_settings_page' );
     add_submenu_page( 'smarttoolz', 'Theme Setup', 'Theme Setup', 'manage_options', 'smarttoolz-video-theme', 'smarttoolz_video_theme_settings' );
 }
 add_action( 'admin_menu', 'smarttoolz_video_admin_menu' );

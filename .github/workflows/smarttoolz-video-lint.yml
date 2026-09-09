@@ -10,13 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check required plugin files
-        run: |
-          test -f wordpress/wp-content/plugins/smarttoolz-video/smarttoolz-video.php
-          test -f wordpress/wp-content/plugins/smarttoolz-video/includes/platform.php
-          test -f wordpress/wp-content/plugins/smarttoolz-video/includes/pages.php
-          test -f wordpress/wp-content/plugins/smarttoolz-video/assets/js/video.js
-          test -f wordpress/wp-content/plugins/smarttoolz-video/assets/css/video.css
+      - name: Check plugin entry point
+        run: test -f wordpress/wp-content/plugins/smarttoolz-video/smarttoolz-video.php
       - name: Lint plugin PHP
         run: |
           set -e

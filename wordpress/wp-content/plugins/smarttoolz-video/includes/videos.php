@@ -67,7 +67,12 @@ function smarttoolz_video_creator_styles() {
     $route = get_query_var( 'smarttoolz_video_route' );
     if ( ! in_array( $route, array('upload','your-videos'), true ) && 'watch' !== $route ) return;
     echo '<style>
-    .stv-creator{max-width:1180px;margin:0 auto}.stv-notice{margin:0 0 18px;padding:12px 14px;border-radius:10px;font-size:14px}.stv-notice--success{background:#17331f;color:#a9efbd;border:1px solid #2d6b40}.stv-notice--error{background:#3a171b;color:#ffb5bd;border:1px solid #79333c}.stv-creator__panel{background:#181818;border:1px solid #303030;border-radius:14px;padding:22px;max-width:850px}.stv-creator__panel h2{margin:0 0 18px}.stv-form{display:grid;gap:15px}.stv-form label{display:grid;gap:7px;color:#ddd;font-size:13px;font-weight:600}.stv-form input[type=text],.stv-form textarea,.stv-form input[type=file]{width:100%;border:1px solid #3a3a3a;border-radius:9px;background:#111;color:#fff;padding:11px 12px}.stv-form textarea{resize:vertical}.stv-form__hint{font-size:12px;color:#929292;font-weight:400}.stv-form__preview{display:block;width:min(100%,720px);max-height:400px;background:#000;border-radius:10px}.stv-form__actions{display:flex;gap:10px;align-items:center}.stv-form__submit,.stv-form__cancel{border:0;border-radius:20px;padding:10px 17px;font-weight:700;cursor:pointer}.stv-form__submit{background:#fff;color:#111}.stv-form__cancel{border:1px solid #444;color:#fff}.stv-video-list{display:grid;gap:12px}.stv-video-list__item{display:grid;grid-template-columns:220px minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px;border:1px solid #2b2b2b;border-radius:12px;background:#151515}.stv-video-list__thumb{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#222}.stv-video-list__thumb video{width:100%;height:100%;object-fit:cover}.stv-video-list__info h3{margin:0 0 5px;font-size:16px}.stv-video-list__info p{margin:0 0 7px;color:#aaa;font-size:13px}.stv-video-list__info small{color:#777}.stv-video-list__actions{display:flex;gap:8px;align-items:center}.stv-video-list__actions a,.stv-video-list__actions button{border:1px solid #404040;border-radius:18px;background:transparent;color:#fff;padding:8px 12px;font-size:12px;text-decoration:none;cursor:pointer}.stv-video-list__actions a:hover,.stv-video-list__actions button:hover{background:#2a2a2a}.stv-watch{max-width:none}.stv-watch__player-wrap{margin-bottom:18px}.stv-watch__meta{color:#999;font-size:13px;margin:8px 0 18px}.stv-watch__description{color:#ccc;line-height:1.7}@media(max-width:760px){.stv-video-list__item{grid-template-columns:1fr}.stv-video-list__actions{flex-wrap:wrap}.stv-creator__panel{padding:16px}}
+    .stv-creator{max-width:1180px;margin:0 auto}.stv-notice{margin:0 0 18px;padding:12px 14px;border-radius:10px;font-size:14px}.stv-notice--success{background:#17331f;color:#a9efbd;border:1px solid #2d6b40}.stv-notice--error{background:#3a171b;color:#ffb5bd;border:1px solid #79333c}.stv-creator__panel{background:#181818;border:1px solid #303030;border-radius:14px;padding:22px;max-width:850px}.stv-creator__panel h2{margin:0 0 18px}.stv-form{display:grid;gap:15px}.stv-form label{display:grid;gap:7px;color:#ddd;font-size:13px;font-weight:600}.stv-form input[type=text],.stv-form textarea,.stv-form input[type=file]{width:100%;border:1px solid #3a3a3a;border-radius:9px;background:#111;color:#fff;padding:11px 12px}.stv-form textarea{resize:vertical}.stv-form__hint{font-size:12px;color:#929292;font-weight:400}.stv-form__preview{display:block;width:min(100%,720px);max-height:400px;background:#000;border-radius:10px}.stv-form__actions{display:flex;gap:10px;align-items:center}.stv-form__submit,.stv-form__cancel{border:0;border-radius:20px;padding:10px 17px;font-weight:700;cursor:pointer}.stv-form__submit{background:#fff;color:#111}.stv-form__cancel{border:1px solid #444;color:#fff}.stv-video-list{display:grid;gap:12px}.stv-video-list__item{display:grid;grid-template-columns:220px minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px;border:1px solid #2b2b2b;border-radius:12px;background:#151515}.stv-video-list__thumb{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#222}.stv-video-list__thumb video{width:100%;height:100%;object-fit:cover}.stv-video-list__info h3{margin:0 0 5px;font-size:16px}.stv-video-list__info p{margin:0 0 7px;color:#aaa;font-size:13px}.stv-video-list__info small{color:#777}.stv-video-list__actions{display:flex;gap:8px;align-items:center}.stv-video-list__actions a,.stv-video-list__actions button{border:1px solid #404040;border-radius:18px;background:transparent;color:#fff;padding:8px 12px;font-size:12px;text-decoration:none;cursor:pointer}.stv-video-list__actions a:hover,.stv-video-list__actions button:hover{background:#2a2a2a}.stv-watch{max-width:none}.stv-watch__player-wrap{margin-bottom:18px}.stv-watch__meta{color:#999;font-size:13px;margin:8px 0 18px}.stv-watch__description{color:#ccc;line-height:1.7}
+    .stv-watch-layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:22px;align-items:start;width:100%}.stv-watch-main{min-width:0}.stv-watch-sidebar{min-width:0}.stv-watch-sidebar__ad{background:#181818;border:1px solid #303030;border-radius:10px;overflow:hidden;margin:0 0 16px}.stv-watch-sidebar__ad-label{padding:9px 12px;color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.08em}.stv-watch-sidebar__ad img,.stv-watch-sidebar__ad video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}.stv-watch-sidebar__ad-body{padding:11px 12px}.stv-watch-sidebar__ad-title{display:block;color:#fff;font-size:14px;font-weight:700;line-height:1.35}.stv-watch-sidebar__ad-text{display:block;color:#aaa;font-size:12px;margin-top:4px}.stv-watch-sidebar__ad-link{display:inline-flex;margin-top:10px;padding:8px 14px;border-radius:18px;background:#fff;color:#111;font-size:12px;font-weight:700}.stv-watch-sidebar__next{display:grid;gap:12px}.stv-watch-sidebar__heading{font-size:16px;font-weight:700;margin:4px 0 2px}.stv-watch-next{display:grid;grid-template-columns:168px minmax(0,1fr);gap:10px;align-items:start}.stv-watch-next__thumb{display:block;position:relative;aspect-ratio:16/9;border-radius:7px;overflow:hidden;background:#222}.stv-watch-next__thumb img{display:block;width:100%;height:100%;object-fit:cover}.stv-watch-next__thumb:empty:after{content:"Video";display:grid;place-items:center;width:100%;height:100%;color:#777;font-size:12px}.stv-watch-next__title{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#fff;font-size:13px;font-weight:700;line-height:1.35}.stv-watch-next__meta{margin-top:5px;color:#999;font-size:11px;line-height:1.35}.stv-watch-next__play{position:absolute;inset:auto 6px 6px auto;background:rgba(0,0,0,.82);color:#fff;border-radius:4px;padding:2px 5px;font-size:10px}.stv-watch-sidebar__empty{padding:20px;border:1px dashed #333;border-radius:10px;color:#888;text-align:center;font-size:12px}.stv-watch-sidebar__ad--placeholder{min-height:150px}.stv-watch-sidebar__ad--placeholder .stv-watch-sidebar__ad-body{text-align:center;padding:30px 12px}
+    @media(max-width:1000px){.stv-watch-layout{grid-template-columns:minmax(0,1fr) 330px}.stv-watch-next{grid-template-columns:140px minmax(0,1fr)}}
+    @media(max-width:760px){.stv-watch-layout{display:block}.stv-watch-sidebar{margin-top:24px}.stv-watch-next{grid-template-columns:150px minmax(0,1fr)}}
+    @media(min-width:761px){body:has(.stv-app[data-route="watch"]) .stv-sidebar{display:none!important}body:has(.stv-app[data-route="watch"]) .stv-layout{display:block!important}body:has(.stv-app[data-route="watch"]) .stv-main{padding-left:18px;padding-right:18px}}
+    @media(max-width:760px){body:has(.stv-app[data-route="watch"]) .stv-sidebar{display:none!important}}
     </style>';
     if ( 'your-videos' === $route && empty( $_GET['edit'] ) ) echo '<style>.stv-creator__panel{display:none!important}</style>';
 }
@@ -106,14 +111,53 @@ function smarttoolz_video_manage_page() {
 
 function smarttoolz_video_upload_page(){return smarttoolz_video_manage_page();}
 
+function smarttoolz_video_watch_sidebar_ad() {
+    if ( ! function_exists( 'smarttoolz_video_ads_settings' ) ) { return ''; }
+    $settings = smarttoolz_video_ads_settings();
+    if ( empty( $settings['enabled'] ) ) { return ''; }
+    $creatives = isset( $settings['creatives'] ) && is_array( $settings['creatives'] ) ? $settings['creatives'] : array();
+    $ad = array();
+    foreach ( array( 'pre_roll', 'mid_roll', 'post_roll', 'pause', 'bumper' ) as $kind ) {
+        if ( ! empty( $creatives[ $kind ] ) && is_array( $creatives[ $kind ] ) ) { $ad = reset( $creatives[ $kind ] ); break; }
+    }
+    if ( empty( $ad['src'] ) ) {
+        return '<div class="stv-watch-sidebar__ad stv-watch-sidebar__ad--placeholder"><div class="stv-watch-sidebar__ad-label">Advertisement</div><div class="stv-watch-sidebar__ad-body"><strong>Advertisement</strong><span class="stv-watch-sidebar__ad-text">Add an ad creative in Ads Setup.</span></div></div>';
+    }
+    $title = ! empty( $ad['title'] ) ? $ad['title'] : 'Advertisement';
+    $text  = ! empty( $ad['text'] ) ? $ad['text'] : '';
+    $url   = ! empty( $ad['url'] ) ? $ad['url'] : '';
+    ob_start();
+    echo '<div class="stv-watch-sidebar__ad"><div class="stv-watch-sidebar__ad-label">Advertisement</div>';
+    if ( 'image' === ( $ad['type'] ?? '' ) ) {
+        echo '<a href="' . ( $url ? esc_url( $url ) : '#' ) . '"' . ( $url ? ' target="_blank" rel="noopener sponsored"' : '' ) . '><img src="' . esc_url( $ad['src'] ) . '" alt="' . esc_attr( $title ) . '"></a>';
+    } else {
+        echo '<video controls playsinline preload="metadata" src="' . esc_url( $ad['src'] ) . '"></video>';
+    }
+    echo '<div class="stv-watch-sidebar__ad-body"><strong class="stv-watch-sidebar__ad-title">' . esc_html( $title ) . '</strong>';
+    if ( $text ) { echo '<span class="stv-watch-sidebar__ad-text">' . esc_html( $text ) . '</span>'; }
+    if ( $url ) { echo '<a class="stv-watch-sidebar__ad-link" href="' . esc_url( $url ) . '" target="_blank" rel="noopener sponsored">Learn more</a>'; }
+    echo '</div></div>';
+    return ob_get_clean();
+}
+
 function smarttoolz_video_render_watch($video_id){
     $video=get_post($video_id);
     if(!$video||'stv_video'!==$video->post_type||'publish'!==$video->post_status){echo '<div class="stv-empty">Video not found.</div>';return;}
     $source=smarttoolz_video_get_source($video_id);
     if(''===$source){echo '<div class="stv-empty">Video file is missing.</div>';return;}
-    echo '<article class="stv-watch"><div class="stv-watch__player-wrap">';
+    $related = get_posts( array( 'post_type' => 'stv_video', 'post_status' => 'publish', 'posts_per_page' => 12, 'post__not_in' => array( $video_id ), 'orderby' => 'date', 'order' => 'DESC' ) );
+    echo '<div class="stv-watch-layout"><main class="stv-watch-main"><article class="stv-watch"><div class="stv-watch__player-wrap">';
     if(function_exists('smarttoolz_video_player_render')){smarttoolz_video_player_render($video_id);}else{echo '<video class="stv-watch__player" controls playsinline preload="metadata" src="'.esc_url($source).'"></video>';}
     echo '</div><h1 class="stv-page-title">'.esc_html($video->post_title).'</h1><div class="stv-watch__meta">By '.esc_html(get_the_author_meta('display_name',$video->post_author)).' · '.esc_html(get_the_date('',$video)).'</div>';
     if($video->post_content)echo '<div class="stv-watch__description">'.wp_kses_post(wpautop($video->post_content)).'</div>';
-    echo '</article>';
+    echo '</article></main><aside class="stv-watch-sidebar">'.smarttoolz_video_watch_sidebar_ad().'<div class="stv-watch-sidebar__heading">Next</div><div class="stv-watch-sidebar__next">';
+    if ( empty( $related ) ) {
+        echo '<div class="stv-watch-sidebar__empty">No more videos yet.</div>';
+    } else {
+        foreach ( $related as $item ) {
+            $thumb = has_post_thumbnail( $item->ID ) ? get_the_post_thumbnail( $item->ID, 'medium' ) : '';
+            echo '<article class="stv-watch-next"><a class="stv-watch-next__thumb" href="' . esc_url( smarttoolz_video_route_url( 'watch', $item->ID ) ) . '">' . $thumb . '<span class="stv-watch-next__play">▶</span></a><div><a class="stv-watch-next__title" href="' . esc_url( smarttoolz_video_route_url( 'watch', $item->ID ) ) . '">' . esc_html( $item->post_title ) . '</a><div class="stv-watch-next__meta">' . esc_html( get_the_author_meta( 'display_name', $item->post_author ) ) . ' · ' . esc_html( get_the_date( '', $item ) ) . '</div></div></article>';
+        }
+    }
+    echo '</div></aside></div>';
 }

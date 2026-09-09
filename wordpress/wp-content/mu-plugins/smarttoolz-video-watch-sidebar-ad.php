@@ -3,8 +3,7 @@
  * SmartToolz Video - watch sidebar ad bridge.
  *
  * Keeps sidebar ads independent from the player-wide "Video ads" switch.
- * The existing watch template already provides the sidebar/Next structure;
- * this bridge fills it with the active Sidebar ad creative.
+ * Multiple active creatives in the same placement are rotated randomly.
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -35,25 +34,29 @@ function smarttoolz_video_watch_sidebar_ad_output( $html ) {
         return $html;
     }
 
-    $creative = null;
+    // Collect every active creative for this placement. If several ads exist,
+    // choose one at random for this page view instead of always showing the
+    // first row in the admin list.
+    $active_ads = array();
     if ( ! empty( $settings['creatives']['sidebar'] ) && is_array( $settings['creatives']['sidebar'] ) ) {
         foreach ( $settings['creatives']['sidebar'] as $ad ) {
             if ( ! empty( $ad['active'] ) && ! empty( $ad['src'] ) ) {
-                $creative = $ad;
-                break;
+                $active_ads[] = $ad;
             }
         }
     }
 
-    if ( ! is_array( $creative ) ) {
+    if ( empty( $active_ads ) ) {
         return $html;
     }
 
-    $src       = esc_url( $creative['src'] );
-    $type      = ( 'image' === ( $creative['type'] ?? '' ) ) ? 'image' : 'video';
-    $title     = sanitize_text_field( $creative['title'] ?? '' );
-    $text      = sanitize_text_field( $creative['text'] ?? '' );
-    $cta_url   = esc_url( $creative['url'] ?? '' );
+    $creative = $active_ads[ wp_rand( 0, count( $active_ads ) - 1 ) ];
+
+    $src     = esc_url( $creative['src'] );
+    $type    = ( 'image' === ( $creative['type'] ?? '' ) ) ? 'image' : 'video';
+    $title   = sanitize_text_field( $creative['title'] ?? '' );
+    $text    = sanitize_text_field( $creative['text'] ?? '' );
+    $cta_url = esc_url( $creative['url'] ?? '' );
 
     if ( 'image' === $type ) {
         $media = '<img src="' . $src . '" alt="' . esc_attr( $title ?: 'Advertisement' ) . '" loading="lazy">';
@@ -81,8 +84,8 @@ function smarttoolz_video_watch_sidebar_ad_output( $html ) {
 
     $ad_html .= '</div>';
 
-    // Hide the old placeholder and insert the real active ad immediately
-    // before the Next-video list.
+    // Hide the old placeholder and insert the randomly selected active ad
+    // immediately before the Next-video list.
     $html = preg_replace(
         '/(<div[^>]+class=["\'][^"\']*stv-watch-sidebar__next[^"\']*["\'][^>]*>)/i',
         '<style>.stv-watch-sidebar__ad--placeholder{display:none!important}.stv-watch-sidebar__ad--live{display:block!important}.stv-watch-sidebar__ad--live img,.stv-watch-sidebar__ad--live video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}</style>' . $ad_html . '$1',

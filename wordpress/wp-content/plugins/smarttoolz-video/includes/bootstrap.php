@@ -7,6 +7,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/videos.php';
+
 function smarttoolz_video_page_definitions() {
     return array(
         'home' => array( 'title' => 'Home', 'slug' => 'video', 'parent' => '' ),
@@ -44,15 +46,9 @@ function smarttoolz_video_page_definitions() {
 
 function smarttoolz_video_page_path( $key, $definitions = null ) {
     $definitions = is_array( $definitions ) ? $definitions : smarttoolz_video_page_definitions();
-    if ( ! isset( $definitions[ $key ] ) ) {
-        return '';
-    }
-
+    if ( ! isset( $definitions[ $key ] ) ) { return ''; }
     $page = $definitions[ $key ];
-    if ( empty( $page['parent'] ) ) {
-        return trim( $page['slug'], '/' );
-    }
-
+    if ( empty( $page['parent'] ) ) { return trim( $page['slug'], '/' ); }
     $parent_path = smarttoolz_video_page_path( $page['parent'], $definitions );
     return trim( $parent_path . '/' . trim( $page['slug'], '/' ), '/' );
 }
@@ -61,101 +57,47 @@ function smarttoolz_video_sync_pages() {
     $pages = smarttoolz_video_page_definitions();
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     $changed = false;
-    $resolving = array();
-
     foreach ( $pages as $key => $page ) {
         $page_id = isset( $ids[ $key ] ) ? absint( $ids[ $key ] ) : 0;
         $valid = $page_id && 'page' === get_post_type( $page_id ) && 'trash' !== get_post_status( $page_id );
-
         if ( ! $valid ) {
             $path = smarttoolz_video_page_path( $key, $pages );
             $existing = get_page_by_path( $path, OBJECT, 'page' );
             if ( $existing && 'trash' !== get_post_status( $existing->ID ) ) {
                 $page_id = $existing->ID;
             } else {
-                $page_id = wp_insert_post(
-                    array(
-                        'post_title'   => $page['title'],
-                        'post_name'    => $page['slug'],
-                        'post_parent'  => 0,
-                        'post_status'  => 'publish',
-                        'post_type'    => 'page',
-                        'post_content' => '<!-- SmartToolz Video page: ' . esc_html( $key ) . ' -->',
-                    ),
-                    true
-                );
-                if ( is_wp_error( $page_id ) ) {
-                    continue;
-                }
+                $parent_id = 0;
+                if ( ! empty( $page['parent'] ) && isset( $ids[ $page['parent'] ] ) ) { $parent_id = absint( $ids[ $page['parent'] ] ); }
+                $page_id = wp_insert_post(array('post_title'=>$page['title'],'post_name'=>$page['slug'],'post_parent'=>$parent_id,'post_status'=>'publish','post_type'=>'page','post_content'=>'<!-- SmartToolz Video page: ' . esc_html($key) . ' -->'), true);
+                if ( is_wp_error( $page_id ) ) { continue; }
             }
-
             $ids[ $key ] = absint( $page_id );
             $changed = true;
         }
-
-        if ( ! $page_id || in_array( $key, $resolving, true ) ) {
-            continue;
-        }
-
-        $resolving[] = $key;
         $parent_id = 0;
-        if ( ! empty( $page['parent'] ) && isset( $ids[ $page['parent'] ] ) ) {
-            $parent_id = absint( $ids[ $page['parent'] ] );
-        }
-
+        if ( ! empty( $page['parent'] ) && isset( $ids[ $page['parent'] ] ) ) { $parent_id = absint( $ids[ $page['parent'] ] ); }
         $updates = array();
-        if ( absint( get_post_field( 'post_parent', $page_id ) ) !== $parent_id ) {
-            $updates['ID'] = $page_id;
-            $updates['post_parent'] = $parent_id;
-        }
-        if ( get_post_field( 'post_name', $page_id ) !== $page['slug'] ) {
-            $updates['ID'] = $page_id;
-            $updates['post_name'] = $page['slug'];
-        }
-        if ( get_the_title( $page_id ) !== $page['title'] ) {
-            $updates['ID'] = $page_id;
-            $updates['post_title'] = $page['title'];
-        }
-
-        if ( ! empty( $updates ) ) {
-            wp_update_post( $updates );
-            $changed = true;
-        }
+        if ( absint( get_post_field( 'post_parent', $page_id ) ) !== $parent_id ) { $updates['ID'] = $page_id; $updates['post_parent'] = $parent_id; }
+        if ( get_post_field( 'post_name', $page_id ) !== $page['slug'] ) { $updates['ID'] = $page_id; $updates['post_name'] = $page['slug']; }
+        if ( get_the_title( $page_id ) !== $page['title'] ) { $updates['ID'] = $page_id; $updates['post_title'] = $page['title']; }
+        if ( ! empty( $updates ) ) { wp_update_post( $updates ); $changed = true; }
     }
-
-    if ( $changed || ! get_option( 'smarttoolz_video_page_ids', false ) ) {
-        update_option( 'smarttoolz_video_page_ids', $ids, false );
-    }
-
+    if ( $changed || ! get_option( 'smarttoolz_video_page_ids', false ) ) { update_option( 'smarttoolz_video_page_ids', $ids, false ); }
     smarttoolz_video_set_static_homepage( false );
 }
 
 function smarttoolz_video_set_static_homepage( $sync = true ) {
-    if ( $sync ) {
-        smarttoolz_video_sync_pages();
-    }
-
+    if ( $sync ) { smarttoolz_video_sync_pages(); }
     $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     $home_id = isset( $ids['home'] ) ? absint( $ids['home'] ) : 0;
-
-    if ( ! $home_id || 'page' !== get_post_type( $home_id ) || 'trash' === get_post_status( $home_id ) ) {
-        return false;
-    }
-
-    if ( 'page' !== get_option( 'show_on_front', 'posts' ) ) {
-        update_option( 'show_on_front', 'page' );
-    }
-    if ( absint( get_option( 'page_on_front', 0 ) ) !== $home_id ) {
-        update_option( 'page_on_front', $home_id );
-    }
-
+    if ( ! $home_id || 'page' !== get_post_type( $home_id ) || 'trash' === get_post_status( $home_id ) ) { return false; }
+    update_option( 'show_on_front', 'page' );
+    update_option( 'page_on_front', $home_id );
     return true;
 }
 
 function smarttoolz_video_page_sync_cron() {
-    if ( ! wp_next_scheduled( 'smarttoolz_video_page_sync_event' ) ) {
-        wp_schedule_event( time() + HOUR_IN_SECONDS, 'twicedaily', 'smarttoolz_video_page_sync_event' );
-    }
+    if ( ! wp_next_scheduled( 'smarttoolz_video_page_sync_event' ) ) { wp_schedule_event( time() + HOUR_IN_SECONDS, 'twicedaily', 'smarttoolz_video_page_sync_event' ); }
 }
 add_action( 'smarttoolz_video_page_sync_event', 'smarttoolz_video_sync_pages' );
 
@@ -168,43 +110,23 @@ function smarttoolz_video_register_routes() {
 }
 add_action( 'init', 'smarttoolz_video_register_routes' );
 
-function smarttoolz_video_register_query_vars( $vars ) {
-    $vars[] = 'smarttoolz_video_route';
-    $vars[] = 'smarttoolz_video_id';
-    return $vars;
-}
+function smarttoolz_video_register_query_vars( $vars ) { $vars[] = 'smarttoolz_video_route'; $vars[] = 'smarttoolz_video_id'; return $vars; }
 add_filter( 'query_vars', 'smarttoolz_video_register_query_vars' );
-
-function smarttoolz_video_is_route() {
-    return (bool) get_query_var( 'smarttoolz_video_route' );
-}
-
+function smarttoolz_video_is_route() { return (bool) get_query_var( 'smarttoolz_video_route' ); }
 function smarttoolz_video_route_url( $route = 'home', $id = '' ) {
     $base = home_url( '/video/' );
-
-    if ( 'watch' === $route && '' !== $id ) {
-        return trailingslashit( $base . 'watch/' . rawurlencode( (string) $id ) );
-    }
-
-    if ( 'home' !== $route ) {
-        return trailingslashit( $base . trim( str_replace( '-', '/', (string) $route ), '/' ) . '/' );
-    }
-
+    if ( 'watch' === $route && '' !== $id ) { return trailingslashit( $base . 'watch/' . rawurlencode( (string) $id ) ); }
+    if ( 'home' !== $route ) { return trailingslashit( $base . trim( str_replace( '-', '/', (string) $route ), '/' ) . '/' ); }
     return $base;
 }
 
 function smarttoolz_video_activate_plugin() {
     smarttoolz_video_register_routes();
+    flush_rewrite_rules();
     smarttoolz_video_sync_pages();
     smarttoolz_video_page_sync_cron();
     smarttoolz_video_set_static_homepage( false );
-    flush_rewrite_rules();
 }
-
-function smarttoolz_video_deactivate_plugin() {
-    wp_clear_scheduled_hook( 'smarttoolz_video_page_sync_event' );
-    flush_rewrite_rules();
-}
-
+function smarttoolz_video_deactivate_plugin() { wp_clear_scheduled_hook( 'smarttoolz_video_page_sync_event' ); flush_rewrite_rules(); }
 add_action( 'init', 'smarttoolz_video_sync_pages', 20 );
 add_action( 'init', 'smarttoolz_video_page_sync_cron', 21 );

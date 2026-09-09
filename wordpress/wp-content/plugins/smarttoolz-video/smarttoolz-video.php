@@ -17,6 +17,7 @@ define( 'SMARTTOOLZ_VIDEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
 
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/bootstrap.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/theme-installer.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/app.php';
 
 function smarttoolz_video_admin_menu() {
@@ -32,11 +33,29 @@ function smarttoolz_video_admin_menu() {
 
     add_submenu_page(
         'smarttoolz',
+        'Dashboard',
+        'Dashboard',
+        'manage_options',
+        'smarttoolz',
+        'smarttoolz_video_dashboard_page'
+    );
+
+    add_submenu_page(
+        'smarttoolz',
         'Page Settings',
         'Page Settings',
         'manage_options',
         'smarttoolz-video-pages',
         'smarttoolz_video_page_settings'
+    );
+
+    add_submenu_page(
+        'smarttoolz',
+        'Theme Setup',
+        'Theme Setup',
+        'manage_options',
+        'smarttoolz-video-theme',
+        'smarttoolz_video_theme_settings'
     );
 }
 add_action( 'admin_menu', 'smarttoolz_video_admin_menu' );
@@ -129,6 +148,56 @@ function smarttoolz_video_page_settings() {
             <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+    <?php
+}
+
+function smarttoolz_video_theme_settings() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    $notice = '';
+    if ( isset( $_POST['stv_install_theme'], $_POST['stv_theme_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_theme_nonce'] ) ), 'stv_theme_action' ) ) {
+        $result = smarttoolz_video_install_theme();
+        $notice = is_wp_error( $result )
+            ? '<div class="notice notice-error is-dismissible"><p>' . esc_html( $result->get_error_message() ) . '</p></div>'
+            : '<div class="notice notice-success is-dismissible"><p>SmartToolz Video Theme installed successfully.</p></div>';
+    }
+
+    if ( isset( $_POST['stv_activate_theme'], $_POST['stv_theme_activate_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_theme_activate_nonce'] ) ), 'stv_activate_theme' ) ) {
+        $result = smarttoolz_video_activate_theme();
+        $notice = is_wp_error( $result )
+            ? '<div class="notice notice-error is-dismissible"><p>' . esc_html( $result->get_error_message() ) . '</p></div>'
+            : '<div class="notice notice-success is-dismissible"><p>SmartToolz Video Theme activated successfully.</p></div>';
+    }
+
+    $installed = smarttoolz_video_theme_installed();
+    $active = smarttoolz_video_theme_is_active();
+    ?>
+    <div class="wrap">
+        <h1>Theme Setup</h1>
+        <p>Install and activate the SmartToolz video-sharing theme without changing any WordPress core file.</p>
+        <?php echo $notice; ?>
+        <table class="widefat striped" style="max-width:1000px;margin-top:16px;">
+            <tbody>
+                <tr><th style="width:220px;">Theme</th><td><?php echo esc_html( smarttoolz_video_theme_name() ); ?></td></tr>
+                <tr><th>Installation</th><td><?php echo $installed ? '<span style="color:#008a20;font-weight:600">Installed</span>' : '<span style="color:#b32d2e;font-weight:600">Not installed</span>'; ?></td></tr>
+                <tr><th>Activation</th><td><?php echo $active ? '<span style="color:#008a20;font-weight:600">Active</span>' : '<span style="color:#b32d2e;font-weight:600">Not active</span>'; ?></td></tr>
+            </tbody>
+        </table>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <form method="post">
+                <?php wp_nonce_field( 'stv_theme_action', 'stv_theme_nonce' ); ?>
+                <input type="hidden" name="stv_install_theme" value="1">
+                <?php submit_button( $installed ? 'Reinstall Theme' : 'Install Theme', 'secondary', 'submit', false ); ?>
+            </form>
+            <form method="post">
+                <?php wp_nonce_field( 'stv_activate_theme', 'stv_theme_activate_nonce' ); ?>
+                <input type="hidden" name="stv_activate_theme" value="1">
+                <?php submit_button( $active ? 'Theme Already Active' : 'Activate Theme', 'primary', 'submit', false, $active ? array( 'disabled' => 'disabled' ) : array() ); ?>
+            </form>
+        </div>
     </div>
     <?php
 }

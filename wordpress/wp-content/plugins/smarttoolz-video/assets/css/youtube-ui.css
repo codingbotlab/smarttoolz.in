@@ -1,0 +1,76 @@
+/* SmartToolz Video — YouTube-inspired interface */
+body.smarttoolz-video-platform{background:#fff;color:#0f0f0f;font-family:Roboto,Arial,Helvetica,sans-serif}
+body.smarttoolz-video-platform .st-main,body.smarttoolz-video-platform .st-content{background:#fff}
+body.smarttoolz-video-platform .st-content{padding:0 0 48px}
+body.smarttoolz-video-platform .st-site-header{background:#fff;border-bottom:1px solid #e5e5e5;box-shadow:none}
+body.smarttoolz-video-platform .st-video-header .st-header-inner{min-height:64px;padding:0 24px;gap:18px}
+body.smarttoolz-video-platform .st-video-header .st-brand{font-size:20px;font-weight:700;letter-spacing:-.02em}
+body.smarttoolz-video-platform .st-video-header .stv-header-nav{gap:2px}
+body.smarttoolz-video-platform .st-video-header .stv-header-nav a{padding:10px 12px;border-radius:8px;color:#0f0f0f;font-size:14px;font-weight:600}
+body.smarttoolz-video-platform .st-video-header .stv-header-nav a:hover{background:#f2f2f2}
+body.smarttoolz-video-platform .st-video-header .st-header-tools{gap:8px}
+body.smarttoolz-video-platform .st-video-header .st-header-search{width:min(520px,38vw);min-width:280px}
+body.smarttoolz-video-platform .st-video-header .st-search-form{gap:0}
+body.smarttoolz-video-platform .st-video-header .st-search-field{height:42px;border:1px solid #ccc;border-radius:22px 0 0 22px;padding:0 18px;font-size:15px;box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+body.smarttoolz-video-platform .st-video-header .st-search-submit{height:42px;border:1px solid #ccc;border-left:0;border-radius:0 22px 22px 0;padding:0 18px;background:#f8f8f8;color:#0f0f0f;font-size:0}
+body.smarttoolz-video-platform .st-video-header .st-search-submit:after{content:'⌕';font-size:21px;line-height:1}
+body.smarttoolz-video-platform .st-video-header .st-theme-toggle{height:38px;padding:0 14px;border:1px solid #d9d9d9;border-radius:19px;background:#fff;color:#0f0f0f;font-size:13px}
+
+/* Home / explore shell */
+body.smarttoolz-video-platform .stv-page-shell{width:100%;max-width:none;margin:0;padding:0 24px 56px}
+body.smarttoolz-video-platform .stv-page-hero{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:28px 0 20px;border:0}
+body.smarttoolz-video-platform .stv-page-hero>div:first-child{max-width:820px}
+body.smarttoolz-video-platform .stv-page-hero .stv-eyebrow{display:block;color:#606060;font-size:12px;font-weight:700;text-transform:none;letter-spacing:0;margin-bottom:7px}
+body.smarttoolz-video-platform .stv-page-hero h1{margin:0 0 8px;font-size:32px;line-height:1.15;font-weight:700;letter-spacing:-.03em}
+body.smarttoolz-video-platform .stv-page-hero p{margin:0;color:#606060;font-size:15px;line-height:1.5}
+body.smarttoolz-video-platform .stv-page-hero-actions{display:flex;align-items:center;gap:10px}
+body.smarttoolz-video-platform .stv-page-hero .stv-upload-cta,
+body.smarttoolz-video-platform .stv-upload-cta{background:#ff0000!important;color:#fff!important;border-radius:22px!important;padding:10px 18px!important;font-weight:700!important}
+body.smarttoolz-video-platform .stv-page-hero .stv-upload-cta:hover{background:#cc0000!important}
+body.smarttoolz-video-platform .stv-chip-row{display:flex;gap:12px;overflow:auto;padding:4px 0 16px;border-bottom:0}
+body.smarttoolz-video-platform .stv-chip-row a{padding:9px 15px;border-radius:8px;background:#f2f2f2;color:#0f0f0f;font-size:14px;font-weight:600}
+body.smarttoolz-video-platform .stv-chip-row a:hover{background:#e5e5e5}
+body.smarttoolz-video-platform .stv-home-section{padding-top:22px}
+body.smarttoolz-video-platform .stv-home-section-head{margin-bottom:16px}
+body.smarttoolz-video-platform .stv-home-section-head h2{font-size:20px;font-weight:700;letter-spacing:-.02em}
+body.smarttoolz-video-platform .stv-home-section-head a{font-size:14px;color:#065fd4;text-decoration:none}
+body.smarttoolz-video-platform .stv-home-section-head a:hover{text-decoration:underline}
+
+/* Video grid/cards */
+body.smarttoolz-video-platform .stv-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:34px 18px!important}
+body.smarttoolz-video-platform .stv-card{min-width:0;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important}
+body.smarttoolz-video-platform .stv-thumb{aspect-ratio:16/9;border-radius:10px;background:#e5e5e5;overflow:hidden}
+body.smarttoolz-video-platform .stv-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+body.smarttoolz-video-platform .stv-duration{right:7px;bottom:7px;padding:3px 5px;border-radius:3px;background:rgba(0,0,0,.9);font-size:12px;font-weight:700}
+body.smarttoolz-video-platform .stv-card-body{padding:10px 2px 0}
+body.smarttoolz-video-platform .stv-card-title{font-size:16px;line-height:1.3;font-weight:700;color:#0f0f0f;margin:0 0 6px;text-decoration:none}
+body.smarttoolz-video-platform .stv-card-author{font-size:13px;color:#606060;line-height:1.35}
+body.smarttoolz-video-platform .stv-card-meta{font-size:13px;color:#606060;line-height:1.35;margin-top:2px}
+body.smarttoolz-video-platform .stv-card:hover .stv-card-title{text-decoration:underline}
+
+/* Explore/library pages */
+body.smarttoolz-video-platform .stv-page-heading{padding:26px 0 22px}
+body.smarttoolz-video-platform .stv-page-heading h1{font-size:30px;font-weight:700;letter-spacing:-.03em;margin:0 0 8px}
+body.smarttoolz-video-platform .stv-page-heading p{margin:0;color:#606060}
+body.smarttoolz-video-platform .stv-search-big{max-width:760px;margin-bottom:28px}
+body.smarttoolz-video-platform .stv-search-big input{height:44px;border:1px solid #ccc;border-radius:22px;padding:0 18px}
+body.smarttoolz-video-platform .stv-search-big button{height:44px;border:0;border-radius:22px;padding:0 22px;background:#0f0f0f;color:#fff;font-weight:700}
+body.smarttoolz-video-platform .stv-category-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+body.smarttoolz-video-platform .stv-category-card{border:1px solid #e5e5e5;border-radius:10px;background:#fff;color:#0f0f0f}
+body.smarttoolz-video-platform .stv-category-card:hover{border-color:#aaa;transform:none}
+
+/* Single video watch page */
+body.smarttoolz-video-platform .stv-watch-layout{width:100%;max-width:none;padding:22px 24px 56px;grid-template-columns:minmax(0,1fr) 360px;gap:26px}
+body.smarttoolz-video-platform .stv-player-shell{border-radius:10px;overflow:hidden;background:#000}
+body.smarttoolz-video-platform .stv-watch-title{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:16px 0 8px}
+body.smarttoolz-video-platform .stv-watch-meta{font-size:13px;color:#606060;border:0;padding:0}
+body.smarttoolz-video-platform .stv-react,body.smarttoolz-video-platform .stv-share{background:#f2f2f2;border-radius:20px;font-size:14px;padding:9px 14px}
+body.smarttoolz-video-platform .stv-react.is-active{background:#0f0f0f;color:#fff}
+body.smarttoolz-video-platform .stv-subscribe{background:#0f0f0f;color:#fff;border-radius:20px}
+body.smarttoolz-video-platform .stv-sidebar h2{font-size:18px}
+
+/* Mobile */
+@media(max-width:1100px){body.smarttoolz-video-platform .stv-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.st-video-header .stv-header-nav{overflow:auto}.st-video-header .st-header-search{min-width:220px}.stv-category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:850px){body.smarttoolz-video-platform .stv-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.stv-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stv-page-hero{align-items:flex-start!important;flex-direction:column}.stv-page-hero-actions{width:100%}.stv-page-hero-actions a{width:auto}}
+@media(max-width:650px){body.smarttoolz-video-platform .st-video-header .st-header-inner{padding:8px 14px}.st-video-header .stv-header-nav{order:3;width:100%;overflow:auto}.st-video-header .st-header-tools{order:2;width:100%}.st-video-header .st-header-search{width:100%;min-width:0}.body.smarttoolz-video-platform .stv-page-shell{padding-inline:14px}body.smarttoolz-video-platform .stv-page-shell,body.smarttoolz-video-platform .stv-watch-layout{padding-left:14px;padding-right:14px}.stv-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.stv-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){body.smarttoolz-video-platform .stv-grid{grid-template-columns:1fr!important}}

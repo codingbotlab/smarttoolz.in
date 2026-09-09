@@ -2,19 +2,17 @@
 /**
  * Plugin Name: SmartToolz Video
  * Description: SmartToolz Video platform. WordPress core remains untouched; application behavior is provided by this plugin.
- * Version: 1.3.4
+ * Version: 1.4.0
  * Author: SmartToolz
  * Text Domain: smarttoolz-video
  */
-
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'SMARTTOOLZ_VIDEO_VERSION', '1.3.4' );
+define( 'SMARTTOOLZ_VIDEO_VERSION', '1.4.0' );
 define( 'SMARTTOOLZ_VIDEO_FILE', __FILE__ );
 define( 'SMARTTOOLZ_VIDEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
 
-// Frontend: only administrators keep the native WordPress admin bar/header controls.
 function smarttoolz_video_show_admin_bar( $show ) {
     if ( is_admin() ) { return $show; }
     $user = wp_get_current_user();
@@ -26,13 +24,11 @@ add_filter( 'show_admin_bar', 'smarttoolz_video_show_admin_bar', 999 );
 function smarttoolz_video_hide_admin_bar_css() {
     if ( is_admin() ) { return; }
     $user = wp_get_current_user();
-    if ( ! $user || ! $user->exists() || ! in_array( 'administrator', (array) $user->roles, true ) ) {
-        echo '<style id="smarttoolz-hide-wp-admin-bar">#wpadminbar{display:none!important}html{margin-top:0!important}</style>';
-    }
+    if ( ! $user || ! $user->exists() || ! in_array( 'administrator', (array) $user->roles, true ) ) echo '<style id="smarttoolz-hide-wp-admin-bar">#wpadminbar{display:none!important}html{margin-top:0!important}</style>';
 }
 add_action( 'wp_head', 'smarttoolz_video_hide_admin_bar_css', 999 );
 
-// Load each application module exactly once, independent of theme state.
+// Load application modules exactly once.
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/videos.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/creator-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/bootstrap.php';
@@ -41,6 +37,9 @@ require_once SMARTTOOLZ_VIDEO_DIR . 'includes/theme-installer.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/auth.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/admin-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/app.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/video-settings.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/player.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/ads.php';
 
 function smarttoolz_video_admin_menu() {
     add_menu_page( 'SmartToolz', 'SmartToolz', 'manage_options', 'smarttoolz', 'smarttoolz_video_dashboard_page', 'dashicons-video-alt3', 25 );
@@ -63,7 +62,7 @@ function smarttoolz_video_dashboard_page() {
     }
     $installed = smarttoolz_video_theme_installed(); $active = smarttoolz_video_theme_is_active(); $ids = (array) get_option( 'smarttoolz_video_page_ids', array() ); $home_id = isset( $ids['home'] ) ? absint( $ids['home'] ) : 0; $static_home = 'page' === get_option( 'show_on_front', 'posts' ) && $home_id && absint( get_option( 'page_on_front', 0 ) ) === $home_id;
     ?>
-    <div class="wrap"><div style="display:flex;align-items:center;gap:12px;margin:8px 0 20px;"><div style="width:44px;height:44px;border-radius:12px;background:#ff0033;color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;">▶</div><div><h1 style="margin:0;">SmartToolz</h1><p style="margin:3px 0 0;color:#646970;">Video-sharing platform control center</p></div></div><?php echo $notice; ?><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1100px;"><div style="background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:20px;"><h2 style="margin-top:0;">Recommended Actions</h2><p style="color:#646970;">Complete the SmartToolz setup for the best video-site experience.</p><?php foreach ( array( 'install_theme' => 'Install SmartToolz Theme', 'activate_theme' => 'Activate SmartToolz Theme', 'set_home' => 'Set SmartToolz Home as Homepage', 'repair_pages' => 'Repair & Sync Pages' ) as $action => $label ) : ?><form method="post" style="margin:0 0 10px;"><?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?><input type="hidden" name="stv_dashboard_action" value="<?php echo esc_attr( $action ); ?>"><button type="submit" class="button <?php echo 'activate_theme' === $action ? 'button-primary' : 'button-secondary'; ?>" style="width:100%;text-align:left;"><?php echo esc_html( $label ); ?></button></form><?php endforeach; ?></div><div style="background:#111827;color:#fff;border-radius:12px;padding:20px;"><h2 style="margin-top:0;color:#fff;">SmartToolz Status</h2><p><strong>Theme:</strong> <?php echo $active ? 'Active' : ( $installed ? 'Installed' : 'Not installed' ); ?></p><p><strong>Static Home:</strong> <?php echo $static_home ? 'Active' : 'Not set'; ?></p><p><strong>Pages:</strong> <?php echo count( smarttoolz_video_page_definitions() ); ?> managed sections</p><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-pages' ) ); ?>" class="button button-secondary">Open Page Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-account-access' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Account & Access</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-settings' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Video Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-google-auth' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Google Login</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-channel-settings' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Channel Settings</a></div></div></div>
+    <div class="wrap"><div style="display:flex;align-items:center;gap:12px;margin:8px 0 20px;"><div style="width:44px;height:44px;border-radius:12px;background:#ff0033;color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;">▶</div><div><h1 style="margin:0;">SmartToolz</h1><p style="margin:3px 0 0;color:#646970;">Video-sharing platform control center</p></div></div><?php echo $notice; ?><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1100px;"><div style="background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:20px;"><h2 style="margin-top:0;">Recommended Actions</h2><p style="color:#646970;">Complete the SmartToolz setup for the best video-site experience.</p><?php foreach ( array( 'install_theme' => 'Install SmartToolz Theme', 'activate_theme' => 'Activate SmartToolz Theme', 'set_home' => 'Set SmartToolz Home as Homepage', 'repair_pages' => 'Repair & Sync Pages' ) as $action => $label ) : ?><form method="post" style="margin:0 0 10px;"><?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?><input type="hidden" name="stv_dashboard_action" value="<?php echo esc_attr( $action ); ?>"><button type="submit" class="button <?php echo 'activate_theme' === $action ? 'button-primary' : 'button-secondary'; ?>" style="width:100%;text-align:left;"><?php echo esc_html( $label ); ?></button></form><?php endforeach; ?></div><div style="background:#111827;color:#fff;border-radius:12px;padding:20px;"><h2 style="margin-top:0;color:#fff;">SmartToolz Status</h2><p><strong>Theme:</strong> <?php echo $active ? 'Active' : ( $installed ? 'Installed' : 'Not installed' ); ?></p><p><strong>Static Home:</strong> <?php echo $static_home ? 'Active' : 'Not set'; ?></p><p><strong>Pages:</strong> <?php echo count( smarttoolz_video_page_definitions() ); ?> managed sections</p><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-pages' ) ); ?>" class="button button-secondary">Open Page Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-account-access' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Account & Access</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-settings' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Video Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-player' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Player Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-ads' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Ads Setup</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-google-auth' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Google Login</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-channel-settings' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Channel Settings</a></div></div></div>
     <?php
 }
 

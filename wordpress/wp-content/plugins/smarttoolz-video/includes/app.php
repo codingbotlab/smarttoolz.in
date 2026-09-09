@@ -40,7 +40,6 @@ function smarttoolz_video_render_app() {
                             echo '<div class="stv-empty" style="grid-column:1/-1;">No videos have been published yet. Be the first creator to upload one.</div>';
                         } else {
                             foreach ( $videos as $video ) {
-                                $source = smarttoolz_video_get_source( $video->ID );
                                 echo '<article class="stv-video-card">';
                                 echo '<a class="stv-video-card__thumb" href="' . esc_url( smarttoolz_video_route_url( 'watch', $video->ID ) ) . '">';
                                 if ( has_post_thumbnail( $video->ID ) ) { echo get_the_post_thumbnail( $video->ID, 'medium_large' ); }
@@ -57,30 +56,51 @@ function smarttoolz_video_render_app() {
             <?php elseif ( 'upload' === $route || 'your-videos' === $route ) : ?>
                 <?php smarttoolz_video_manage_page(); ?>
             <?php elseif ( 'account' === $route ) : ?>
-                <?php $user = wp_get_current_user(); ?>
-                <section class="stv-account-hero">
-                    <?php if ( is_user_logged_in() ) : ?>
-                        <div class="stv-account-avatar"><?php echo esc_html( strtoupper( substr( $user->display_name ?: $user->user_login, 0, 1 ) ) ); ?></div>
-                        <div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Hi, <?php echo esc_html( $user->display_name ?: $user->user_login ); ?></h1><p><?php echo esc_html( $user->user_email ); ?></p><a class="stv-button" href="<?php echo esc_url( smarttoolz_video_route_url( 'edit-profile' ) ); ?>">Edit profile</a></div>
-                    <?php else : ?><div class="stv-account-avatar">?</div><div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Sign in to SmartToolz</h1><p>Access your channel, subscriptions, playlists, history and personal settings.</p><a class="stv-button" href="<?php echo esc_url( smarttoolz_video_route_url( 'login' ) ); ?>">Sign in</a></div><?php endif; ?>
-                </section>
-                <section class="stv-account-grid">
-                    <?php
-                    echo smarttoolz_video_account_card_link( 'edit-profile', 'Edit Profile', 'Name, avatar and profile details' );
-                    echo smarttoolz_video_account_card_link( 'channel', 'Your Channel', 'Channel home, videos and live content' );
-                    echo smarttoolz_video_account_card_link( 'subscriptions', 'Subscriptions', 'Channels and creators you follow' );
-                    echo smarttoolz_video_account_card_link( 'playlists', 'Playlists', 'Manage your saved collections' );
-                    echo smarttoolz_video_account_card_link( 'history', 'History', 'Recently watched videos' );
-                    echo smarttoolz_video_account_card_link( 'watch-later', 'Watch Later', 'Videos you saved for later' );
-                    echo smarttoolz_video_account_card_link( 'liked-videos', 'Liked Videos', 'Videos you have liked' );
-                    echo smarttoolz_video_account_card_link( 'your-videos', 'Your Videos', 'Manage the videos you publish' );
-                    echo smarttoolz_video_account_card_link( 'comments', 'Comments & Activity', 'Your comments and account activity' );
-                    echo smarttoolz_video_account_card_link( 'podcasts', 'Your Podcasts', 'Podcasts associated with your account' );
-                    echo smarttoolz_video_account_card_link( 'badges', 'Badges', 'Achievements and earned badges' );
-                    echo smarttoolz_video_account_card_link( 'privacy', 'Privacy & Your Data', 'Privacy and personal data controls' );
-                    echo smarttoolz_video_account_card_link( 'settings', 'Settings', 'General SmartToolz preferences' );
-                    echo smarttoolz_video_account_card_link( 'notifications', 'Notifications', 'Manage alerts and activity' );
-                    ?>
+                <?php
+                if ( ! is_user_logged_in() ) {
+                    wp_safe_redirect( smarttoolz_video_route_url( 'login' ) );
+                    exit;
+                }
+                $user = wp_get_current_user();
+                $handle = get_user_meta( $user->ID, 'smarttoolz_channel_handle', true );
+                if ( '' === $handle ) { $handle = $user->user_nicename; }
+                $avatar = get_user_meta( $user->ID, 'smarttoolz_avatar_url', true );
+                $initial = strtoupper( substr( $user->display_name ?: $user->user_login, 0, 1 ) );
+                ?>
+                <section class="stv-account-page">
+                    <div class="stv-account-hero">
+                        <?php if ( $avatar ) : ?>
+                            <img class="stv-account-avatar" src="<?php echo esc_url( $avatar ); ?>" alt="<?php echo esc_attr( $user->display_name ); ?>">
+                        <?php else : ?>
+                            <div class="stv-account-avatar"><?php echo esc_html( $initial ); ?></div>
+                        <?php endif; ?>
+                        <div class="stv-account-identity">
+                            <span class="stv-eyebrow">SmartToolz Account</span>
+                            <h1 class="stv-page-title"><?php echo esc_html( $user->display_name ?: $user->user_login ); ?></h1>
+                            <p>@<?php echo esc_html( $handle ); ?></p>
+                            <div class="stv-account-actions">
+                                <a class="stv-button" href="<?php echo esc_url( smarttoolz_video_route_url( 'channel', $handle ) ); ?>">View channel</a>
+                                <a class="stv-button stv-button--secondary" href="<?php echo esc_url( smarttoolz_video_route_url( 'edit-profile' ) ); ?>">Edit profile</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stv-account-section-heading">
+                        <h2>Your SmartToolz</h2>
+                        <p>Manage your channel and personal video activity.</p>
+                    </div>
+                    <section class="stv-account-grid">
+                        <?php
+                        echo smarttoolz_video_account_card_link( 'channel', 'Your Channel', 'View and manage your creator channel' );
+                        echo smarttoolz_video_account_card_link( 'your-videos', 'Your Videos', 'Manage videos you have published' );
+                        echo smarttoolz_video_account_card_link( 'subscriptions', 'Subscriptions', 'Channels and creators you follow' );
+                        echo smarttoolz_video_account_card_link( 'history', 'History', 'Videos you recently watched' );
+                        echo smarttoolz_video_account_card_link( 'watch-later', 'Watch Later', 'Videos you saved to watch later' );
+                        echo smarttoolz_video_account_card_link( 'liked-videos', 'Liked Videos', 'Videos you have liked' );
+                        echo smarttoolz_video_account_card_link( 'playlists', 'Playlists', 'Manage your saved collections' );
+                        echo smarttoolz_video_account_card_link( 'settings', 'Settings', 'Manage your SmartToolz preferences' );
+                        ?>
+                    </section>
                 </section>
             <?php elseif ( 'login' === $route || 'signup' === $route ) : ?>
                 <?php smarttoolz_video_render_login(); ?>

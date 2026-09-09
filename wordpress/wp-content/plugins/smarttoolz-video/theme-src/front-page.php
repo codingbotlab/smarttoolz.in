@@ -6,7 +6,7 @@ get_header();
     <div class="stv-hero__box">
         <h1>Watch, share and discover.</h1>
         <p>SmartToolz is your video-sharing home. Explore videos, follow creators and build your own library.</p>
-        <a class="stv-button" href="<?php echo esc_url( home_url( '/video/' ) ); ?>">Open SmartToolz Videos</a>
+        <a class="stv-button" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>">Open SmartToolz Videos</a>
     </div>
 </section>
 <section>

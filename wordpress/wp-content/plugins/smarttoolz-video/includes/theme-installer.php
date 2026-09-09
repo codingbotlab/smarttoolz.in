@@ -7,7 +7,7 @@ function smarttoolz_video_theme_name() { return 'SmartToolz Video Theme'; }
 function smarttoolz_video_theme_slug() { return 'smarttoolz-video-theme'; }
 function smarttoolz_video_theme_source_dir() { return trailingslashit( SMARTTOOLZ_VIDEO_DIR . 'theme-src' ); }
 function smarttoolz_video_theme_target_dir() { return trailingslashit( WP_CONTENT_DIR . '/themes/' . smarttoolz_video_theme_slug() ); }
-function smarttoolz_video_theme_source_version() { return '1.3.0'; }
+function smarttoolz_video_theme_source_version() { return '1.3.1'; }
 function smarttoolz_video_theme_source_files() { return array( 'style.css', 'functions.php', 'header.php', 'footer.php', 'index.php', 'front-page.php', 'page.php' ); }
 function smarttoolz_video_theme_installed() { return file_exists( smarttoolz_video_theme_target_dir() . 'style.css' ) && file_exists( smarttoolz_video_theme_target_dir() . 'functions.php' ) && file_exists( smarttoolz_video_theme_target_dir() . 'page.php' ); }
 function smarttoolz_video_install_theme() {

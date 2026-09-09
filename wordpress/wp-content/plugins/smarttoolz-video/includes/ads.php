@@ -14,6 +14,7 @@ function smarttoolz_video_ads_defaults() {
         'midroll' => 1,
         'post_roll' => 1,
         'pause' => 1,
+        'sidebar' => 1,
         'skip_after' => 5,
         'midroll_interval' => 300,
         'pause_cooldown' => 60000,
@@ -23,15 +24,23 @@ function smarttoolz_video_ads_defaults() {
             'mid_roll' => array(),
             'post_roll' => array(),
             'pause' => array(),
+            'sidebar' => array(),
         ),
     );
 }
 
 function smarttoolz_video_ads_settings() {
-    return wp_parse_args(
-        (array) get_option( 'smarttoolz_video_ads_settings', array() ),
-        smarttoolz_video_ads_defaults()
-    );
+    $saved = get_option( 'smarttoolz_video_ads_settings', array() );
+    $settings = wp_parse_args( is_array( $saved ) ? $saved : array(), smarttoolz_video_ads_defaults() );
+    $defaults = smarttoolz_video_ads_defaults();
+
+    foreach ( $defaults['creatives'] as $kind => $unused ) {
+        if ( empty( $settings['creatives'][ $kind ] ) || ! is_array( $settings['creatives'][ $kind ] ) ) {
+            $settings['creatives'][ $kind ] = array();
+        }
+    }
+
+    return $settings;
 }
 
 function smarttoolz_video_ads_register_settings() {
@@ -54,12 +63,11 @@ function smarttoolz_video_ads_sanitize_settings( $input ) {
         'midroll' => empty( $input['midroll'] ) ? 0 : 1,
         'post_roll' => empty( $input['post_roll'] ) ? 0 : 1,
         'pause' => empty( $input['pause'] ) ? 0 : 1,
+        'sidebar' => empty( $input['sidebar'] ) ? 0 : 1,
         'skip_after' => max( 1, min( 15, absint( $input['skip_after'] ?? 5 ) ) ),
         'midroll_interval' => max( 60, min( 1800, absint( $input['midroll_interval'] ?? 300 ) ) ),
         'pause_cooldown' => max( 15000, min( 600000, absint( $input['pause_cooldown'] ?? 60000 ) ) ),
-        'creatives' => isset( $old['creatives'] ) && is_array( $old['creatives'] )
-            ? $old['creatives']
-            : smarttoolz_video_ads_defaults()['creatives'],
+        'creatives' => $old['creatives'],
     );
 }
 
@@ -75,21 +83,51 @@ function smarttoolz_video_ads_admin_menu() {
 }
 add_action( 'admin_menu', 'smarttoolz_video_ads_admin_menu', 27 );
 
+/**
+ * Allow the ad formats in WordPress uploads as well as in the ad uploader.
+ */
 function smarttoolz_video_ads_upload_mimes( $mimes ) {
-    $mimes['mp4'] = 'video/mp4';
+    $mimes['mp4']  = 'video/mp4';
+    $mimes['m4v']  = 'video/mp4';
     $mimes['webm'] = 'video/webm';
-    $mimes['ogv'] = 'video/ogg';
-    $mimes['mov'] = 'video/quicktime';
-    $mimes['jpg'] = 'image/jpeg';
+    $mimes['ogv']  = 'video/ogg';
+    $mimes['ogg']  = 'video/ogg';
+    $mimes['mov']  = 'video/quicktime';
+    $mimes['avi']  = 'video/x-msvideo';
+    $mimes['jpg']  = 'image/jpeg';
     $mimes['jpeg'] = 'image/jpeg';
-    $mimes['png'] = 'image/png';
+    $mimes['png']  = 'image/png';
     $mimes['webp'] = 'image/webp';
+    $mimes['gif']  = 'image/gif';
     return $mimes;
 }
+add_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes', 20 );
+
+function smarttoolz_video_ads_check_filetype( $types, $file, $filename, $mimes, $real_mime ) {
+    $extension = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+    $allowed = array(
+        'mp4' => 'video/mp4', 'm4v' => 'video/mp4', 'webm' => 'video/webm',
+        'ogv' => 'video/ogg', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime',
+        'avi' => 'video/x-msvideo', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
+        'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif',
+    );
+
+    if ( isset( $allowed[ $extension ] ) && ( empty( $types['type'] ) || empty( $types['ext'] ) ) ) {
+        $types['ext'] = $extension;
+        $types['type'] = $allowed[ $extension ];
+    }
+
+    return $types;
+}
+add_filter( 'wp_check_filetype_and_ext', 'smarttoolz_video_ads_check_filetype', 20, 5 );
 
 function smarttoolz_video_ads_handle_upload( $field, $kind ) {
     if ( empty( $_FILES[ $field ]['name'] ) ) {
         return null;
+    }
+
+    if ( ! empty( $_FILES[ $field ]['error'] ) ) {
+        return new WP_Error( 'ad_upload_error', 'Upload failed. Please choose a valid video or image file.' );
     }
 
     require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -100,12 +138,26 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
         'video/webm' => 'webm',
         'video/ogg' => 'ogv',
         'video/quicktime' => 'mov',
+        'video/x-msvideo' => 'avi',
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
         'image/webp' => 'webp',
+        'image/gif' => 'gif',
     );
 
-    add_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes' );
+    $extension = strtolower( pathinfo( sanitize_file_name( $_FILES[ $field ]['name'] ), PATHINFO_EXTENSION ) );
+    $extension_map = array(
+        'mp4' => 'video/mp4', 'm4v' => 'video/mp4', 'webm' => 'video/webm',
+        'ogv' => 'video/ogg', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime',
+        'avi' => 'video/x-msvideo', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
+        'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif',
+    );
+
+    if ( ! isset( $extension_map[ $extension ] ) ) {
+        return new WP_Error( 'ad_upload_type', 'Unsupported ad file type. Use MP4, WebM, OGV, MOV, AVI, JPG, PNG, WebP or GIF.' );
+    }
+
+    add_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes', 30 );
     $upload = wp_handle_upload(
         $_FILES[ $field ],
         array(
@@ -113,18 +165,17 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
             'mimes' => $allowed,
         )
     );
-    remove_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes' );
+    remove_filter( 'upload_mimes', 'smarttoolz_video_ads_upload_mimes', 30 );
 
     if ( isset( $upload['error'] ) ) {
         return new WP_Error( 'ad_upload_error', $upload['error'] );
     }
 
-    $file_type = wp_check_filetype( basename( $upload['file'] ), $allowed );
-    $is_image = 0 === strpos( (string) $file_type['type'], 'image/' );
-
+    $mime = $extension_map[ $extension ];
+    $is_image = 0 === strpos( $mime, 'image/' );
     $attachment = wp_insert_attachment(
         array(
-            'post_mime_type' => $file_type['type'],
+            'post_mime_type' => $mime,
             'post_title' => sanitize_text_field( pathinfo( $upload['file'], PATHINFO_FILENAME ) ),
             'post_status' => 'inherit',
         ),
@@ -137,21 +188,23 @@ function smarttoolz_video_ads_handle_upload( $field, $kind ) {
     }
 
     if ( $is_image ) {
-        wp_update_attachment_metadata(
-            $attachment,
-            wp_generate_attachment_metadata( $attachment, $upload['file'] )
-        );
+        $metadata = wp_generate_attachment_metadata( $attachment, $upload['file'] );
+        if ( ! is_wp_error( $metadata ) ) {
+            wp_update_attachment_metadata( $attachment, $metadata );
+        }
     }
 
     return array(
         'src' => esc_url_raw( $upload['url'] ),
         'type' => $is_image ? 'image' : 'video',
-        'title' => sanitize_text_field( $_POST[ $kind . '_title' ] ?? '' ),
-        'text' => sanitize_text_field( $_POST[ $kind . '_text' ] ?? '' ),
-        'url' => esc_url_raw( $_POST[ $kind . '_url' ] ?? '' ),
+        'title' => sanitize_text_field( wp_unslash( $_POST[ $kind . '_title' ] ?? '' ) ),
+        'text' => sanitize_text_field( wp_unslash( $_POST[ $kind . '_text' ] ?? '' ) ),
+        'url' => esc_url_raw( wp_unslash( $_POST[ $kind . '_url' ] ?? '' ) ),
         'duration' => max( 3, min( 120, absint( $_POST[ $kind . '_duration' ] ?? 10 ) ) ),
         'skippable' => ! empty( $_POST[ $kind . '_skippable' ] ),
+        'active' => 1,
         'attachment_id' => absint( $attachment ),
+        'created_at' => current_time( 'mysql' ),
     );
 }
 
@@ -166,20 +219,21 @@ function smarttoolz_video_ads_settings_page() {
 
     $s = smarttoolz_video_ads_settings();
     $notice = '';
+    $kinds = array(
+        'pre_roll' => 'Pre-roll',
+        'bumper' => 'Bumper',
+        'mid_roll' => 'Mid-roll',
+        'post_roll' => 'Post-roll',
+        'pause' => 'Pause ad',
+        'sidebar' => 'Sidebar ad',
+    );
 
-    if (
-        isset( $_POST['stv_ads_nonce'] ) &&
-        wp_verify_nonce(
-            sanitize_text_field( wp_unslash( $_POST['stv_ads_nonce'] ) ),
-            'stv_ads_save'
-        )
-    ) {
+    if ( isset( $_POST['stv_ads_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_ads_nonce'] ) ), 'stv_ads_save' ) ) {
         $action = sanitize_key( $_POST['stv_ads_action'] ?? 'save' );
+        $kind = sanitize_key( $_POST['stv_ad_kind'] ?? '' );
 
         if ( 'delete' === $action ) {
-            $kind = sanitize_key( $_POST['stv_ad_kind'] ?? '' );
             $index = absint( $_POST['stv_ad_index'] ?? -1 );
-
             if ( isset( $s['creatives'][ $kind ][ $index ] ) ) {
                 $ad = $s['creatives'][ $kind ][ $index ];
                 if ( ! empty( $ad['attachment_id'] ) ) {
@@ -189,24 +243,24 @@ function smarttoolz_video_ads_settings_page() {
                 update_option( 'smarttoolz_video_ads_settings', $s, false );
                 $notice = smarttoolz_video_ads_page_notice( 'Ad creative deleted.' );
             }
-        } elseif ( 'upload' === $action ) {
-            $kind = sanitize_key( $_POST['stv_ad_kind'] ?? '' );
-
-            if ( in_array( $kind, array( 'pre_roll', 'bumper', 'mid_roll', 'post_roll', 'pause' ), true ) ) {
-                $new = smarttoolz_video_ads_handle_upload( 'stv_ad_file', $kind );
-
-                if ( is_wp_error( $new ) ) {
-                    $notice = smarttoolz_video_ads_page_notice( $new->get_error_message(), true );
-                } elseif ( $new ) {
-                    $s['creatives'][ $kind ][] = $new;
-                    update_option( 'smarttoolz_video_ads_settings', $s, false );
-                    $notice = smarttoolz_video_ads_page_notice( 'Ad creative uploaded.' );
-                }
+        } elseif ( 'toggle' === $action ) {
+            $index = absint( $_POST['stv_ad_index'] ?? -1 );
+            if ( isset( $s['creatives'][ $kind ][ $index ] ) ) {
+                $s['creatives'][ $kind ][ $index ]['active'] = empty( $s['creatives'][ $kind ][ $index ]['active'] ) ? 1 : 0;
+                update_option( 'smarttoolz_video_ads_settings', $s, false );
+                $notice = smarttoolz_video_ads_page_notice( 'Ad status updated.' );
+            }
+        } elseif ( 'upload' === $action && isset( $kinds[ $kind ] ) ) {
+            $new = smarttoolz_video_ads_handle_upload( 'stv_ad_file', $kind );
+            if ( is_wp_error( $new ) ) {
+                $notice = smarttoolz_video_ads_page_notice( $new->get_error_message(), true );
+            } elseif ( $new ) {
+                $s['creatives'][ $kind ][] = $new;
+                update_option( 'smarttoolz_video_ads_settings', $s, false );
+                $notice = smarttoolz_video_ads_page_notice( 'Ad creative uploaded successfully.' );
             }
         } else {
-            $s = smarttoolz_video_ads_sanitize_settings(
-                $_POST['smarttoolz_video_ads_settings'] ?? array()
-            );
+            $s = smarttoolz_video_ads_sanitize_settings( $_POST['smarttoolz_video_ads_settings'] ?? array() );
             update_option( 'smarttoolz_video_ads_settings', $s, false );
             $notice = smarttoolz_video_ads_page_notice( 'Ads settings saved.' );
         }
@@ -214,19 +268,20 @@ function smarttoolz_video_ads_settings_page() {
     ?>
     <div class="wrap">
         <h1>Ads Setup</h1>
-        <p>Manage first-party video ad creatives and player placements. This is your site's own ad system, not the YouTube/Google ad network.</p>
+        <p>Manage first-party ads for the video player and the watch-page sidebar.</p>
         <?php echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
         <form method="post">
             <?php wp_nonce_field( 'stv_ads_save', 'stv_ads_nonce' ); ?>
             <input type="hidden" name="stv_ads_action" value="save">
             <table class="form-table" role="presentation">
-                <tr><th>Video ads</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[enabled]" value="1" <?php checked( $s['enabled'], 1 ); ?>> Enable ads in the player</label></td></tr>
-                <tr><th>Pre-roll</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[pre_roll]" value="1" <?php checked( $s['pre_roll'], 1 ); ?>> Enable pre-roll</label></td></tr>
-                <tr><th>Bumper</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[bumper]" value="1" <?php checked( $s['bumper'], 1 ); ?>> Enable short non-skippable bumper</label></td></tr>
-                <tr><th>Mid-roll</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[midroll]" value="1" <?php checked( $s['midroll'], 1 ); ?>> Enable automatic mid-roll breaks</label></td></tr>
-                <tr><th>Post-roll</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[post_roll]" value="1" <?php checked( $s['post_roll'], 1 ); ?>> Enable post-roll</label></td></tr>
-                <tr><th>Pause ads</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[pause]" value="1" <?php checked( $s['pause'], 1 ); ?>> Show an ad when a viewer pauses</label></td></tr>
+                <tr><th>Video ads</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[enabled]" value="1" <?php checked( $s['enabled'], 1 ); ?>> Enable ads</label></td></tr>
+                <tr><th>Pre-roll</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[pre_roll]" value="1" <?php checked( $s['pre_roll'], 1 ); ?>> Play before the main video</label></td></tr>
+                <tr><th>Bumper</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[bumper]" value="1" <?php checked( $s['bumper'], 1 ); ?>> Short non-skippable bumper</label></td></tr>
+                <tr><th>Mid-roll</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[midroll]" value="1" <?php checked( $s['midroll'], 1 ); ?>> Automatic mid-roll breaks</label></td></tr>
+                <tr><th>Post-roll</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[post_roll]" value="1" <?php checked( $s['post_roll'], 1 ); ?>> Play after the main video</label></td></tr>
+                <tr><th>Pause ads</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[pause]" value="1" <?php checked( $s['pause'], 1 ); ?>> Show an ad when viewer pauses</label></td></tr>
+                <tr><th>Sidebar ads</th><td><label><input type="checkbox" name="smarttoolz_video_ads_settings[sidebar]" value="1" <?php checked( $s['sidebar'], 1 ); ?>> Show active sidebar ads above the Next video list</label></td></tr>
                 <tr><th>Skip after</th><td><input type="number" min="1" max="15" name="smarttoolz_video_ads_settings[skip_after]" value="<?php echo esc_attr( $s['skip_after'] ); ?>"> seconds</td></tr>
                 <tr><th>Mid-roll interval</th><td><input type="number" min="60" max="1800" name="smarttoolz_video_ads_settings[midroll_interval]" value="<?php echo esc_attr( $s['midroll_interval'] ); ?>"> seconds</td></tr>
                 <tr><th>Pause-ad cooldown</th><td><input type="number" min="15000" max="600000" step="1000" name="smarttoolz_video_ads_settings[pause_cooldown]" value="<?php echo esc_attr( $s['pause_cooldown'] ); ?>"> milliseconds</td></tr>
@@ -235,45 +290,66 @@ function smarttoolz_video_ads_settings_page() {
         </form>
 
         <hr>
-        <h2>Ad Creatives</h2>
-        <p>Upload MP4/WebM/OGV/MOV video creatives or JPG/PNG/WebP image creatives.</p>
+        <h2>Active Ads</h2>
+        <p>All uploaded creatives are listed here. Use Activate/Deactivate to control which ads can be shown.</p>
+        <table class="widefat striped" style="margin-bottom:30px">
+            <thead><tr><th>Ad</th><th>Placement</th><th>Type</th><th>Status</th><th>Duration</th><th>Action</th></tr></thead>
+            <tbody>
+            <?php
+            $has_ads = false;
+            foreach ( $kinds as $kind => $label ) :
+                foreach ( $s['creatives'][ $kind ] as $i => $ad ) :
+                    $has_ads = true;
+                    $active = ! empty( $ad['active'] );
+                    ?>
+                    <tr>
+                        <td><strong><?php echo esc_html( $ad['title'] ?: basename( parse_url( $ad['src'], PHP_URL_PATH ) ) ); ?></strong></td>
+                        <td><?php echo esc_html( $label ); ?></td>
+                        <td><?php echo esc_html( ucfirst( $ad['type'] ?? 'video' ) ); ?></td>
+                        <td><strong><?php echo $active ? 'Active' : 'Inactive'; ?></strong></td>
+                        <td><?php echo esc_html( absint( $ad['duration'] ?? 10 ) ); ?>s</td>
+                        <td>
+                            <form method="post" style="display:inline-block">
+                                <?php wp_nonce_field( 'stv_ads_save', 'stv_ads_nonce' ); ?>
+                                <input type="hidden" name="stv_ads_action" value="toggle">
+                                <input type="hidden" name="stv_ad_kind" value="<?php echo esc_attr( $kind ); ?>">
+                                <input type="hidden" name="stv_ad_index" value="<?php echo esc_attr( $i ); ?>">
+                                <button class="button" type="submit"><?php echo $active ? 'Deactivate' : 'Activate'; ?></button>
+                            </form>
+                            <form method="post" style="display:inline-block;margin-left:5px">
+                                <?php wp_nonce_field( 'stv_ads_save', 'stv_ads_nonce' ); ?>
+                                <input type="hidden" name="stv_ads_action" value="delete">
+                                <input type="hidden" name="stv_ad_kind" value="<?php echo esc_attr( $kind ); ?>">
+                                <input type="hidden" name="stv_ad_index" value="<?php echo esc_attr( $i ); ?>">
+                                <button class="button-link-delete" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach;
+            endforeach;
+            if ( ! $has_ads ) : ?>
+                <tr><td colspan="6">No ad creatives uploaded yet.</td></tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
 
-        <?php foreach ( array( 'pre_roll' => 'Pre-roll', 'bumper' => 'Bumper', 'mid_roll' => 'Mid-roll', 'post_roll' => 'Post-roll', 'pause' => 'Pause ad' ) as $kind => $label ) : ?>
-            <div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px;margin:14px 0;max-width:1050px">
+        <h2>Upload Ad Creative</h2>
+        <p>Choose the placement below. Both video and image creatives are supported. No external ad URL is required.</p>
+
+        <?php foreach ( $kinds as $kind => $label ) : ?>
+            <div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px;margin:14px 0">
                 <h3 style="margin-top:0"><?php echo esc_html( $label ); ?></h3>
-
-                <?php if ( ! empty( $s['creatives'][ $kind ] ) ) : ?>
-                    <ul>
-                        <?php foreach ( $s['creatives'][ $kind ] as $i => $ad ) : ?>
-                            <li>
-                                <strong><?php echo esc_html( $ad['title'] ?: basename( parse_url( $ad['src'], PHP_URL_PATH ) ) ); ?></strong>
-                                — <?php echo esc_html( $ad['type'] ); ?>
-                                <?php if ( ! empty( $ad['skippable'] ) ) : ?> — skippable<?php endif; ?>
-                                <form method="post" style="display:inline">
-                                    <?php wp_nonce_field( 'stv_ads_save', 'stv_ads_nonce' ); ?>
-                                    <input type="hidden" name="stv_ads_action" value="delete">
-                                    <input type="hidden" name="stv_ad_kind" value="<?php echo esc_attr( $kind ); ?>">
-                                    <input type="hidden" name="stv_ad_index" value="<?php echo esc_attr( $i ); ?>">
-                                    <button class="button-link-delete" type="submit">Delete</button>
-                                </form>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else : ?>
-                    <p>No creative uploaded yet.</p>
-                <?php endif; ?>
-
-                <form method="post" enctype="multipart/form-data" style="display:grid;gap:8px;max-width:700px">
+                <form method="post" enctype="multipart/form-data" style="display:grid;gap:10px;max-width:760px">
                     <?php wp_nonce_field( 'stv_ads_save', 'stv_ads_nonce' ); ?>
                     <input type="hidden" name="stv_ads_action" value="upload">
                     <input type="hidden" name="stv_ad_kind" value="<?php echo esc_attr( $kind ); ?>">
-                    <input type="file" name="stv_ad_file" accept="video/mp4,video/webm,video/ogg,video/quicktime,image/jpeg,image/png,image/webp" required>
+                    <label><strong>Ad video / image</strong><br><input type="file" name="stv_ad_file" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,.avi,.jpg,.jpeg,.png,.webp,.gif,video/*,image/*" required></label>
                     <input type="text" name="<?php echo esc_attr( $kind ); ?>_title" placeholder="Ad title">
                     <input type="text" name="<?php echo esc_attr( $kind ); ?>_text" placeholder="Short ad text">
                     <input type="url" name="<?php echo esc_attr( $kind ); ?>_url" placeholder="CTA URL (optional)">
-                    <label>Image duration <input type="number" min="3" max="120" name="<?php echo esc_attr( $kind ); ?>_duration" value="10"> sec</label>
-                    <label><input type="checkbox" name="<?php echo esc_attr( $kind ); ?>_skippable" value="1"> Allow Skip after <?php echo esc_html( $s['skip_after'] ); ?> seconds</label>
-                    <?php submit_button( 'Upload Creative', 'secondary', 'submit', false ); ?>
+                    <label>Display duration <input type="number" min="3" max="120" name="<?php echo esc_attr( $kind ); ?>_duration" value="10"> seconds (image ads)</label>
+                    <label><input type="checkbox" name="<?php echo esc_attr( $kind ); ?>_skippable" value="1"> Allow skip after <?php echo esc_html( $s['skip_after'] ); ?> seconds</label>
+                    <?php submit_button( 'Upload ' . $label, 'secondary', 'submit', false ); ?>
                 </form>
             </div>
         <?php endforeach; ?>
@@ -289,19 +365,16 @@ function smarttoolz_video_ads_runtime_config() {
     }
 
     $creatives = array();
-
-    foreach ( array( 'pre_roll', 'bumper', 'mid_roll', 'post_roll', 'pause' ) as $kind ) {
+    foreach ( array( 'pre_roll', 'bumper', 'mid_roll', 'post_roll', 'pause', 'sidebar' ) as $kind ) {
         $creatives[ $kind ] = array();
-
-        if ( empty( $s[ $kind ] ) || empty( $s['creatives'][ $kind ] ) ) {
+        if ( empty( $s['creatives'][ $kind ] ) ) {
             continue;
         }
 
         foreach ( (array) $s['creatives'][ $kind ] as $ad ) {
-            if ( empty( $ad['src'] ) ) {
+            if ( empty( $ad['src'] ) || isset( $ad['active'] ) && ! $ad['active'] ) {
                 continue;
             }
-
             $creatives[ $kind ][] = array(
                 'src' => esc_url_raw( $ad['src'] ),
                 'type' => ( 'image' === ( $ad['type'] ?? '' ) ? 'image' : 'video' ),
@@ -317,9 +390,13 @@ function smarttoolz_video_ads_runtime_config() {
     return array(
         'enabled' => true,
         'skip_after' => absint( $s['skip_after'] ),
+        'pre_roll' => ! empty( $s['pre_roll'] ),
+        'bumper' => ! empty( $s['bumper'] ),
         'midroll' => ! empty( $s['midroll'] ),
-        'midroll_interval' => absint( $s['midroll_interval'] ),
+        'post_roll' => ! empty( $s['post_roll'] ),
         'pause' => ! empty( $s['pause'] ),
+        'sidebar' => ! empty( $s['sidebar'] ),
+        'midroll_interval' => absint( $s['midroll_interval'] ),
         'pause_cooldown' => absint( $s['pause_cooldown'] ),
         'creatives' => $creatives,
     );

@@ -19,13 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
                     <span class="stv-brand__text">SmartToolz</span>
                 </a>
             </div>
-            <form class="stv-search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-                <input type="search" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="Search" aria-label="Search">
+            <form class="stv-search" method="get" action="<?php echo esc_url( smarttoolz_video_theme_search_url() ); ?>">
+                <input type="search" name="search_query" value="<?php echo esc_attr( isset( $_GET['search_query'] ) ? sanitize_text_field( wp_unslash( $_GET['search_query'] ) ) : get_search_query() ); ?>" placeholder="Search" aria-label="Search">
                 <button type="submit" aria-label="Search">⌕</button>
             </form>
             <div class="stv-header__actions">
-                <a class="stv-header__icon" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'notifications', home_url( '/video/notifications/' ) ) ); ?>" aria-label="Notifications">♢</a>
                 <?php if ( is_user_logged_in() ) : ?>
+                    <a class="stv-header__icon" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'notifications', home_url( '/video/notifications/' ) ) ); ?>" aria-label="Notifications">♢</a>
                     <a class="stv-header__button" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'upload', home_url( '/video/upload/' ) ) ); ?>">＋ Create</a>
                     <?php $stv_user = wp_get_current_user(); ?>
                     <details class="stv-account-menu">
@@ -40,15 +40,15 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
                                     <span><?php echo esc_html( $stv_user->user_email ); ?></span>
                                 </div>
                             </div>
-                            <a href="<?php echo esc_url( home_url( '/video/channel/' ) ); ?>">Your channel</a>
-                            <a href="<?php echo esc_url( home_url( '/video/account/' ) ); ?>">Your account</a>
-                            <a href="<?php echo esc_url( home_url( '/video/settings/' ) ); ?>">Settings</a>
-                            <a href="<?php echo esc_url( home_url( '/video/notifications/' ) ); ?>">Notifications</a>
-                            <a href="<?php echo esc_url( wp_logout_url( home_url( '/video/' ) ) ); ?>">Sign out</a>
+                            <a href="<?php echo esc_url( smarttoolz_video_theme_channel_url( $stv_user->ID ) ); ?>">Your channel</a>
+                            <a href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'account', home_url( '/video/account/' ) ) ); ?>">Your account</a>
+                            <a href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'settings', home_url( '/video/settings/' ) ) ); ?>">Settings</a>
+                            <a href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'notifications', home_url( '/video/notifications/' ) ) ); ?>">Notifications</a>
+                            <a href="<?php echo esc_url( wp_logout_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ) ); ?>">Sign out</a>
                         </div>
                     </details>
                 <?php else : ?>
-                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( home_url( '/video/login/' ) ); ?>">Sign in</a>
+                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'login', home_url( '/video/login/' ) ) ); ?>">Sign in</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -63,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
             <div class="stv-sidebar__section">
                 <div class="stv-sidebar__label">You</div>
                 <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'account', home_url( '/video/account/' ) ) ); ?>"><span class="stv-sidebar__icon">◎</span><span>Your account</span></a>
-                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'channel', home_url( '/video/channel/' ) ) ); ?>"><span class="stv-sidebar__icon">◉</span><span>Your channel</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_channel_url() ); ?>"><span class="stv-sidebar__icon">◉</span><span>Your channel</span></a>
                 <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'history', home_url( '/video/history/' ) ) ); ?>"><span class="stv-sidebar__icon">◷</span><span>History</span></a>
                 <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'liked-videos', home_url( '/video/liked/' ) ) ); ?>"><span class="stv-sidebar__icon">♡</span><span>Liked videos</span></a>
                 <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'playlists', home_url( '/video/playlists/' ) ) ); ?>"><span class="stv-sidebar__icon">☷</span><span>Playlists</span></a>

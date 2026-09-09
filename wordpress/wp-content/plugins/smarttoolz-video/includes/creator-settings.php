@@ -80,3 +80,6 @@ function smarttoolz_creator_video_settings_admin_menu() {
     );
 }
 add_action( 'admin_menu', 'smarttoolz_creator_video_settings_admin_menu', 20 );
+
+// Load public channel UI and creator channel settings after the core creator settings module.
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/channel.php';

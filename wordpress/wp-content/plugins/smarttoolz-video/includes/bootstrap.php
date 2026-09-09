@@ -75,6 +75,21 @@ function smarttoolz_video_sync_pages() {
     }
 }
 
+function smarttoolz_video_set_static_homepage() {
+    smarttoolz_video_sync_pages();
+    $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
+    $home_id = isset( $ids['home'] ) ? absint( $ids['home'] ) : 0;
+
+    if ( ! $home_id || 'page' !== get_post_type( $home_id ) || 'trash' === get_post_status( $home_id ) ) {
+        return false;
+    }
+
+    update_option( 'show_on_front', 'page' );
+    update_option( 'page_on_front', $home_id );
+
+    return true;
+}
+
 function smarttoolz_video_page_sync_cron() {
     if ( ! wp_next_scheduled( 'smarttoolz_video_page_sync_event' ) ) {
         wp_schedule_event( time() + HOUR_IN_SECONDS, 'twicedaily', 'smarttoolz_video_page_sync_event' );

@@ -25,8 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
             </form>
             <div class="stv-header__actions">
                 <a class="stv-header__icon" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'notifications', home_url( '/video/notifications/' ) ) ); ?>" aria-label="Notifications">♢</a>
-                <a class="stv-header__button" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'upload', home_url( '/video/upload/' ) ) ); ?>">＋ Create</a>
                 <?php if ( is_user_logged_in() ) : ?>
+                    <a class="stv-header__button" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'upload', home_url( '/video/upload/' ) ) ); ?>">＋ Create</a>
                     <?php $stv_user = wp_get_current_user(); ?>
                     <details class="stv-account-menu">
                         <summary class="stv-avatar" aria-label="Account">

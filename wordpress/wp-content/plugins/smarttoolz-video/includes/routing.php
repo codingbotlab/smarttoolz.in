@@ -1,11 +1,13 @@
 <?php
 /** SmartToolz Video URL Mapping & Routing admin helpers. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 function smarttoolz_video_route_defaults() {
     return array(
         'home'=>array('label'=>'Video Home','slug'=>'video','enabled'=>1),'watch'=>array('label'=>'Watch Video','slug'=>'watch','enabled'=>1),'shorts'=>array('label'=>'Shorts','slug'=>'shorts','enabled'=>1),'subscriptions'=>array('label'=>'Subscriptions','slug'=>'subscriptions','enabled'=>1),'search'=>array('label'=>'Search','slug'=>'search','enabled'=>1),'channel'=>array('label'=>'Channel','slug'=>'channel','enabled'=>1),'channel-videos'=>array('label'=>'Channel Videos','slug'=>'videos','enabled'=>1),'channel-shorts'=>array('label'=>'Channel Shorts','slug'=>'shorts','enabled'=>1),'channel-live'=>array('label'=>'Channel Live','slug'=>'live','enabled'=>1),'playlists'=>array('label'=>'Playlists','slug'=>'playlists','enabled'=>1),'watch-later'=>array('label'=>'Watch Later','slug'=>'watch-later','enabled'=>1),'history'=>array('label'=>'History','slug'=>'history','enabled'=>1),'liked-videos'=>array('label'=>'Liked Videos','slug'=>'liked','enabled'=>1),'your-videos'=>array('label'=>'Your Videos','slug'=>'your-videos','enabled'=>1),'trending'=>array('label'=>'Trending','slug'=>'trending','enabled'=>1),'explore'=>array('label'=>'Explore','slug'=>'explore','enabled'=>1),'live'=>array('label'=>'Live','slug'=>'live','enabled'=>1),'memberships'=>array('label'=>'Memberships','slug'=>'memberships','enabled'=>1),'purchases'=>array('label'=>'Purchases','slug'=>'purchases','enabled'=>1),'account'=>array('label'=>'Account','slug'=>'account','enabled'=>1),'edit-profile'=>array('label'=>'Edit Profile','slug'=>'edit-profile','enabled'=>1),'comments'=>array('label'=>'Comments & Activity','slug'=>'comments','enabled'=>1),'badges'=>array('label'=>'Badges','slug'=>'badges','enabled'=>1),'podcasts'=>array('label'=>'Podcasts','slug'=>'podcasts','enabled'=>1),'privacy'=>array('label'=>'Privacy','slug'=>'privacy','enabled'=>1),'login'=>array('label'=>'Login','slug'=>'login','enabled'=>1),'signup'=>array('label'=>'Sign Up','slug'=>'signup','enabled'=>1),'forgot-password'=>array('label'=>'Forgot Password','slug'=>'forgot-password','enabled'=>1),'settings'=>array('label'=>'Settings','slug'=>'settings','enabled'=>1),'notifications'=>array('label'=>'Notifications','slug'=>'notifications','enabled'=>1),'upload'=>array('label'=>'Upload Video','slug'=>'upload','enabled'=>1),
     );
 }
+
 function smarttoolz_video_route_settings() {
     $defaults=smarttoolz_video_route_defaults(); $saved=get_option('smarttoolz_video_route_settings',array()); if(!is_array($saved))$saved=array(); $out=array();
     foreach($defaults as $key=>$default){$row=isset($saved[$key])&&is_array($saved[$key])?$saved[$key]:array();$slug=isset($row['slug'])?sanitize_title((string)$row['slug']):$default['slug'];$out[$key]=array('label'=>$default['label'],'slug'=>$slug?:$default['slug'],'enabled'=>array_key_exists('enabled',$row)?(empty($row['enabled'])?0:1):1);}
@@ -28,44 +30,3 @@ function smarttoolz_video_routing_settings_page(){
     echo '</tbody></table>';submit_button('Save URL & Routing Settings');echo ' <button type="submit" name="stv_routing_action" value="reset" class="button">Reset Defaults</button></form></div>';
 }
 function smarttoolz_video_routing_preview_path($key,$settings=null){$settings=is_array($settings)?$settings:smarttoolz_video_route_settings();if(!isset($settings[$key]))return ''; $base=trim($settings['home']['slug'],'/');if('home'===$key)return $base;if('youtube'===smarttoolz_video_route_mode()){$map=array('watch'=>'watch','shorts'=>'shorts','subscriptions'=>'feed/subscriptions','search'=>'results','channel'=>'@{handle}','channel-videos'=>'@{handle}/videos','channel-shorts'=>'@{handle}/shorts','channel-live'=>'@{handle}/live','watch-later'=>'feed/watch-later','history'=>'feed/history','liked-videos'=>'feed/liked','login'=>'login','signup'=>'signup','upload'=>'upload');return trim($base.'/'.(isset($map[$key])?$map[$key]:$settings[$key]['slug']),'/');}return trim($base.'/'.$settings[$key]['slug'],'/');}
-
-function smarttoolz_video_register_routes(){
-    $settings=smarttoolz_video_route_settings();$base=isset($settings['home']['slug'])?trim($settings['home']['slug'],'/'):'video';if(''===$base)$base='video';
-    if('youtube'===smarttoolz_video_route_mode()){
-        if(smarttoolz_video_route_enabled('home'))add_rewrite_rule('^'.preg_quote($base,'/').'/?$','index.php?smarttoolz_video_route=home','top');
-        if(smarttoolz_video_route_enabled('watch')){$watch=trim($settings['watch']['slug'],'/');add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($watch,'/').'/?$','index.php?smarttoolz_video_route=watch','top');add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($watch,'/').'/([^/]+)/?$','index.php?smarttoolz_video_route=watch&smarttoolz_video_id=$matches[1]','top');}
-        if(smarttoolz_video_route_enabled('shorts')){$shorts=trim($settings['shorts']['slug'],'/');add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($shorts,'/').'/?$','index.php?smarttoolz_video_route=shorts','top');add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($shorts,'/').'/([^/]+)/?$','index.php?smarttoolz_video_route=shorts&smarttoolz_video_id=$matches[1]','top');}
-        if(smarttoolz_video_route_enabled('channel')){add_rewrite_rule('^'.preg_quote($base,'/').'/@([^/]+)/?$','index.php?smarttoolz_video_route=channel&smarttoolz_video_channel=$matches[1]','top');foreach(array('channel-videos','channel-shorts','channel-live') as $key){if(!smarttoolz_video_route_enabled($key))continue;$slug=trim($settings[$key]['slug'],'/');add_rewrite_rule('^'.preg_quote($base,'/').'/@([^/]+)/'.preg_quote($slug,'/').'/?$','index.php?smarttoolz_video_route='.$key.'&smarttoolz_video_channel=$matches[1]','top');}}
-        $simple=array('subscriptions'=>'feed/subscriptions','watch-later'=>'feed/watch-later','history'=>'feed/history','liked-videos'=>'feed/liked','search'=>'results','playlists'=>'playlists','your-videos'=>'your-videos','trending'=>'trending','explore'=>'explore','live'=>'live','memberships'=>'memberships','purchases'=>'purchases','account'=>'account','login'=>'login','signup'=>'signup','forgot-password'=>'forgot-password','settings'=>'settings','notifications'=>'notifications','upload'=>'upload');
-        foreach($simple as $key=>$path){if(!smarttoolz_video_route_enabled($key))continue;add_rewrite_rule('^'.preg_quote($base.'/'.trim($path,'/'),'/').'/?$','index.php?smarttoolz_video_route='.$key,'top');}
-    } else {
-        if(smarttoolz_video_route_enabled('home'))add_rewrite_rule('^'.preg_quote($base,'/').'/?$','index.php?smarttoolz_video_route=home','top');
-        if(smarttoolz_video_route_enabled('watch'))add_rewrite_rule('^'.preg_quote($base.'/'.$settings['watch']['slug'],'/').'/([^/]+)/?$','index.php?smarttoolz_video_route=watch&smarttoolz_video_id=$matches[1]','top');
-        foreach(smarttoolz_video_route_defaults() as $key=>$route){if('home'===$key||'watch'===$key||!smarttoolz_video_route_enabled($key))continue;$path=smarttoolz_video_routing_preview_path($key,$settings);if(''!==$path)add_rewrite_rule('^'.preg_quote($path,'/').'/?$','index.php?smarttoolz_video_route='.$key,'top');}
-    }
-}
-add_action('init','smarttoolz_video_register_routes',10);
-function smarttoolz_video_register_query_vars($vars){$vars[]='smarttoolz_video_route';$vars[]='smarttoolz_video_id';$vars[]='smarttoolz_video_channel';$vars[]='v';$vars[]='search_query';$vars[]='list';return $vars;}
-add_filter('query_vars','smarttoolz_video_register_query_vars');
-function smarttoolz_video_is_route(){return (bool)get_query_var('smarttoolz_video_route');}
-function smarttoolz_video_route_url($route='home',$id=''){
-    $settings=smarttoolz_video_route_settings();$base=home_url('/'.trim($settings['home']['slug'],'/').'/');
-    if('youtube'===smarttoolz_video_route_mode()){
-        if('watch'===$route&&''!==$id)return add_query_arg('v',(string)$id,trailingslashit($base.trim($settings['watch']['slug'],'/')));
-        if('shorts'===$route&&''!==$id)return trailingslashit($base.trim($settings['shorts']['slug'],'/').'/'.rawurlencode((string)$id));
-        if(in_array($route,array('channel','channel-videos','channel-shorts','channel-live'),true)){
-            $handle='';
-            if(''!==$id)$handle=(string)$id;
-            if(''===$handle&&is_user_logged_in())$handle=wp_get_current_user()->user_nicename;
-            if(''!==$handle){$handle=ltrim($handle,'@');$suffix='';if('channel-videos'===$route)$suffix='/'.trim($settings['channel-videos']['slug'],'/');elseif('channel-shorts'===$route)$suffix='/'.trim($settings['channel-shorts']['slug'],'/');elseif('channel-live'===$route)$suffix='/'.trim($settings['channel-live']['slug'],'/');return trailingslashit($base.'@'.sanitize_title($handle).$suffix);}
-        }
-        $map=array('home'=>'','subscriptions'=>'feed/'.$settings['subscriptions']['slug'],'search'=>$settings['search']['slug'],'playlists'=>$settings['playlists']['slug'],'watch-later'=>'feed/'.$settings['watch-later']['slug'],'history'=>'feed/'.$settings['history']['slug'],'liked-videos'=>'feed/'.$settings['liked-videos']['slug'],'your-videos'=>$settings['your-videos']['slug'],'trending'=>$settings['trending']['slug'],'explore'=>$settings['explore']['slug'],'live'=>$settings['live']['slug'],'memberships'=>$settings['memberships']['slug'],'purchases'=>$settings['purchases']['slug'],'account'=>$settings['account']['slug'],'edit-profile'=>$settings['account']['slug'].'/'.$settings['edit-profile']['slug'],'comments'=>$settings['account']['slug'].'/'.$settings['comments']['slug'],'badges'=>$settings['account']['slug'].'/'.$settings['badges']['slug'],'podcasts'=>$settings['account']['slug'].'/'.$settings['podcasts']['slug'],'privacy'=>$settings['account']['slug'].'/'.$settings['privacy']['slug'],'login'=>$settings['login']['slug'],'signup'=>$settings['signup']['slug'],'forgot-password'=>$settings['forgot-password']['slug'],'settings'=>$settings['settings']['slug'],'notifications'=>$settings['notifications']['slug'],'upload'=>$settings['upload']['slug']);
-        if(isset($map[$route]))return trailingslashit($base.trim($map[$route],'/'));
-    }
-    if('watch'===$route&&''!==$id)return trailingslashit($base.trim($settings['watch']['slug'],'/').'/'.rawurlencode((string)$id));
-    if(isset($settings[$route]))return trailingslashit(home_url('/'.smarttoolz_video_routing_preview_path($route,$settings).'/'));
-    return trailingslashit($base.trim(str_replace('-','/',(string)$route),'/').'/');
-}
-function smarttoolz_video_activate_plugin(){smarttoolz_video_sync_pages();smarttoolz_video_page_sync_cron();smarttoolz_video_register_routes();flush_rewrite_rules();smarttoolz_video_set_static_homepage(false);}
-function smarttoolz_video_deactivate_plugin(){wp_clear_scheduled_hook('smarttoolz_video_page_sync_event');flush_rewrite_rules();}
-add_action('init','smarttoolz_video_sync_pages',20);add_action('init','smarttoolz_video_page_sync_cron',21);

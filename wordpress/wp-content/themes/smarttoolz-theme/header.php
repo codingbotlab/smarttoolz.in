@@ -7,7 +7,7 @@ $is_video = function_exists( 'smarttoolz_is_video_context' ) && smarttoolz_is_vi
 <meta charset="<?php bloginfo( 'charset' ); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php wp_head(); ?>
-<?php if ( $is_video ) : ?><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6TaO0Kf7WJ3VnqWw2f8wN8FZ6rQ8hV2ZqN0s3Q9Gm8w8TQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<?php if ( $is_video && function_exists( 'smarttoolz_video_setting' ) && smarttoolz_video_setting( 'icon_enabled', 1 ) ) : $st_icon_url = smarttoolz_video_setting( 'icon_cdn_url', '' ); if ( $st_icon_url ) : ?><link rel="stylesheet" href="<?php echo esc_url( $st_icon_url ); ?>" referrerpolicy="no-referrer" /><?php endif; ?>
 <style id="smarttoolz-video-account-inline-css">
 body.smarttoolz-video-platform .st-header-controls{flex:1;min-width:0;display:flex;align-items:center}
 body.smarttoolz-video-platform .st-video-header .st-header-tools{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-left:0}

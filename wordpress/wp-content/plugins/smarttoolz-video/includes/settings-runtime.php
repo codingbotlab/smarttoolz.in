@@ -33,12 +33,16 @@ function smarttoolz_video_runtime_upload_guard() {
 }
 add_action( 'template_redirect', 'smarttoolz_video_runtime_upload_guard', 0 );
 
+function smarttoolz_video_runtime_remove_legacy_auth_submenu() {
+    remove_submenu_page( 'edit.php?post_type=st_video', 'smarttoolz-video-auth' );
+}
+add_action( 'admin_menu', 'smarttoolz_video_runtime_remove_legacy_auth_submenu', 99 );
+
 /**
- * Settings tabs submit only their own fields. WordPress sanitizes the submitted
- * array before updating the option, so a pre_update filter is too late to
- * reconstruct fields that were already replaced by defaults. This filter runs
- * with the original unsanitized value and merges it with the currently saved
- * option before applying the plugin's normal sanitizer.
+ * Normalize tabbed settings before WordPress persists them. Each tab submits
+ * only its own controls, so merge those controls into the already-saved option.
+ * The third filter argument is the original value before sanitization, which
+ * preserves the distinction between an unchecked checkbox and a missing field.
  */
 function smarttoolz_video_settings_preserve_tab_values( $value, $option, $original_value ) {
     if ( 'smarttoolz_video_settings' !== $option || ! is_array( $original_value ) ) { return $value; }
@@ -67,6 +71,9 @@ function smarttoolz_video_settings_preserve_tab_values( $value, $option, $origin
         'pages'    => array(),
     );
 
+    // The submit-time helper below normally sends 0 for unchecked checkboxes.
+    // Keep this fallback for browsers or cached admin markup where that helper
+    // did not run before the request was submitted.
     if ( isset( $tab_bools[ $active ] ) ) {
         foreach ( $tab_bools[ $active ] as $key ) {
             if ( ! array_key_exists( $key, $original_value ) ) {
@@ -79,11 +86,39 @@ function smarttoolz_video_settings_preserve_tab_values( $value, $option, $origin
 }
 add_filter( 'sanitize_option_smarttoolz_video_settings', 'smarttoolz_video_settings_preserve_tab_values', 10, 3 );
 
-/** Add active tab marker to the existing Settings API form. */
+/**
+ * Add the active tab marker and make unchecked checkboxes explicit 0 values at
+ * submit time. This prevents an unchecked option from being indistinguishable
+ * from a setting belonging to another tab.
+ */
 function smarttoolz_video_settings_active_tab_field() {
     $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
     if ( ! $screen || false === strpos( (string) $screen->id, 'smarttoolz-video' ) ) { return; }
     $tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
-    echo '<script>document.addEventListener("DOMContentLoaded",function(){var f=document.querySelector("form[action*=options.php]");if(!f||f.querySelector("input[name=smarttoolz_video_settings_tab]"))return;var i=document.createElement("input");i.type="hidden";i.name="smarttoolz_video_settings_tab";i.value=' . wp_json_encode( $tab ) . ';f.appendChild(i);});</script>';
+    echo '<script>
+    document.addEventListener("DOMContentLoaded",function(){
+        var f=document.querySelector("form[action*=options.php]");
+        if(!f)return;
+        if(!f.querySelector("input[name=smarttoolz_video_settings_tab]")){
+            var i=document.createElement("input");
+            i.type="hidden";
+            i.name="smarttoolz_video_settings_tab";
+            i.value=' . wp_json_encode( $tab ) . ';
+            f.appendChild(i);
+        }
+        f.addEventListener("submit",function(){
+            f.querySelectorAll("input[type=checkbox][name]").forEach(function(cb){
+                if(cb.checked)return;
+                if(f.querySelector("input[type=hidden][data-stv-unchecked=\\\"1\\\"][name=\\\""+CSS.escape(cb.name)+"\\\"]"))return;
+                var h=document.createElement("input");
+                h.type="hidden";
+                h.name=cb.name;
+                h.value="0";
+                h.setAttribute("data-stv-unchecked","1");
+                f.appendChild(h);
+            });
+        });
+    });
+    </script>';
 }
 add_action( 'admin_footer', 'smarttoolz_video_settings_active_tab_field', 99 );

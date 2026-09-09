@@ -103,7 +103,7 @@ function smarttoolz_video_channel_admin_page() {
             <?php submit_button( 'Load Channel', 'secondary', 'submit', false ); ?>
         </form>
         <?php if ( $selected && ! empty( $profile ) ) : ?>
-            <form method="post" style="max-width:900px;background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:22px;">
+            <form method="post" enctype="multipart/form-data" style="max-width:900px;background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:22px;">
                 <?php wp_nonce_field( 'stv_admin_channel_save', 'stv_admin_channel_nonce' ); ?>
                 <input type="hidden" name="stv_admin_channel_user" value="<?php echo esc_attr( $selected ); ?>">
                 <h3 style="margin-top:0;">Public profile</h3>
@@ -339,13 +339,13 @@ function smarttoolz_video_channel_settings_render() {
     $site = function_exists( 'smarttoolz_video_theme_site_name' ) ? smarttoolz_video_theme_site_name() : get_bloginfo( 'name' );
     echo '<section class="stv-channel-settings"><div class="stv-channel-settings__panel"><span class="stv-channel__eyebrow">' . esc_html( $site ) . ' Channel</span><h1 class="stv-page-title">Customize your channel</h1><p class="stv-section-subtitle">Make your channel look like your own. These details are public to visitors.</p>';
     if ( $saved ) { echo '<div class="stv-channel-settings__notice">Channel settings saved.</div>'; }
-    echo '<form method="post" class="stv-channel-settings__form">';
+    echo '<form method="post" enctype="multipart/form-data" class="stv-channel-settings__form">';
     wp_nonce_field( 'stv_channel_settings_save', 'stv_channel_settings_nonce' );
     echo '<div class="stv-channel-settings__preview">';
     if ( $profile['avatar'] ) { echo '<img class="stv-channel-settings__preview-avatar" src="' . esc_url( $profile['avatar'] ) . '" alt="">'; } else { echo '<div class="stv-channel-settings__preview-avatar"></div>'; }
     echo '<div class="stv-channel-settings__preview-banner"' . ( $profile['banner'] ? ' style="background-image:url(' . esc_url( $profile['banner'] ) . ')"' : '' ) . '></div></div>';
     echo '<div class="stv-channel-settings__group"><h2>Profile</h2><label>Channel name<input type="text" name="stv_channel_name" maxlength="80" required value="' . esc_attr( $profile['name'] ) . '"></label><label>Handle<input type="text" name="stv_channel_handle" maxlength="50" required value="' . esc_attr( ltrim( $profile['handle'], '@' ) ) . '"><small>Public URL: ' . esc_html( trailingslashit( home_url( '/' . trim( smarttoolz_video_route_settings()['home']['slug'], '/' ) . '/@' . ltrim( $profile['handle'], '@' ) ) ) ) . '</small></label><label>Description<textarea name="stv_channel_description" maxlength="1000">' . esc_textarea( $profile['description'] ) . '</textarea></label></div>';
-    echo '<div class="stv-channel-settings__group"><h2>Brand images</h2><label>Profile picture URL<input type="url" name="stv_channel_avatar" value="' . esc_attr( $profile['avatar'] ) . '" placeholder="https://example.com/avatar.jpg"></label><label>Banner image URL<input type="url" name="stv_channel_banner" value="' . esc_attr( $profile['banner'] ) . '" placeholder="https://example.com/banner.jpg"></label><small>Use a public HTTPS image URL. The site administrator can also set defaults from Channel Settings.</small></div>';
+    echo '<div class="stv-channel-settings__group"><h2>Brand images</h2><label>Profile picture<input type="file" name="stv_channel_avatar" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"></label><label>Banner image<input type="file" name="stv_channel_banner" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"></label><small>Upload JPG, PNG, GIF or WebP images from your device.</small></div>';
     echo '<div class="stv-channel-settings__group"><h2>Links</h2><div class="stv-channel-settings__links">';
     for ( $i = 0; $i < 5; $i++ ) { $row = isset( $profile['links'][$i] ) && is_array( $profile['links'][$i] ) ? $profile['links'][$i] : array( 'title' => '', 'url' => '' ); echo '<div class="stv-channel-settings__link-row"><input type="text" name="stv_channel_links[' . $i . '][title]" value="' . esc_attr( isset( $row['title'] ) ? $row['title'] : '' ) . '" placeholder="Link title"><input type="url" name="stv_channel_links[' . $i . '][url]" value="' . esc_attr( isset( $row['url'] ) ? $row['url'] : '' ) . '" placeholder="https://example.com"></div>'; }
     echo '</div></div>';

@@ -1,8 +1,5 @@
 <?php
-/**
- * SmartToolz video content and frontend creator tools.
- */
-
+/** SmartToolz video content and frontend creator tools. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function smarttoolz_video_register_content() {
@@ -15,7 +12,14 @@ function smarttoolz_video_register_content() {
 }
 add_action( 'init', 'smarttoolz_video_register_content' );
 
-function smarttoolz_video_get_source( $video_id ) { return (string) get_post_meta( $video_id, '_stv_video_source', true ); }
+function smarttoolz_video_get_source( $video_id ) {
+    $source = (string) get_post_meta( $video_id, '_stv_video_source', true );
+    if ( '' === $source ) {
+        $attachment_id = absint( get_post_meta( $video_id, '_stv_video_attachment_id', true ) );
+        if ( $attachment_id ) { $source = (string) wp_get_attachment_url( $attachment_id ); }
+    }
+    return $source;
+}
 function smarttoolz_video_get_attachment_id( $video_id ) { return absint( get_post_meta( $video_id, '_stv_video_attachment_id', true ) ); }
 
 function smarttoolz_video_delete_owned_video( $video_id, $permanent = true ) {
@@ -52,26 +56,10 @@ function smarttoolz_video_handle_uploaded_file( $field_name, $existing_attachmen
 function smarttoolz_video_upload_mimes( $mimes ) {
     $mimes['mp4']='video/mp4'; $mimes['webm']='video/webm'; $mimes['ogv']='video/ogg'; $mimes['mov']='video/quicktime'; $mimes['avi']='video/x-msvideo'; $mimes['mkv']='video/x-matroska'; return $mimes;
 }
-
-/**
- * WordPress can reject video uploads when the server-reported MIME type is
- * missing or differs from the browser-provided MIME. For this plugin we
- * explicitly allow only the video extensions declared above.
- */
 function smarttoolz_video_check_filetype_and_ext( $data, $file, $filename, $mimes, $real_mime ) {
     $extension = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
-    $allowed = array(
-        'mp4'  => 'video/mp4',
-        'webm' => 'video/webm',
-        'ogv'  => 'video/ogg',
-        'mov'  => 'video/quicktime',
-        'avi'  => 'video/x-msvideo',
-        'mkv'  => 'video/x-matroska',
-    );
-    if ( isset( $allowed[ $extension ] ) ) {
-        $data['ext']  = $extension;
-        $data['type'] = $allowed[ $extension ];
-    }
+    $allowed = array('mp4'=>'video/mp4','webm'=>'video/webm','ogv'=>'video/ogg','mov'=>'video/quicktime','avi'=>'video/x-msvideo','mkv'=>'video/x-matroska');
+    if ( isset( $allowed[ $extension ] ) ) { $data['ext']=$extension; $data['type']=$allowed[$extension]; }
     return $data;
 }
 
@@ -79,11 +67,9 @@ function smarttoolz_video_creator_styles() {
     $route = get_query_var( 'smarttoolz_video_route' );
     if ( ! in_array( $route, array('upload','your-videos'), true ) && 'watch' !== $route ) return;
     echo '<style>
-    .stv-creator{max-width:1180px;margin:0 auto}.stv-notice{margin:0 0 18px;padding:12px 14px;border-radius:10px;font-size:14px}.stv-notice--success{background:#17331f;color:#a9efbd;border:1px solid #2d6b40}.stv-notice--error{background:#3a171b;color:#ffb5bd;border:1px solid #79333c}.stv-creator__panel{background:#181818;border:1px solid #303030;border-radius:14px;padding:22px;max-width:850px}.stv-creator__panel h2{margin:0 0 18px}.stv-form{display:grid;gap:15px}.stv-form label{display:grid;gap:7px;color:#ddd;font-size:13px;font-weight:600}.stv-form input[type=text],.stv-form textarea,.stv-form input[type=file]{width:100%;border:1px solid #3a3a3a;border-radius:9px;background:#111;color:#fff;padding:11px 12px}.stv-form textarea{resize:vertical}.stv-form__hint{font-size:12px;color:#929292;font-weight:400}.stv-form__preview{display:block;width:min(100%,720px);max-height:400px;background:#000;border-radius:10px}.stv-form__actions{display:flex;gap:10px;align-items:center}.stv-form__submit,.stv-form__cancel{border:0;border-radius:20px;padding:10px 17px;font-weight:700;cursor:pointer}.stv-form__submit{background:#fff;color:#111}.stv-form__cancel{border:1px solid #444;color:#fff}.stv-video-list{display:grid;gap:12px}.stv-video-list__item{display:grid;grid-template-columns:220px minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px;border:1px solid #2b2b2b;border-radius:12px;background:#151515}.stv-video-list__thumb{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#222}.stv-video-list__thumb video{width:100%;height:100%;object-fit:cover}.stv-video-list__info h3{margin:0 0 5px;font-size:16px}.stv-video-list__info p{margin:0 0 7px;color:#aaa;font-size:13px}.stv-video-list__info small{color:#777}.stv-video-list__actions{display:flex;gap:8px;align-items:center}.stv-video-list__actions a,.stv-video-list__actions button{border:1px solid #404040;border-radius:18px;background:transparent;color:#fff;padding:8px 12px;font-size:12px;text-decoration:none;cursor:pointer}.stv-video-list__actions a:hover,.stv-video-list__actions button:hover{background:#2a2a2a}.stv-watch{max-width:1000px}.stv-watch__player{width:100%;max-height:68vh;background:#000;border-radius:12px;display:block;margin-bottom:18px}.stv-watch__meta{color:#999;font-size:13px;margin:8px 0 18px}.stv-watch__description{color:#ccc;line-height:1.7}@media(max-width:760px){.stv-video-list__item{grid-template-columns:1fr}.stv-video-list__actions{flex-wrap:wrap}.stv-creator__panel{padding:16px}}
+    .stv-creator{max-width:1180px;margin:0 auto}.stv-notice{margin:0 0 18px;padding:12px 14px;border-radius:10px;font-size:14px}.stv-notice--success{background:#17331f;color:#a9efbd;border:1px solid #2d6b40}.stv-notice--error{background:#3a171b;color:#ffb5bd;border:1px solid #79333c}.stv-creator__panel{background:#181818;border:1px solid #303030;border-radius:14px;padding:22px;max-width:850px}.stv-creator__panel h2{margin:0 0 18px}.stv-form{display:grid;gap:15px}.stv-form label{display:grid;gap:7px;color:#ddd;font-size:13px;font-weight:600}.stv-form input[type=text],.stv-form textarea,.stv-form input[type=file]{width:100%;border:1px solid #3a3a3a;border-radius:9px;background:#111;color:#fff;padding:11px 12px}.stv-form textarea{resize:vertical}.stv-form__hint{font-size:12px;color:#929292;font-weight:400}.stv-form__preview{display:block;width:min(100%,720px);max-height:400px;background:#000;border-radius:10px}.stv-form__actions{display:flex;gap:10px;align-items:center}.stv-form__submit,.stv-form__cancel{border:0;border-radius:20px;padding:10px 17px;font-weight:700;cursor:pointer}.stv-form__submit{background:#fff;color:#111}.stv-form__cancel{border:1px solid #444;color:#fff}.stv-video-list{display:grid;gap:12px}.stv-video-list__item{display:grid;grid-template-columns:220px minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px;border:1px solid #2b2b2b;border-radius:12px;background:#151515}.stv-video-list__thumb{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#222}.stv-video-list__thumb video{width:100%;height:100%;object-fit:cover}.stv-video-list__info h3{margin:0 0 5px;font-size:16px}.stv-video-list__info p{margin:0 0 7px;color:#aaa;font-size:13px}.stv-video-list__info small{color:#777}.stv-video-list__actions{display:flex;gap:8px;align-items:center}.stv-video-list__actions a,.stv-video-list__actions button{border:1px solid #404040;border-radius:18px;background:transparent;color:#fff;padding:8px 12px;font-size:12px;text-decoration:none;cursor:pointer}.stv-video-list__actions a:hover,.stv-video-list__actions button:hover{background:#2a2a2a}.stv-watch{max-width:none}.stv-watch__player-wrap{margin-bottom:18px}.stv-watch__meta{color:#999;font-size:13px;margin:8px 0 18px}.stv-watch__description{color:#ccc;line-height:1.7}@media(max-width:760px){.stv-video-list__item{grid-template-columns:1fr}.stv-video-list__actions{flex-wrap:wrap}.stv-creator__panel{padding:16px}}
     </style>';
-    if ( 'your-videos' === $route && empty( $_GET['edit'] ) ) {
-        echo '<style>.stv-creator__panel{display:none!important}</style>';
-    }
+    if ( 'your-videos' === $route && empty( $_GET['edit'] ) ) echo '<style>.stv-creator__panel{display:none!important}</style>';
 }
 add_action( 'wp_head', 'smarttoolz_video_creator_styles', 30 );
 
@@ -108,10 +94,10 @@ function smarttoolz_video_manage_page() {
     $edit_id=isset($_GET['edit'])?absint($_GET['edit']):0; $editing=$edit_id?get_post($edit_id):null; if($editing&&('stv_video'!==$editing->post_type||(int)$editing->post_author!==$user_id)){$editing=null;}
     $videos=get_posts(array('post_type'=>'stv_video','post_status'=>array('publish','draft','pending'),'author'=>$user_id,'posts_per_page'=>50,'orderby'=>'date','order'=>'DESC'));
     ?>
-    <section class="stv-creator"><div class="stv-section-heading"><div><h1 class="stv-page-title">Your videos</h1><p class="stv-section-subtitle">Manage the videos on your SmartToolz channel.</p></div><a class="stv-view-link" href="<?php echo esc_url(smarttoolz_video_route_url('channel')); ?>">View channel</a></div>
+    <section class="stv-creator"><div class="stv-section-heading"><div><h1 class="stv-page-title">Your videos</h1><p class="stv-section-subtitle">Manage the videos on your <?php echo esc_html( smarttoolz_video_site_name() ); ?> channel.</p></div><a class="stv-view-link" href="<?php echo esc_url(smarttoolz_video_route_url('channel')); ?>">View channel</a></div>
     <?php if($notice):?><div class="stv-notice stv-notice--success"><?php echo esc_html($notice);?></div><?php endif;?><?php if($error):?><div class="stv-notice stv-notice--error"><?php echo esc_html($error);?></div><?php endif;?>
     <?php if ( 'upload' === get_query_var('smarttoolz_video_route') || $editing ) : ?>
-    <div class="stv-creator__panel"><h2><?php echo $editing?'Edit video':'Upload a video';?></h2><form method="post" enctype="multipart/form-data" class="stv-form"><?php wp_nonce_field('stv_save_video','stv_video_nonce');?><input type="hidden" name="stv_save_video" value="<?php echo $editing?esc_attr($editing->ID):'0';?>"><label>Title<input type="text" name="stv_video_title" maxlength="180" required value="<?php echo $editing?esc_attr($editing->post_title):'';?>"></label><label>Description<textarea name="stv_video_description" rows="5"><?php echo $editing?esc_textarea($editing->post_content):'';?></textarea></label><label>Video file<?php if($editing&&smarttoolz_video_get_source($editing->ID)):?><span class="stv-form__hint">Upload a new file only when you want to replace the current video.</span><?php endif;?><input type="file" name="stv_video_file" accept="video/*" <?php echo $editing?'':'required';?>></label><?php if($editing&&smarttoolz_video_get_source($editing->ID)):?><video class="stv-form__preview" controls preload="metadata" src="<?php echo esc_url(smarttoolz_video_get_source($editing->ID));?>"></video><?php endif;?><div class="stv-form__actions"><button class="stv-form__submit" type="submit"><?php echo $editing?'Save changes':'Upload video';?></button><?php if($editing):?><a class="stv-form__cancel" href="<?php echo esc_url(smarttoolz_video_route_url('your-videos'));?>">Cancel</a><?php endif;?></div></form></div>
+    <div class="stv-creator__panel"><h2><?php echo $editing?'Edit video':'Upload a video';?></h2><form method="post" enctype="multipart/form-data" class="stv-form"><?php wp_nonce_field('stv_save_video','stv_video_nonce');?><input type="hidden" name="stv_save_video" value="<?php echo $editing?esc_attr($editing->ID):'0';?>"><label>Title<input type="text" name="stv_video_title" maxlength="180" required value="<?php echo $editing?esc_attr($editing->post_title):'';?>"></label><label>Description<textarea name="stv_video_description" rows="5"><?php echo $editing?esc_textarea($editing->post_content):'';?></textarea></label><label>Video file<?php if($editing&&smarttoolz_video_get_source($editing->ID)):?><span class="stv-form__hint">Upload a new file only when you want to replace the current video.</span><?php endif;?><input type="file" name="stv_video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska" <?php echo $editing?'':'required';?>></label><?php if($editing&&smarttoolz_video_get_source($editing->ID)):?><video class="stv-form__preview" controls preload="metadata" src="<?php echo esc_url(smarttoolz_video_get_source($editing->ID));?>"></video><?php endif;?><div class="stv-form__actions"><button class="stv-form__submit" type="submit"><?php echo $editing?'Save changes':'Upload video';?></button><?php if($editing):?><a class="stv-form__cancel" href="<?php echo esc_url(smarttoolz_video_route_url('your-videos'));?>">Cancel</a><?php endif;?></div></form></div>
     <?php endif; ?>
     <div class="stv-section-heading" style="margin-top:28px"><div><h2 class="stv-page-title" style="font-size:22px">Your uploads</h2></div></div>
     <?php if(empty($videos)):?><div class="stv-empty">You have not uploaded any videos yet.</div><?php else:?><div class="stv-video-list"><?php foreach($videos as $video):?><article class="stv-video-list__item"><div class="stv-video-list__thumb"><video preload="metadata" src="<?php echo esc_url(smarttoolz_video_get_source($video->ID));?>"></video></div><div class="stv-video-list__info"><h3><?php echo esc_html($video->post_title);?></h3><p><?php echo esc_html(wp_trim_words(wp_strip_all_tags($video->post_content),24));?></p><small><?php echo esc_html(get_the_date('',$video));?></small></div><div class="stv-video-list__actions"><a href="<?php echo esc_url(smarttoolz_video_route_url('watch',$video->ID));?>">View</a><a href="<?php echo esc_url(add_query_arg('edit',$video->ID,smarttoolz_video_route_url('your-videos')));?>">Edit</a><form method="post" onsubmit="return confirm('Delete this video permanently?');"><?php wp_nonce_field('stv_delete_video','stv_delete_nonce');?><button type="submit" name="stv_delete_video" value="<?php echo esc_attr($video->ID);?>">Delete</button></form></div></article><?php endforeach;?></div><?php endif;?></section>
@@ -120,4 +106,14 @@ function smarttoolz_video_manage_page() {
 
 function smarttoolz_video_upload_page(){return smarttoolz_video_manage_page();}
 
-function smarttoolz_video_render_watch($video_id){$video=get_post($video_id);if(!$video||'stv_video'!==$video->post_type||'publish'!==$video->post_status){echo '<div class="stv-empty">Video not found.</div>';return;}$source=smarttoolz_video_get_source($video_id);?><article class="stv-watch"><video class="stv-watch__player" controls playsinline preload="metadata" src="<?php echo esc_url($source);?>"></video><h1 class="stv-page-title"><?php echo esc_html($video->post_title);?></h1><div class="stv-watch__meta">By <?php echo esc_html(get_the_author_meta('display_name',$video->post_author));?> · <?php echo esc_html(get_the_date('',$video));?></div><?php if($video->post_content):?><div class="stv-watch__description"><?php echo wp_kses_post(wpautop($video->post_content));?></div><?php endif;?></article><?php }
+function smarttoolz_video_render_watch($video_id){
+    $video=get_post($video_id);
+    if(!$video||'stv_video'!==$video->post_type||'publish'!==$video->post_status){echo '<div class="stv-empty">Video not found.</div>';return;}
+    $source=smarttoolz_video_get_source($video_id);
+    if(''===$source){echo '<div class="stv-empty">Video file is missing.</div>';return;}
+    echo '<article class="stv-watch"><div class="stv-watch__player-wrap">';
+    if(function_exists('smarttoolz_video_player_render')){smarttoolz_video_player_render($video_id);}else{echo '<video class="stv-watch__player" controls playsinline preload="metadata" src="'.esc_url($source).'"></video>';}
+    echo '</div><h1 class="stv-page-title">'.esc_html($video->post_title).'</h1><div class="stv-watch__meta">By '.esc_html(get_the_author_meta('display_name',$video->post_author)).' · '.esc_html(get_the_date('',$video)).'</div>';
+    if($video->post_content)echo '<div class="stv-watch__description">'.wp_kses_post(wpautop($video->post_content)).'</div>';
+    echo '</article>';
+}

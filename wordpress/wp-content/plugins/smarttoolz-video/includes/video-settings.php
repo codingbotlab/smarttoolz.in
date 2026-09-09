@@ -23,7 +23,13 @@ function smarttoolz_video_register_settings() {
 }
 add_action( 'admin_init', 'smarttoolz_video_register_settings' );
 
+function smarttoolz_video_settings_admin_menu() {
+    add_submenu_page( 'smarttoolz', 'Video Settings', 'Video Settings', 'manage_options', 'smarttoolz-video-settings', 'smarttoolz_video_settings_page' );
+}
+add_action( 'admin_menu', 'smarttoolz_video_settings_admin_menu', 20 );
+
 function smarttoolz_video_sanitize_settings( $input ) {
+    $input = is_array( $input ) ? $input : array();
     $settings = smarttoolz_video_get_settings();
     $settings['uploads_enabled']      = empty( $input['uploads_enabled'] ) ? 0 : 1;
     $settings['require_login_upload'] = empty( $input['require_login_upload'] ) ? 0 : 1;

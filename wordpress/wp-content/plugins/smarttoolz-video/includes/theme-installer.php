@@ -70,6 +70,14 @@ function smarttoolz_video_activate_theme() {
     }
 
     switch_theme( smarttoolz_video_theme_slug() );
+
+    if ( function_exists( 'smarttoolz_video_sync_pages' ) ) {
+        smarttoolz_video_sync_pages();
+    }
+    if ( function_exists( 'smarttoolz_video_set_static_homepage' ) ) {
+        smarttoolz_video_set_static_homepage( false );
+    }
+
     return true;
 }
 

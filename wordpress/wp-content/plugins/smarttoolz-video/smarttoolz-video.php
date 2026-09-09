@@ -26,6 +26,7 @@ require_once SMARTTOOLZ_VIDEO_DIR.'includes/admin-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR.'includes/app.php';
 require_once SMARTTOOLZ_VIDEO_DIR.'includes/video-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR.'includes/player.php';
+require_once SMARTTOOLZ_VIDEO_DIR.'includes/js-player.php';
 require_once SMARTTOOLZ_VIDEO_DIR.'includes/ads.php';
 require_once SMARTTOOLZ_VIDEO_DIR.'includes/route-fallback.php';
 function smarttoolz_video_admin_menu(){add_menu_page('SmartToolz','SmartToolz','manage_options','smarttoolz','smarttoolz_video_dashboard_page','dashicons-video-alt3',25);add_submenu_page('smarttoolz','Dashboard','Dashboard','manage_options','smarttoolz','smarttoolz_video_dashboard_page');add_submenu_page('smarttoolz','Page Settings','Page Settings','manage_options','smarttoolz-video-pages','smarttoolz_video_page_settings');add_submenu_page('smarttoolz','Theme Setup','Theme Setup','manage_options','smarttoolz-video-theme','smarttoolz_video_theme_settings');}

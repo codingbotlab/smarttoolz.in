@@ -31,6 +31,10 @@ if ( defined( 'SMARTTOOLZ_VIDEO_DIR' ) ) {
     if ( file_exists( $smarttoolz_channel_file ) ) {
         require_once $smarttoolz_channel_file;
     }
+    $smarttoolz_branding_file = SMARTTOOLZ_VIDEO_DIR . 'includes/frontend-branding.php';
+    if ( file_exists( $smarttoolz_branding_file ) ) {
+        require_once $smarttoolz_branding_file;
+    }
 }
 
 /* Frontend branding always comes from the WordPress site owner. */

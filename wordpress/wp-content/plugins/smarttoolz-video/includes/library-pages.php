@@ -52,11 +52,35 @@ function stv_library_feed( $args = array() ) {
 
 function smarttoolz_video_home_shortcode() {
     ob_start(); ?>
-    <div class="stv-page-shell">
-        <section class="stv-page-hero"><div><span class="stv-eyebrow">SmartToolz Video</span><h1>Watch. Share. Create.</h1><p>Discover videos, follow creators and build your own channel.</p></div><div class="stv-page-hero-actions"><a class="stv-upload-cta" href="<?php echo esc_url( smarttoolz_video_page_link( 'video-upload' ) ); ?>">Upload video</a></div></section>
-        <div class="stv-chip-row"><a href="<?php echo esc_url( smarttoolz_video_page_link( 'video-library' ) ); ?>">All videos</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'trending-videos' ) ); ?>">Trending</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'video-categories' ) ); ?>">Categories</a><?php if ( is_user_logged_in() ) : ?><a href="<?php echo esc_url( smarttoolz_video_page_link( 'subscriptions' ) ); ?>">Subscriptions</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'watch-history' ) ); ?>">History</a><a href="<?php echo esc_url( smarttoolz_video_page_link( 'liked-videos' ) ); ?>">Liked</a><?php endif; ?></div>
-        <section class="stv-home-section"><div class="stv-home-section-head"><h2>Latest videos</h2><a href="<?php echo esc_url( smarttoolz_video_page_link( 'video-library' ) ); ?>">View all →</a></div><?php echo stv_render_feed( array( 'per_page' => 12, 'orderby' => 'date' ) ); ?></section>
-        <section class="stv-home-section"><div class="stv-home-section-head"><h2>Trending</h2><a href="<?php echo esc_url( smarttoolz_video_page_link( 'trending-videos' ) ); ?>">See all →</a></div><?php echo stv_render_feed( array( 'per_page' => 8, 'orderby' => 'views' ) ); ?></section>
+    <div class="stv-home-shell">
+        <section class="stv-home-hero">
+            <div>
+                <span class="stv-eyebrow">SmartToolz Video</span>
+                <h1>Watch, share and create.</h1>
+                <p>Discover videos and follow creators on SmartToolz.</p>
+            </div>
+            <?php if ( is_user_logged_in() ) : ?>
+                <div class="stv-home-actions">
+                    <a class="stv-upload-cta" href="<?php echo esc_url( smarttoolz_video_page_link( 'video-upload' ) ); ?>">Upload video</a>
+                </div>
+            <?php endif; ?>
+        </section>
+
+        <section class="stv-home-section">
+            <div class="stv-home-section-head">
+                <h2>Latest videos</h2>
+                <a href="<?php echo esc_url( smarttoolz_video_page_link( 'video-library' ) ); ?>">View all →</a>
+            </div>
+            <?php echo stv_render_feed( array( 'per_page' => 12, 'orderby' => 'date' ) ); ?>
+        </section>
+
+        <section class="stv-home-section">
+            <div class="stv-home-section-head">
+                <h2>Trending</h2>
+                <a href="<?php echo esc_url( smarttoolz_video_page_link( 'trending-videos' ) ); ?>">See all →</a>
+            </div>
+            <?php echo stv_render_feed( array( 'per_page' => 8, 'orderby' => 'views' ) ); ?>
+        </section>
     </div>
     <?php return ob_get_clean();
 }

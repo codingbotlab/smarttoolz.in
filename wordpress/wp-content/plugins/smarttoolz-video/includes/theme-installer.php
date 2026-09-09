@@ -21,6 +21,10 @@ function smarttoolz_video_theme_target_dir() {
     return trailingslashit( WP_CONTENT_DIR . '/themes/' . smarttoolz_video_theme_slug() );
 }
 
+function smarttoolz_video_theme_source_version() {
+    return '1.1.0';
+}
+
 function smarttoolz_video_theme_source_files() {
     return array( 'style.css', 'functions.php', 'header.php', 'footer.php', 'index.php', 'front-page.php', 'page.php' );
 }
@@ -56,8 +60,32 @@ function smarttoolz_video_install_theme() {
     }
 
     update_option( 'smarttoolz_video_theme_installed', 1, false );
+    update_option( 'smarttoolz_video_theme_version', smarttoolz_video_theme_source_version(), false );
     return true;
 }
+
+function smarttoolz_video_maybe_update_theme() {
+    if ( ! smarttoolz_video_theme_is_active() || ! smarttoolz_video_theme_installed() ) {
+        return;
+    }
+
+    $source_version = smarttoolz_video_theme_source_version();
+    $installed_version = (string) get_option( 'smarttoolz_video_theme_version', '' );
+
+    if ( $installed_version !== $source_version ) {
+        $source = smarttoolz_video_theme_source_dir();
+        $target = smarttoolz_video_theme_target_dir();
+        foreach ( smarttoolz_video_theme_source_files() as $file ) {
+            $from = $source . $file;
+            $to = $target . $file;
+            if ( file_exists( $from ) ) {
+                copy( $from, $to );
+            }
+        }
+        update_option( 'smarttoolz_video_theme_version', $source_version, false );
+    }
+}
+add_action( 'after_setup_theme', 'smarttoolz_video_maybe_update_theme', 1 );
 
 function smarttoolz_video_activate_theme() {
     if ( ! current_user_can( 'manage_options' ) ) {

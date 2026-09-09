@@ -12,32 +12,49 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 <div class="stv-site">
     <header class="stv-header">
         <div class="stv-header__inner">
-            <a class="stv-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-                <span class="stv-brand__mark">▶</span>
-                <span class="stv-brand__text">SmartToolz</span>
-            </a>
+            <div class="stv-brand-wrap">
+                <button class="stv-brand__menu" type="button" aria-label="Open menu">☰</button>
+                <a class="stv-brand" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>">
+                    <span class="stv-brand__mark">▶</span>
+                    <span class="stv-brand__text">SmartToolz</span>
+                </a>
+            </div>
             <form class="stv-search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-                <input type="search" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="Search videos">
+                <input type="search" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="Search" aria-label="Search">
                 <button type="submit" aria-label="Search">⌕</button>
             </form>
             <div class="stv-header__actions">
-                <a class="stv-header__button" href="<?php echo esc_url( home_url( '/video/upload/' ) ); ?>">Create</a>
+                <a class="stv-header__icon" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'notifications', home_url( '/video/notifications/' ) ) ); ?>" aria-label="Notifications">♢</a>
+                <a class="stv-header__button" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'upload', home_url( '/video/upload/' ) ) ); ?>">＋ Create</a>
                 <?php if ( is_user_logged_in() ) : ?>
-                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">Sign out</a>
+                    <a class="stv-avatar" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'settings', home_url( '/video/settings/' ) ) ); ?>" aria-label="Account">
+                        <?php echo esc_html( strtoupper( substr( wp_get_current_user()->display_name ?: wp_get_current_user()->user_login, 0, 1 ) ) ); ?>
+                    </a>
                 <?php else : ?>
-                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( wp_login_url( home_url( '/' ) ) ); ?>">Sign in</a>
+                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( wp_login_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ) ); ?>">Sign in</a>
                 <?php endif; ?>
             </div>
         </div>
     </header>
     <div class="stv-layout">
         <aside class="stv-sidebar">
-            <a class="stv-sidebar__link stv-sidebar__link--active" href="<?php echo esc_url( home_url( '/video/' ) ); ?>">⌂ <span>Home</span></a>
-            <a class="stv-sidebar__link" href="<?php echo esc_url( home_url( '/video/shorts/' ) ); ?>">◉ <span>Shorts</span></a>
-            <a class="stv-sidebar__link" href="<?php echo esc_url( home_url( '/video/subscriptions/' ) ); ?>">▣ <span>Subscriptions</span></a>
-            <a class="stv-sidebar__link" href="<?php echo esc_url( home_url( '/video/history/' ) ); ?>">◷ <span>History</span></a>
-            <a class="stv-sidebar__link" href="<?php echo esc_url( home_url( '/video/liked/' ) ); ?>">♡ <span>Liked videos</span></a>
-            <a class="stv-sidebar__link" href="<?php echo esc_url( home_url( '/video/playlists/' ) ); ?>">☷ <span>Playlists</span></a>
-            <a class="stv-sidebar__link" href="<?php echo esc_url( home_url( '/video/your-videos/' ) ); ?>">▸ <span>Your videos</span></a>
+            <div class="stv-sidebar__section">
+                <a class="stv-sidebar__link stv-sidebar__link--active" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>"><span class="stv-sidebar__icon">⌂</span><span>Home</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'shorts', home_url( '/video/shorts/' ) ) ); ?>"><span class="stv-sidebar__icon">◉</span><span>Shorts</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'subscriptions', home_url( '/video/subscriptions/' ) ) ); ?>"><span class="stv-sidebar__icon">▣</span><span>Subscriptions</span></a>
+            </div>
+            <div class="stv-sidebar__section">
+                <div class="stv-sidebar__label">You</div>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'history', home_url( '/video/history/' ) ) ); ?>"><span class="stv-sidebar__icon">◷</span><span>History</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'liked-videos', home_url( '/video/liked/' ) ) ); ?>"><span class="stv-sidebar__icon">♡</span><span>Liked videos</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'playlists', home_url( '/video/playlists/' ) ) ); ?>"><span class="stv-sidebar__icon">☷</span><span>Playlists</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'your-videos', home_url( '/video/your-videos/' ) ) ); ?>"><span class="stv-sidebar__icon">▸</span><span>Your videos</span></a>
+            </div>
+            <div class="stv-sidebar__section">
+                <div class="stv-sidebar__label">Explore</div>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'trending', home_url( '/video/trending/' ) ) ); ?>"><span class="stv-sidebar__icon">⌁</span><span>Trending</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'explore', home_url( '/video/explore/' ) ) ); ?>"><span class="stv-sidebar__icon">✦</span><span>Explore</span></a>
+                <a class="stv-sidebar__link" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'live', home_url( '/video/live/' ) ) ); ?>"><span class="stv-sidebar__icon">●</span><span>Live</span></a>
+            </div>
         </aside>
         <main class="stv-main">

@@ -36,10 +36,43 @@ function smarttoolz_video_admin_page() {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
+
+    if ( isset( $_POST['stv_sync_pages'], $_POST['stv_sync_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stv_sync_nonce'] ) ), 'stv_sync_pages' ) ) {
+        smarttoolz_video_sync_pages();
+        echo '<div class="notice notice-success is-dismissible"><p>SmartToolz Video pages synced successfully.</p></div>';
+    }
+
+    $definitions = smarttoolz_video_page_definitions();
+    $ids = (array) get_option( 'smarttoolz_video_page_ids', array() );
     ?>
     <div class="wrap">
         <h1>SmartToolz Video</h1>
-        <p>Video platform is controlled from the SmartToolz Video plugin. WordPress core files are not modified.</p>
+        <p>All video-platform pages are managed by this plugin. WordPress core files are not modified.</p>
+
+        <form method="post">
+            <?php wp_nonce_field( 'stv_sync_pages', 'stv_sync_nonce' ); ?>
+            <input type="hidden" name="stv_sync_pages" value="1">
+            <?php submit_button( 'Sync / Repair Pages', 'primary', 'submit', false ); ?>
+        </form>
+
+        <h2>Managed Pages</h2>
+        <table class="widefat striped">
+            <thead><tr><th>Section</th><th>Page ID</th><th>Status</th><th>URL</th></tr></thead>
+            <tbody>
+            <?php foreach ( $definitions as $key => $page ) :
+                $id = isset( $ids[ $key ] ) ? absint( $ids[ $key ] ) : 0;
+                $valid = $id && 'page' === get_post_type( $id ) && 'trash' !== get_post_status( $id );
+                $url = $valid ? get_permalink( $id ) : home_url( '/' . trim( $page['slug'], '/' ) . '/' );
+                ?>
+                <tr>
+                    <td><?php echo esc_html( $page['title'] ); ?></td>
+                    <td><?php echo $id ? esc_html( $id ) : '—'; ?></td>
+                    <td><?php echo $valid ? '<span style="color:#008a20">Active</span>' : '<span style="color:#b32d2e">Missing</span>'; ?></td>
+                    <td><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $url ); ?></a></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
     <?php
 }

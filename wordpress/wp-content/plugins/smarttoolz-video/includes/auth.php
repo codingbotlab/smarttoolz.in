@@ -38,9 +38,42 @@ function smarttoolz_auth_assets() {
     $pagenow = isset( $GLOBALS['pagenow'] ) ? $GLOBALS['pagenow'] : '';
     if ( 'wp-login.php' !== $pagenow ) { return; }
     wp_enqueue_script( 'smarttoolz-google-gsi', 'https://accounts.google.com/gsi/client', array(), null, true );
-    wp_enqueue_style( 'smarttoolz-auth', SMARTTOOLZ_VIDEO_URL . 'assets/css/auth.css', array(), SMARTTOOLZ_VIDEO_VERSION . '.auth4' );
+    wp_enqueue_style( 'smarttoolz-auth', SMARTTOOLZ_VIDEO_URL . 'assets/css/auth.css', array(), SMARTTOOLZ_VIDEO_VERSION . '.auth5' );
 }
 add_action( 'login_enqueue_scripts', 'smarttoolz_auth_assets' );
+
+function smarttoolz_auth_login_header() {
+    $home = home_url( '/' );
+    echo '<header class="stv-login-site-header">';
+    echo '<div class="stv-login-site-inner">';
+    echo '<a class="stv-login-site-brand" href="' . esc_url( $home ) . '" aria-label="SmartToolz home">';
+    echo '<span class="stv-login-menu" aria-hidden="true">☰</span>'; 
+    echo '<span class="stv-login-site-logo">S</span>'; 
+    echo '<span class="stv-login-site-name">SmartToolz</span>';
+    echo '</a>';
+    echo '<a class="stv-login-back" href="' . esc_url( $home ) . '">Back to SmartToolz</a>';
+    echo '</div></header>';
+}
+add_action( 'login_header', 'smarttoolz_auth_login_header', 5 );
+
+function smarttoolz_auth_login_footer() {
+    echo '<footer class="stv-login-site-footer">';
+    echo '<div class="stv-login-site-footer-inner">';
+    echo '<div><strong>SmartToolz Video</strong><span>Watch. Share. Create.</span></div>';
+    echo '<nav aria-label="Login footer"><a href="' . esc_url( home_url( '/' ) ) . '">Home</a><a href="' . esc_url( home_url( '/videos/' ) ) . '">Videos</a><a href="' . esc_url( home_url( '/video-categories/' ) ) . '">Categories</a></nav>';
+    echo '</div></footer>';
+}
+add_action( 'login_footer', 'smarttoolz_auth_login_footer', 5 );
+
+function smarttoolz_auth_login_header_url() {
+    return home_url( '/' );
+}
+add_filter( 'login_headerurl', 'smarttoolz_auth_login_header_url' );
+
+function smarttoolz_auth_login_header_title() {
+    return 'SmartToolz';
+}
+add_filter( 'login_headertext', 'smarttoolz_auth_login_header_title' );
 
 function smarttoolz_auth_enable_registration_on_login() {
     return isset( $GLOBALS['pagenow'] ) && 'wp-login.php' === $GLOBALS['pagenow'] ? true : false;

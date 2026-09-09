@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
         <div class="stv-header__inner">
             <div class="stv-brand-wrap">
                 <button class="stv-brand__menu" type="button" aria-label="Open menu">☰</button>
-                <a class="stv-brand" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>">
-                    <span class="stv-brand__mark">▶</span>
-                    <span class="stv-brand__text"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
+                <a class="stv-brand" href="<?php echo esc_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ); ?>" aria-label="<?php echo esc_attr( smarttoolz_video_theme_site_name() ); ?>">
+                    <?php echo smarttoolz_video_theme_brand_logo(); ?>
+                    <span class="stv-brand__text"><?php echo esc_html( smarttoolz_video_theme_site_name() ); ?></span>
                 </a>
             </div>
             <form class="stv-search" method="get" action="<?php echo esc_url( smarttoolz_video_theme_search_url() ); ?>">

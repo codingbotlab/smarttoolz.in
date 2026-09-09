@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SmartToolz Video
  * Description: SmartToolz Video platform. WordPress core remains untouched; application behavior is provided by this plugin.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: SmartToolz
  * Text Domain: smarttoolz-video
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'SMARTTOOLZ_VIDEO_VERSION', '1.3.0' );
+define( 'SMARTTOOLZ_VIDEO_VERSION', '1.3.1' );
 define( 'SMARTTOOLZ_VIDEO_FILE', __FILE__ );
 define( 'SMARTTOOLZ_VIDEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SMARTTOOLZ_VIDEO_URL', plugin_dir_url( __FILE__ ) );
@@ -22,6 +22,7 @@ require_once SMARTTOOLZ_VIDEO_DIR . 'includes/creator-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/bootstrap.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/theme-installer.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/auth.php';
+require_once SMARTTOOLZ_VIDEO_DIR . 'includes/admin-settings.php';
 require_once SMARTTOOLZ_VIDEO_DIR . 'includes/app.php';
 
 function smarttoolz_video_admin_menu() {
@@ -37,6 +38,7 @@ function smarttoolz_video_admin_menu() {
 
     add_submenu_page( 'smarttoolz', 'Dashboard', 'Dashboard', 'manage_options', 'smarttoolz', 'smarttoolz_video_dashboard_page' );
     add_submenu_page( 'smarttoolz', 'Page Settings', 'Page Settings', 'manage_options', 'smarttoolz-video-pages', 'smarttoolz_video_page_settings' );
+    add_submenu_page( 'smarttoolz', 'Account & Access', 'Account & Access', 'manage_options', 'smarttoolz-account-access', 'smarttoolz_video_platform_settings_page' );
     add_submenu_page( 'smarttoolz', 'Theme Setup', 'Theme Setup', 'manage_options', 'smarttoolz-video-theme', 'smarttoolz_video_theme_settings' );
 }
 add_action( 'admin_menu', 'smarttoolz_video_admin_menu' );
@@ -79,7 +81,7 @@ function smarttoolz_video_dashboard_page() {
                 <form method="post" style="margin:0 0 10px;"><?php wp_nonce_field( 'stv_dashboard_action', 'stv_dashboard_nonce' ); ?><input type="hidden" name="stv_dashboard_action" value="<?php echo esc_attr( $action ); ?>"><button type="submit" class="button <?php echo 'activate_theme' === $action ? 'button-primary' : 'button-secondary'; ?>" style="width:100%;text-align:left;"><?php echo esc_html( $label ); ?></button></form>
                 <?php endforeach; ?>
             </div>
-            <div style="background:#111827;color:#fff;border-radius:12px;padding:20px;"><h2 style="margin-top:0;color:#fff;">SmartToolz Status</h2><p><strong>Theme:</strong> <?php echo $active ? 'Active' : ( $installed ? 'Installed' : 'Not installed' ); ?></p><p><strong>Static Home:</strong> <?php echo $static_home ? 'Active' : 'Not set'; ?></p><p><strong>Pages:</strong> <?php echo count( smarttoolz_video_page_definitions() ); ?> managed sections</p><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-pages' ) ); ?>" class="button button-secondary">Open Page Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-settings' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Video Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-google-auth' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Google Login</a></div>
+            <div style="background:#111827;color:#fff;border-radius:12px;padding:20px;"><h2 style="margin-top:0;color:#fff;">SmartToolz Status</h2><p><strong>Theme:</strong> <?php echo $active ? 'Active' : ( $installed ? 'Installed' : 'Not installed' ); ?></p><p><strong>Static Home:</strong> <?php echo $static_home ? 'Active' : 'Not set'; ?></p><p><strong>Pages:</strong> <?php echo count( smarttoolz_video_page_definitions() ); ?> managed sections</p><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-pages' ) ); ?>" class="button button-secondary">Open Page Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-account-access' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Account & Access</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-video-settings' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Video Settings</a><a href="<?php echo esc_url( admin_url( 'admin.php?page=smarttoolz-google-auth' ) ); ?>" class="button button-secondary" style="margin-left:8px;">Google Login</a></div>
         </div>
     </div>
     <?php

@@ -22,7 +22,7 @@ function smarttoolz_video_register_routes(){
     if('youtube'===smarttoolz_video_route_mode()){
         if(smarttoolz_video_route_enabled('home')) add_rewrite_rule('^'.preg_quote($base,'/').'/?$','index.php?smarttoolz_video_route=home','top');
         if(smarttoolz_video_route_enabled('watch')){add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($s['watch']['slug'],'/').'/?$','index.php?smarttoolz_video_route=watch','top');add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($s['watch']['slug'],'/').'/([^/]+)/?$','index.php?smarttoolz_video_route=watch&smarttoolz_video_id=$matches[1]','top');}
-        if(smarttoolz_video_route_enabled('shorts')) add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($s['shorts']['slug'],'/')(?:/([^/]+))?/?$','index.php?smarttoolz_video_route=shorts&smarttoolz_video_id=$matches[1]','top');
+        if(smarttoolz_video_route_enabled('shorts')) add_rewrite_rule('^'.preg_quote($base,'/').'/'.preg_quote($s['shorts']['slug'],'/').'(/([^/]+))?/?$','index.php?smarttoolz_video_route=shorts&smarttoolz_video_id=$matches[2]','top');
         if(smarttoolz_video_route_enabled('channel')){
             add_rewrite_rule('^'.preg_quote($base,'/').'/@([^/]+)/?$','index.php?smarttoolz_video_route=channel&smarttoolz_video_channel=$matches[1]','top');
             foreach(array('channel-videos'=>'videos','channel-shorts'=>'shorts','channel-live'=>'live') as $key=>$tab){if(!smarttoolz_video_route_enabled($key))continue;add_rewrite_rule('^'.preg_quote($base,'/').'/@([^/]+)/'.preg_quote($s[$key]['slug'],'/').'/?$','index.php?smarttoolz_video_route='.$key.'&smarttoolz_video_channel=$matches[1]','top');}

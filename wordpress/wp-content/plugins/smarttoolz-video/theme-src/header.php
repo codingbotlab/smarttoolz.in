@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
                         </div>
                     </details>
                 <?php else : ?>
-                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( wp_login_url( smarttoolz_video_theme_page_url( 'home', home_url( '/video/' ) ) ) ); ?>">Sign in</a>
+                    <a class="stv-header__button stv-header__button--primary" href="<?php echo esc_url( home_url( '/video/login/' ) ); ?>">Sign in</a>
                 <?php endif; ?>
             </div>
         </div>

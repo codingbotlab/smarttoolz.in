@@ -101,3 +101,6 @@ function smarttoolz_google_login_ajax() {
     $redirect=isset($_POST['redirect_to'])?wp_validate_redirect(wp_unslash($_POST['redirect_to']),home_url('/wordpress/')):home_url('/wordpress/');wp_send_json_success(array('redirect'=>$redirect));
 }
 add_action('wp_ajax_nopriv_smarttoolz_google_login','smarttoolz_google_login_ajax');add_action('wp_ajax_smarttoolz_google_login','smarttoolz_google_login_ajax');
+
+// Load the settings runtime bridge after the authentication helpers are defined.
+require_once dirname( __FILE__ ) . '/settings-runtime.php';

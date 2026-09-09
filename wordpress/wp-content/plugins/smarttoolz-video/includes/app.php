@@ -62,7 +62,7 @@ function smarttoolz_video_render_app() {
                     <?php if ( is_user_logged_in() ) : ?>
                         <div class="stv-account-avatar"><?php echo esc_html( strtoupper( substr( $user->display_name ?: $user->user_login, 0, 1 ) ) ); ?></div>
                         <div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Hi, <?php echo esc_html( $user->display_name ?: $user->user_login ); ?></h1><p><?php echo esc_html( $user->user_email ); ?></p><a class="stv-button" href="<?php echo esc_url( home_url( '/video/account/edit-profile/' ) ); ?>">Edit profile</a></div>
-                    <?php else : ?><div class="stv-account-avatar">?</div><div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Sign in to SmartToolz</h1><p>Access your channel, subscriptions, playlists, history and personal settings.</p><a class="stv-button" href="<?php echo esc_url( wp_login_url( home_url( '/video/account/' ) ) ); ?>">Sign in</a></div><?php endif; ?>
+                    <?php else : ?><div class="stv-account-avatar">?</div><div><span class="stv-eyebrow">Your Account</span><h1 class="stv-page-title">Sign in to SmartToolz</h1><p>Access your channel, subscriptions, playlists, history and personal settings.</p><a class="stv-button" href="<?php echo esc_url( home_url( '/video/login/' ) ); ?>">Sign in</a></div><?php endif; ?>
                 </section>
                 <section class="stv-account-grid">
                     <?php
@@ -82,6 +82,8 @@ function smarttoolz_video_render_app() {
                     echo smarttoolz_video_account_card_link( 'notifications', 'Notifications', 'Manage alerts and activity' );
                     ?>
                 </section>
+            <?php elseif ( 'login' === $route || 'signup' === $route ) : ?>
+                <?php smarttoolz_video_render_login(); ?>
             <?php elseif ( 0 === strpos( $route, 'account-' ) ) : ?>
                 <h1 class="stv-page-title"><?php echo esc_html( ucwords( str_replace( array( 'account-', '-' ), array( '', ' ' ), $route ) ) ); ?></h1>
                 <div class="stv-empty">This account section is ready for its feature implementation.</div>

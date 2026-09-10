@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Furlong & Feet to Kilometer Converter</title>
+  <meta name="description" content="Convert furlongs and feet to kilometers instantly with this simple live converter.">
+  <style>
+    :root{--bg:#f6f8fb;--card:#fff;--text:#18212f;--muted:#667085;--border:#dfe4ea;--accent:#2563eb;--accent2:#1d4ed8;--result:#eef5ff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef4ff 0,#f8fafc 45%,var(--bg) 100%);color:var(--text);min-height:100vh}
+    .wrap{width:min(720px,92%);margin:0 auto;padding:54px 0}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:30px;box-shadow:0 16px 45px rgba(16,24,40,.09)}
+    .eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+    h1{font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0 0 12px}
+    .intro{color:var(--muted);font-size:16px;line-height:1.6;margin:0 0 28px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    label{display:block;font-weight:700;font-size:14px;margin-bottom:8px}
+    input{width:100%;height:54px;border:1px solid var(--border);border-radius:12px;padding:0 15px;font-size:18px;outline:none;background:#fff;transition:.15s}
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+    .result{margin-top:24px;background:var(--result);border:1px solid #cfe0ff;border-radius:16px;padding:22px}
+    .result-label{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .value{font-size:clamp(32px,7vw,48px);font-weight:800;line-height:1.1;margin-top:7px;word-break:break-word}
+    .unit{font-size:20px;font-weight:700}
+    .formula{margin-top:10px;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+    button{border:0;border-radius:11px;padding:12px 17px;font-weight:700;font-size:14px;cursor:pointer}
+    .primary{background:var(--accent);color:#fff}.primary:hover{background:var(--accent2)}
+    .secondary{background:#f2f4f7;color:var(--text)}
+    .note{margin-top:22px;color:var(--muted);font-size:13px;line-height:1.55}
+    @media(max-width:560px){.card{padding:22px}.grid{grid-template-columns:1fr}.wrap{padding:28px 0}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" aria-labelledby="title">
+      <span class="eyebrow">SmartToolz Converter</span>
+      <h1 id="title">Furlong + Feet to Kilometer</h1>
+      <p class="intro">Enter furlongs and feet. The kilometer result updates instantly as you type.</p>
+
+      <div class="grid">
+        <div>
+          <label for="furlongs">Furlongs</label>
+          <input id="furlongs" type="number" inputmode="decimal" min="0" step="any" value="0" placeholder="e.g. 5">
+        </div>
+        <div>
+          <label for="feet">Feet</label>
+          <input id="feet" type="number" inputmode="decimal" min="0" step="any" value="0" placeholder="e.g. 10">
+        </div>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div class="result-label">Result</div>
+        <div class="value"><span id="km">0</span> <span class="unit">km</span></div>
+        <div class="formula">1 furlong = 0.201168 km · 1 foot = 0.0003048 km</div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="copy" type="button">Copy Result</button>
+        <button class="secondary" id="reset" type="button">Reset</button>
+      </div>
+      <div class="note">Conversion: (furlongs × 0.201168) + (feet × 0.0003048) = kilometers.</div>
+    </section>
+  </main>
+
+  <script>
+    const furlongs = document.getElementById('furlongs');
+    const feet = document.getElementById('feet');
+    const km = document.getElementById('km');
+    const copy = document.getElementById('copy');
+    const reset = document.getElementById('reset');
+
+    function num(el){
+      const n = parseFloat(el.value);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    }
+    function format(n){
+      return n.toLocaleString('en-US',{maximumFractionDigits:12});
+    }
+    function calculate(){
+      const result = num(furlongs) * 0.201168 + num(feet) * 0.0003048;
+      km.textContent = format(result);
+      return result;
+    }
+    [furlongs,feet].forEach(el => el.addEventListener('input',calculate));
+    reset.addEventListener('click',()=>{
+      furlongs.value='0'; feet.value='0'; calculate(); furlongs.focus();
+    });
+    copy.addEventListener('click',async()=>{
+      const text = `${km.textContent} km`;
+      try{
+        await navigator.clipboard.writeText(text);
+        copy.textContent='Copied!';
+        setTimeout(()=>copy.textContent='Copy Result',1400);
+      }catch(e){
+        copy.textContent='Copy failed';
+        setTimeout(()=>copy.textContent='Copy Result',1400);
+      }
+    });
+    calculate();
+  </script>
+</body>
+</html>
